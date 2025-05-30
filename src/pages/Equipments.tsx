@@ -4,103 +4,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from '@/components/StatusBadge';
+import { AddEquipmentForm } from '@/components/AddEquipmentForm';
+import { useEquipments } from '@/hooks/useEquipments';
 import { 
   Search, 
   Filter, 
-  Plus, 
   MapPin, 
   Calendar,
   User,
   Thermometer,
-  Settings
+  Settings,
+  Loader2
 } from 'lucide-react';
 
 export default function Equipments() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
-  const equipments = [
-    {
-      id: 'FR-2024-089',
-      type: 'Réfrigérateur commercial',
-      brand: 'Samsung',
-      model: 'RF-450XL',
-      location: 'Agence Casablanca Nord',
-      agency: 'Casablanca',
-      status: 'operational',
-      technician: 'Ahmed Benali',
-      lastMaintenance: '2024-01-15',
-      nextMaintenance: '2024-03-15',
-      temperature: '4°C',
-      serialNumber: 'SAM789456123'
-    },
-    {
-      id: 'FR-2024-012',
-      type: 'Chambre froide',
-      brand: 'LG',
-      model: 'CF-1200',
-      location: 'Agence Rabat Centre',
-      agency: 'Rabat',
-      status: 'maintenance',
-      technician: 'Fatima Zahra',
-      lastMaintenance: '2024-01-20',
-      nextMaintenance: '2024-02-20',
-      temperature: '2°C',
-      serialNumber: 'LG456789321'
-    },
-    {
-      id: 'FR-2024-134',
-      type: 'Réfrigérateur commercial',
-      brand: 'Whirlpool',
-      model: 'WR-350L',
-      location: 'Agence Marrakech Sud',
-      agency: 'Marrakech',
-      status: 'critical',
-      technician: 'Mohamed Alami',
-      lastMaintenance: '2024-01-10',
-      nextMaintenance: '2024-02-10',
-      temperature: '8°C',
-      serialNumber: 'WP123654789'
-    },
-    {
-      id: 'FR-2024-045',
-      type: 'Congélateur vertical',
-      brand: 'Bosch',
-      model: 'BV-200F',
-      location: 'Agence Tanger Port',
-      agency: 'Tanger',
-      status: 'offline',
-      technician: 'Youssef Idrissi',
-      lastMaintenance: '2024-01-05',
-      nextMaintenance: '2024-02-05',
-      temperature: '-',
-      serialNumber: 'BSH987321654'
-    },
-    {
-      id: 'FR-2024-067',
-      type: 'Réfrigérateur commercial',
-      brand: 'Electrolux',
-      model: 'EX-400C',
-      location: 'Agence Fès Centre',
-      agency: 'Fès',
-      status: 'operational',
-      technician: 'Aicha Benjelloun',
-      lastMaintenance: '2024-01-18',
-      nextMaintenance: '2024-03-18',
-      temperature: '3°C',
-      serialNumber: 'ELX654987321'
-    }
-  ];
+  const { equipments, isLoading, refetch } = useEquipments();
 
   const filteredEquipments = equipments.filter(equipment => {
-    const matchesSearch = equipment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = equipment.equipment_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          equipment.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          equipment.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || equipment.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Non défini';
+    return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -110,10 +54,7 @@ export default function Equipments() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Équipements</h1>
           <p className="text-gray-600">Gestion et suivi de vos équipements frigorifiques</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvel équipement
-        </Button>
+        <AddEquipmentForm onSuccess={refetch} />
       </div>
 
       {/* Filters */}
@@ -195,7 +136,7 @@ export default function Equipments() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg font-bold text-blue-600">
-                    {equipment.id}
+                    {equipment.equipment_id}
                   </CardTitle>
                   <p className="text-sm text-gray-600 mt-1">{equipment.type}</p>
                 </div>
@@ -216,7 +157,7 @@ export default function Equipments() {
                   <span className="text-gray-500">Température:</span>
                   <div className="font-medium flex items-center gap-1">
                     <Thermometer className="w-3 h-3" />
-                    {equipment.temperature}
+                    {equipment.temperature || 'N/A'}
                   </div>
                 </div>
               </div>
@@ -226,13 +167,15 @@ export default function Equipments() {
                   <MapPin className="w-4 h-4 text-gray-400" />
                   <span>{equipment.location}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <span>{equipment.technician}</span>
-                </div>
+                {equipment.technician && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="w-4 h-4 text-gray-400" />
+                    <span>{equipment.technician}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-gray-400" />
-                  <span>Prochaine maintenance: {equipment.nextMaintenance}</span>
+                  <span>Prochaine maintenance: {formatDate(equipment.next_maintenance)}</span>
                 </div>
               </div>
 
@@ -250,10 +193,14 @@ export default function Equipments() {
         ))}
       </div>
 
-      {filteredEquipments.length === 0 && (
+      {filteredEquipments.length === 0 && !isLoading && (
         <Card>
           <CardContent className="text-center py-12">
-            <p className="text-gray-500">Aucun équipement trouvé avec ces critères.</p>
+            <p className="text-gray-500">
+              {equipments.length === 0 
+                ? 'Aucun équipement trouvé. Ajoutez votre premier équipement!'
+                : 'Aucun équipement trouvé avec ces critères.'}
+            </p>
           </CardContent>
         </Card>
       )}
