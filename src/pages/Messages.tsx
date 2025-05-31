@@ -15,6 +15,8 @@ import {
   Video
 } from 'lucide-react';
 import { useMessages } from '@/hooks/useMessages';
+import { useCallState } from '@/hooks/useCallState';
+import { CallInterface } from '@/components/CallInterface';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -28,6 +30,7 @@ export default function Messages() {
     sendMessage
   } = useMessages();
   
+  const { callState, startCall, endCall } = useCallState();
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -42,6 +45,27 @@ export default function Messages() {
     if (newMessage.trim() && selectedConversationId) {
       await sendMessage(selectedConversationId, newMessage);
       setNewMessage('');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleAudioCall = () => {
+    if (selectedConversation) {
+      const contactName = selectedConversation.participant?.user_name || selectedConversation.name;
+      startCall(contactName, 'audio');
+    }
+  };
+
+  const handleVideoCall = () => {
+    if (selectedConversation) {
+      const contactName = selectedConversation.participant?.user_name || selectedConversation.name;
+      startCall(contactName, 'video');
     }
   };
 
@@ -185,10 +209,20 @@ export default function Messages() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleAudioCall}
+                      title="Appel audio"
+                    >
                       <Phone className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleVideoCall}
+                      title="Appel vidéo"
+                    >
                       <Video className="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="sm">
@@ -235,7 +269,7 @@ export default function Messages() {
                     placeholder="Tapez votre message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    onKeyPress={handleKeyPress}
                     className="flex-1"
                   />
                   <Button 
@@ -262,6 +296,14 @@ export default function Messages() {
           )}
         </Card>
       </div>
+
+      {/* Call Interface */}
+      <CallInterface 
+        isVisible={callState.isVisible}
+        onClose={endCall}
+        contactName={callState.contactName}
+        callType={callState.callType}
+      />
     </div>
   );
 }
