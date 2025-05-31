@@ -43,32 +43,48 @@ export function useMessages() {
 
   const fetchConversations = async () => {
     try {
+      console.log('Fetching conversations...');
       const { data: conversationsData, error: convError } = await supabase
         .from('conversations')
         .select('*')
         .order('updated_at', { ascending: false });
 
-      if (convError) throw convError;
+      if (convError) {
+        console.error('Error fetching conversations:', convError);
+        throw convError;
+      }
+
+      console.log('Conversations fetched:', conversationsData);
 
       const { data: participantsData, error: partError } = await supabase
         .from('conversation_participants')
         .select('*');
 
-      if (partError) throw partError;
+      if (partError) {
+        console.error('Error fetching participants:', partError);
+        throw partError;
+      }
+
+      console.log('Participants fetched:', participantsData);
 
       const { data: messagesData, error: msgError } = await supabase
         .from('messages')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (msgError) throw msgError;
+      if (msgError) {
+        console.error('Error fetching messages:', msgError);
+        throw msgError;
+      }
+
+      console.log('Messages fetched:', messagesData);
 
       const conversationsWithData = conversationsData.map(conv => {
         const participant = participantsData.find(p => p.conversation_id === conv.id);
         const conversationMessages = messagesData.filter(m => m.conversation_id === conv.id);
         const lastMessage = conversationMessages[0];
         const unreadCount = conversationMessages.filter(m => !m.is_me).length > 0 ? 
-          Math.floor(Math.random() * 3) : 0; // Simulation du nombre de messages non lus
+          Math.floor(Math.random() * 3) : 0;
 
         return {
           ...conv,
@@ -78,6 +94,7 @@ export function useMessages() {
         };
       });
 
+      console.log('Conversations with data:', conversationsWithData);
       setConversations(conversationsWithData);
     } catch (error) {
       console.error('Erreur lors de la récupération des conversations:', error);
@@ -89,13 +106,19 @@ export function useMessages() {
 
   const fetchMessages = async (conversationId: string) => {
     try {
+      console.log('Fetching messages for conversation:', conversationId);
       const { data, error } = await supabase
         .from('messages')
         .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+      
+      console.log('Messages fetched for conversation:', data);
       setMessages(data || []);
     } catch (error) {
       console.error('Erreur lors de la récupération des messages:', error);
@@ -105,6 +128,7 @@ export function useMessages() {
 
   const sendMessage = async (conversationId: string, content: string) => {
     try {
+      console.log('Sending message to conversation:', conversationId, content);
       const { error } = await supabase
         .from('messages')
         .insert([
@@ -116,7 +140,10 @@ export function useMessages() {
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error sending message:', error);
+        throw error;
+      }
 
       // Mettre à jour la conversation
       await supabase
@@ -124,11 +151,17 @@ export function useMessages() {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      console.log('Message sent successfully');
       toast.success('Message envoyé');
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
       toast.error('Erreur lors de l\'envoi du message');
     }
+  };
+
+  const selectConversation = (conversationId: string) => {
+    console.log('Selecting conversation:', conversationId);
+    setSelectedConversationId(conversationId);
   };
 
   useEffect(() => {
@@ -137,12 +170,14 @@ export function useMessages() {
 
   useEffect(() => {
     if (selectedConversationId) {
+      console.log('Selected conversation changed:', selectedConversationId);
       fetchMessages(selectedConversationId);
     }
   }, [selectedConversationId]);
 
   // Écouter les nouveaux messages en temps réel
   useEffect(() => {
+    console.log('Setting up realtime subscription');
     const channel = supabase
       .channel('messages-changes')
       .on(
@@ -153,6 +188,7 @@ export function useMessages() {
           table: 'messages'
         },
         (payload) => {
+          console.log('New message received:', payload);
           const newMessage = payload.new as Message;
           if (newMessage.conversation_id === selectedConversationId) {
             setMessages(prev => [...prev, newMessage]);
@@ -164,6 +200,7 @@ export function useMessages() {
       .subscribe();
 
     return () => {
+      console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
   }, [selectedConversationId]);
@@ -172,7 +209,7 @@ export function useMessages() {
     conversations,
     messages,
     selectedConversationId,
-    setSelectedConversationId,
+    setSelectedConversationId: selectConversation,
     isLoading,
     sendMessage,
     refetch: fetchConversations,

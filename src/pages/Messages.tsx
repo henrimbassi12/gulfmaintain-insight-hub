@@ -55,6 +55,11 @@ export default function Messages() {
     }
   };
 
+  const handleConversationClick = (conversationId: string) => {
+    console.log('Conversation clicked:', conversationId);
+    setSelectedConversationId(conversationId);
+  };
+
   const handleAudioCall = () => {
     if (selectedConversation) {
       const contactName = selectedConversation.participant?.user_name || selectedConversation.name;
@@ -124,7 +129,7 @@ export default function Messages() {
                 {filteredConversations.map((conversation) => (
                   <div
                     key={conversation.id}
-                    onClick={() => setSelectedConversationId(conversation.id)}
+                    onClick={() => handleConversationClick(conversation.id)}
                     className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
                       selectedConversationId === conversation.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
                     }`}
