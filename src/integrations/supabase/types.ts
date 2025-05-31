@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      conversation_participants: {
+        Row: {
+          avatar_url: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          is_online: boolean | null
+          user_name: string
+          user_role: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_online?: boolean | null
+          user_name: string
+          user_role: string
+        }
+        Update: {
+          avatar_url?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_online?: boolean | null
+          user_name?: string
+          user_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       equipments: {
         Row: {
           agency: string
@@ -62,6 +121,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_me: boolean | null
+          sender_name: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_me?: boolean | null
+          sender_name: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_me?: boolean | null
+          sender_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

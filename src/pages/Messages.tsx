@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Send,
   Search,
@@ -13,107 +14,60 @@ import {
   Phone,
   Video
 } from 'lucide-react';
+import { useMessages } from '@/hooks/useMessages';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export default function Messages() {
-  const [selectedConversation, setSelectedConversation] = useState(1);
+  const {
+    conversations,
+    messages,
+    selectedConversationId,
+    setSelectedConversationId,
+    isLoading,
+    sendMessage
+  } = useMessages();
+  
   const [newMessage, setNewMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const conversations = [
-    {
-      id: 1,
-      name: 'Ahmed Benali',
-      role: 'Technicien Senior',
-      lastMessage: 'La maintenance est terminée, tout fonctionne parfaitement.',
-      time: '10:30',
-      unread: 0,
-      online: true,
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: 2,
-      name: 'Fatima Zahra',
-      role: 'Technicienne',
-      lastMessage: 'J\'aurai besoin de la pièce de rechange pour demain.',
-      time: '09:45',
-      unread: 2,
-      online: true,
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: 3,
-      name: 'Mohamed Alami',
-      role: 'Technicien',
-      lastMessage: 'L\'inspection est prévue pour 14h.',
-      time: 'Hier',
-      unread: 0,
-      online: false,
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: 4,
-      name: 'Youssef Idrissi',
-      role: 'Technicien Senior',
-      lastMessage: 'Le compresseur est défaillant, remplacement nécessaire.',
-      time: 'Hier',
-      unread: 1,
-      online: false,
-      avatar: '/placeholder.svg'
-    }
-  ];
+  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+  
+  const filteredConversations = conversations.filter(conv =>
+    conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (conv.participant?.user_name.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  const messages = [
-    {
-      id: 1,
-      sender: 'Ahmed Benali',
-      message: 'Bonjour, je commence l\'intervention sur le frigo FR-2024-089.',
-      time: '09:00',
-      isMe: false
-    },
-    {
-      id: 2,
-      sender: 'Vous',
-      message: 'Parfait, tenez-moi au courant de l\'avancement.',
-      time: '09:05',
-      isMe: true
-    },
-    {
-      id: 3,
-      sender: 'Ahmed Benali',
-      message: 'J\'ai détecté un problème au niveau du thermostat. Je procède au remplacement.',
-      time: '09:30',
-      isMe: false
-    },
-    {
-      id: 4,
-      sender: 'Vous',
-      message: 'D\'accord, avez-vous la pièce en stock ?',
-      time: '09:32',
-      isMe: true
-    },
-    {
-      id: 5,
-      sender: 'Ahmed Benali',
-      message: 'Oui, j\'ai tout ce qu\'il faut. L\'intervention devrait prendre encore 1h.',
-      time: '09:35',
-      isMe: false
-    },
-    {
-      id: 6,
-      sender: 'Ahmed Benali',
-      message: 'La maintenance est terminée, tout fonctionne parfaitement.',
-      time: '10:30',
-      isMe: false
-    }
-  ];
-
-  const selectedConv = conversations.find(c => c.id === selectedConversation);
-
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      console.log('Sending message:', newMessage);
+  const handleSendMessage = async () => {
+    if (newMessage.trim() && selectedConversationId) {
+      await sendMessage(selectedConversationId, newMessage);
       setNewMessage('');
     }
   };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return format(date, 'HH:mm', { locale: fr });
+    } else if (diffInHours < 48) {
+      return 'Hier';
+    } else {
+      return format(date, 'dd/MM', { locale: fr });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">Chargement des messages...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -128,66 +82,81 @@ export default function Messages() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle>Conversations</CardTitle>
-              <Badge variant="secondary">{conversations.length}</Badge>
+              <Badge variant="secondary">{filteredConversations.length}</Badge>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Rechercher..." className="pl-9" />
+              <Input 
+                placeholder="Rechercher..." 
+                className="pl-9" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="space-y-1">
-              {conversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation.id)}
-                  className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedConversation === conversation.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="relative">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={conversation.avatar} />
-                        <AvatarFallback>
-                          {conversation.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      {conversation.online && (
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium text-gray-900 truncate">
-                            {conversation.name}
-                          </h4>
-                          <p className="text-xs text-gray-500">{conversation.role}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-xs text-gray-500">{conversation.time}</span>
-                          {conversation.unread > 0 && (
-                            <Badge className="bg-red-500 text-white text-xs">
-                              {conversation.unread}
-                            </Badge>
-                          )}
-                        </div>
+            <ScrollArea className="h-[calc(100vh-350px)]">
+              <div className="space-y-1">
+                {filteredConversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    onClick={() => setSelectedConversationId(conversation.id)}
+                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                      selectedConversationId === conversation.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="relative">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={conversation.participant?.avatar_url || '/placeholder.svg'} />
+                          <AvatarFallback>
+                            {conversation.participant?.user_name 
+                              ? conversation.participant.user_name.split(' ').map(n => n[0]).join('').substring(0, 2)
+                              : conversation.name.substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        {conversation.participant?.is_online && (
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-600 truncate mt-1">
-                        {conversation.lastMessage}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium text-gray-900 truncate">
+                              {conversation.participant?.user_name || conversation.name}
+                            </h4>
+                            <p className="text-xs text-gray-500">
+                              {conversation.participant?.user_role || 'Conversation'}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-xs text-gray-500">
+                              {conversation.lastMessage 
+                                ? formatTime(conversation.lastMessage.created_at)
+                                : formatTime(conversation.updated_at)}
+                            </span>
+                            {conversation.unreadCount > 0 && (
+                              <Badge className="bg-red-500 text-white text-xs">
+                                {conversation.unreadCount}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate mt-1">
+                          {conversation.lastMessage?.content || 'Aucun message'}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
 
         {/* Chat Area */}
         <Card className="lg:col-span-2 flex flex-col">
-          {selectedConv ? (
+          {selectedConversation ? (
             <>
               {/* Chat Header */}
               <CardHeader className="border-b pb-4">
@@ -195,19 +164,23 @@ export default function Messages() {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={selectedConv.avatar} />
+                        <AvatarImage src={selectedConversation.participant?.avatar_url || '/placeholder.svg'} />
                         <AvatarFallback>
-                          {selectedConv.name.split(' ').map(n => n[0]).join('')}
+                          {selectedConversation.participant?.user_name 
+                            ? selectedConversation.participant.user_name.split(' ').map(n => n[0]).join('').substring(0, 2)
+                            : selectedConversation.name.substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      {selectedConv.online && (
+                      {selectedConversation.participant?.is_online && (
                         <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{selectedConv.name}</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        {selectedConversation.participant?.user_name || selectedConversation.name}
+                      </h3>
                       <p className="text-sm text-gray-500">
-                        {selectedConv.online ? 'En ligne' : 'Hors ligne'} • {selectedConv.role}
+                        {selectedConversation.participant?.is_online ? 'En ligne' : 'Hors ligne'} • {selectedConversation.participant?.user_role || 'Conversation'}
                       </p>
                     </div>
                   </div>
@@ -226,28 +199,30 @@ export default function Messages() {
               </CardHeader>
 
               {/* Messages */}
-              <CardContent className="flex-1 p-4 overflow-y-auto">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.isMe ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-[70%] ${
-                        message.isMe 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white border'
-                      } p-3 rounded-lg shadow-sm`}>
-                        <p className="text-sm">{message.message}</p>
-                        <p className={`text-xs mt-1 ${
-                          message.isMe ? 'text-blue-100' : 'text-gray-500'
-                        }`}>
-                          {message.time}
-                        </p>
+              <CardContent className="flex-1 p-4 overflow-hidden">
+                <ScrollArea className="h-full">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.is_me ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[70%] ${
+                          message.is_me 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-white border'
+                        } p-3 rounded-lg shadow-sm`}>
+                          <p className="text-sm">{message.content}</p>
+                          <p className={`text-xs mt-1 ${
+                            message.is_me ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </CardContent>
 
               {/* Message Input */}
