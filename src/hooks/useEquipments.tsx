@@ -36,7 +36,13 @@ export function useEquipments() {
         throw error;
       }
 
-      setEquipments(data || []);
+      // Type assertion pour s'assurer que les données correspondent au type Equipment
+      const typedData = (data || []).map(item => ({
+        ...item,
+        status: item.status as 'operational' | 'maintenance' | 'critical' | 'offline'
+      }));
+
+      setEquipments(typedData);
     } catch (error) {
       console.error('Erreur lors de la récupération des équipements:', error);
       toast.error('Erreur lors de la récupération des équipements');
