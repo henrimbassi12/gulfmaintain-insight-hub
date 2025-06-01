@@ -75,7 +75,7 @@ const RecurrenceAnalysis: React.FC<RecurrenceAnalysisProps> = ({ data }) => {
             <span className="font-medium">Recommandation IA</span>
           </div>
           <p className="text-sm text-purple-600 mt-1">
-            Les équipements avec taux de récurrence > 40% nécessitent une évaluation pour remplacement
+            Les équipements avec taux de récurrence supérieur à 40% nécessitent une évaluation pour remplacement
           </p>
         </div>
       </CardContent>
