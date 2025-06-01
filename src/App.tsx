@@ -12,6 +12,7 @@ import Maintenance from "./pages/Maintenance";
 import Messages from "./pages/Messages";
 import Supervision from "./pages/Supervision";
 import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,7 +37,7 @@ const App = () => (
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/supervision" element={<Supervision />} />
                 <Route path="/reports" element={<Reports />} />
-                <Route path="/settings" element={<Dashboard />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
