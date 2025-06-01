@@ -1,16 +1,20 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Brain, AlertTriangle, User, RotateCcw, TrendingUp, Calendar, MapPin, Wrench } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Brain } from "lucide-react";
+import PredictionsList from "@/components/supervision/PredictionsList";
+import TechnicianRecommendations from "@/components/supervision/TechnicianRecommendations";
+import RecurrenceAnalysis from "@/components/supervision/RecurrenceAnalysis";
+import AIReliabilityScore from "@/components/supervision/AIReliabilityScore";
+import SupervisionFilters from "@/components/supervision/SupervisionFilters";
 
 const Supervision = () => {
-  const [selectedEquipment, setSelectedEquipment] = useState<string>("");
-  const [predictionType, setPredictionType] = useState<string>("failure");
+  const [sortBy, setSortBy] = useState<string>("risk");
+  const [filters, setFilters] = useState({
+    dateRange: "all",
+    technician: "all",
+    region: "all",
+    riskLevel: "all"
+  });
 
   // Mock data for AI predictions
   const failurePredictions = [
@@ -46,50 +50,90 @@ const Supervision = () => {
   const technicianRecommendations = [
     {
       equipmentId: "EQ-001",
+      equipmentName: "Climatiseur Bureau A1",
       technician: "Ahmed Ben Ali",
       matchScore: 94,
       expertise: ["Climatisation", "Réfrigération"],
       availability: "Disponible",
       location: "Tunis Centre",
-      experience: "8 ans"
+      experience: "8 ans",
+      successRate: 92
     },
     {
       equipmentId: "EQ-045",
+      equipmentName: "Groupe électrogène Principal",
       technician: "Fatma Trabelsi",
       matchScore: 89,
       expertise: ["Électricité", "Groupes électrogènes"],
       availability: "Disponible demain",
       location: "Tunis Nord",
-      experience: "12 ans"
+      experience: "12 ans",
+      successRate: 87
     },
     {
       equipmentId: "EQ-023",
+      equipmentName: "Ascenseur Tour B",
       technician: "Mohamed Khelifi",
       matchScore: 91,
       expertise: ["Ascenseurs", "Mécanique"],
       availability: "Disponible",
       location: "Tunis Centre",
-      experience: "15 ans"
+      experience: "15 ans",
+      successRate: 95
     }
   ];
 
   const recurrenceData = [
-    { equipment: "Climatiseur Bureau A1", recurrenceRate: 23, category: "Élevée" },
-    { equipment: "Imprimante Laser HP", recurrenceRate: 8, category: "Faible" },
-    { equipment: "Projecteur Salle 201", recurrenceRate: 45, category: "Très élevée" },
-    { equipment: "Photocopieur Canon", recurrenceRate: 15, category: "Modérée" }
+    { 
+      equipment: "Climatiseur Bureau A1", 
+      recurrenceRate: 23, 
+      category: "Élevée",
+      totalFailures: 8,
+      avgTimeBetweenFailures: 45
+    },
+    { 
+      equipment: "Imprimante Laser HP", 
+      recurrenceRate: 8, 
+      category: "Faible",
+      totalFailures: 3,
+      avgTimeBetweenFailures: 120
+    },
+    { 
+      equipment: "Projecteur Salle 201", 
+      recurrenceRate: 45, 
+      category: "Très élevée",
+      totalFailures: 12,
+      avgTimeBetweenFailures: 30
+    },
+    { 
+      equipment: "Photocopieur Canon", 
+      recurrenceRate: 15, 
+      category: "Modérée",
+      totalFailures: 5,
+      avgTimeBetweenFailures: 75
+    }
   ];
 
-  const getRiskColor = (risk: number) => {
-    if (risk >= 80) return "text-red-600 bg-red-50 border-red-200";
-    if (risk >= 60) return "text-orange-600 bg-orange-50 border-orange-200";
-    return "text-yellow-600 bg-yellow-50 border-yellow-200";
+  const aiMetrics = {
+    predictionAccuracy: 89,
+    confidenceScore: 92,
+    totalPredictions: 1247,
+    correctPredictions: 1110,
+    modelVersion: "v2.1.3",
+    lastUpdated: "2024-01-10 14:30"
   };
 
-  const getRecurrenceColor = (rate: number) => {
-    if (rate >= 40) return "destructive";
-    if (rate >= 20) return "secondary";
-    return "default";
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      dateRange: "all",
+      technician: "all",
+      region: "all",
+      riskLevel: "all"
+    });
   };
 
   return (
@@ -102,165 +146,48 @@ const Supervision = () => {
         </div>
       </div>
 
-      {/* Prédiction de pannes */}
-      <Card className="hover-scale">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-orange-500" />
-            🔮 Prédiction de panne (AF/NF)
-          </CardTitle>
-          <CardDescription>
-            Analyse prédictive des équipements à risque de panne
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            {failurePredictions.map((prediction) => (
-              <div
-                key={prediction.id}
-                className={`p-4 rounded-lg border ${getRiskColor(prediction.failureRisk)}`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-semibold">{prediction.name}</h3>
-                    <p className="text-sm opacity-75">{prediction.location}</p>
-                  </div>
-                  <Badge variant={prediction.type === "AF" ? "destructive" : "secondary"}>
-                    {prediction.type}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                  <div>
-                    <p className="text-sm font-medium">Risque de panne</p>
-                    <div className="flex items-center gap-2">
-                      <Progress value={prediction.failureRisk} className="flex-1" />
-                      <span className="text-sm font-bold">{prediction.failureRisk}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Date prédite</p>
-                    <p className="text-sm">{prediction.predictedDate}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Action recommandée</p>
-                    <p className="text-sm">{prediction.recommendedAction}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Section d'aide à l'interprétation */}
+      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 mb-6">
+        <h3 className="font-semibold text-blue-900 mb-2">💡 Guide d'interprétation</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+          <div>
+            <p><strong>🔴 Équipements critiques:</strong> Nécessitent une attention immédiate</p>
+            <p><strong>🔶 Équipements à surveiller:</strong> Planifier maintenance préventive</p>
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <p><strong>🟢 Équipements stables:</strong> Surveillance continue</p>
+            <p><strong>♻️ Récurrence élevée:</strong> Évaluer remplacement équipement</p>
+          </div>
+        </div>
+      </div>
 
-      {/* Recommandation technicien */}
-      <Card className="hover-scale">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5 text-blue-500" />
-            🤖 Recommandation du technicien le plus adapté
-          </CardTitle>
-          <CardDescription>
-            IA recommande le meilleur technicien pour chaque intervention
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            {technicianRecommendations.map((rec) => (
-              <div key={rec.equipmentId} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-semibold text-blue-900">{rec.technician}</h3>
-                    <p className="text-sm text-blue-700">Score de compatibilité: {rec.matchScore}%</p>
-                  </div>
-                  <Badge variant="outline" className="bg-white">
-                    {rec.availability}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Expertise</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {rec.expertise.map((skill) => (
-                        <Badge key={skill} variant="secondary" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Localisation</p>
-                    <p className="text-sm text-blue-700">{rec.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Expérience</p>
-                    <p className="text-sm text-blue-700">{rec.experience}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Filtres globaux */}
+      <SupervisionFilters 
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onResetFilters={handleResetFilters}
+      />
 
-      {/* Taux de récurrence */}
-      <Card className="hover-scale">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RotateCcw className="w-5 h-5 text-purple-500" />
-            ♻️ Taux de récurrence d'un équipement
-          </CardTitle>
-          <CardDescription>
-            Analyse des pannes récurrentes par équipement
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3">
-            {recurrenceData.map((item, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex-1">
-                  <p className="font-medium">{item.equipment}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Progress value={item.recurrenceRate} className="flex-1 max-w-xs" />
-                    <span className="text-sm text-gray-600">{item.recurrenceRate}%</span>
-                  </div>
-                </div>
-                <Badge variant={getRecurrenceColor(item.recurrenceRate)}>
-                  {item.category}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Disposition responsive 3 colonnes / 2 blocs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Colonne gauche */}
+        <div className="space-y-6">
+          <PredictionsList 
+            predictions={failurePredictions}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+          />
+          
+          <RecurrenceAnalysis data={recurrenceData} />
+        </div>
 
-      {/* Données historiques */}
-      <Card className="hover-scale">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-500" />
-            🔍 Données historiques techniques analysées
-          </CardTitle>
-          <CardDescription>
-            Analyse des tendances et patterns de maintenance
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <h3 className="text-2xl font-bold text-green-600">1,247</h3>
-              <p className="text-sm text-green-700">Interventions analysées</p>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <h3 className="text-2xl font-bold text-blue-600">89%</h3>
-              <p className="text-sm text-blue-700">Précision prédictive</p>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <h3 className="text-2xl font-bold text-purple-600">156</h3>
-              <p className="text-sm text-purple-700">Équipements surveillés</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Colonne droite */}
+        <div className="space-y-6">
+          <TechnicianRecommendations recommendations={technicianRecommendations} />
+          
+          <AIReliabilityScore metrics={aiMetrics} />
+        </div>
+      </div>
     </div>
   );
 };
