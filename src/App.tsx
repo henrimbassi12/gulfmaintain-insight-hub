@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Equipments from "./pages/Equipments";
 import Maintenance from "./pages/Maintenance";
 import Messages from "./pages/Messages";
+import Supervision from "./pages/Supervision";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,8 +34,8 @@ const App = () => (
                 <Route path="/equipments" element={<Equipments />} />
                 <Route path="/maintenance" element={<Maintenance />} />
                 <Route path="/messages" element={<Messages />} />
-                <Route path="/supervision" element={<Dashboard />} />
-                <Route path="/reports" element={<Dashboard />} />
+                <Route path="/supervision" element={<Supervision />} />
+                <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
