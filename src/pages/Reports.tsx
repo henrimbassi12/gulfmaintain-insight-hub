@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,9 +37,9 @@ interface MaintenanceReport {
 
 const Reports = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTechnician, setSelectedTechnician] = useState<string>("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("");
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  const [selectedTechnician, setSelectedTechnician] = useState<string>("all");
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -113,8 +112,8 @@ const Reports = () => {
       report.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.location.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesTechnician = selectedTechnician === "" || report.technician === selectedTechnician;
-    const matchesRegion = selectedRegion === "" || report.region === selectedRegion;
+    const matchesTechnician = selectedTechnician === "all" || report.technician === selectedTechnician;
+    const matchesRegion = selectedRegion === "all" || report.region === selectedRegion;
     
     let matchesPeriod = true;
     if (startDate && endDate) {
@@ -192,7 +191,7 @@ const Reports = () => {
                   <SelectValue placeholder="Tous les techniciens" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les techniciens</SelectItem>
+                  <SelectItem value="all">Tous les techniciens</SelectItem>
                   {technicians.map(tech => (
                     <SelectItem key={tech} value={tech}>{tech}</SelectItem>
                   ))}
@@ -206,7 +205,7 @@ const Reports = () => {
                   <SelectValue placeholder="Toutes les régions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes les régions</SelectItem>
+                  <SelectItem value="all">Toutes les régions</SelectItem>
                   {regions.map(region => (
                     <SelectItem key={region} value={region}>{region}</SelectItem>
                   ))}
