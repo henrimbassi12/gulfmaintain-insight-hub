@@ -2,127 +2,135 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, Calendar, MapPin, Wrench } from "lucide-react";
-
-interface Prediction {
-  id: string;
-  name: string;
-  failureRisk: number;
-  predictedDate: string;
-  type: string;
-  location: string;
-  recommendedAction: string;
-}
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, MapPin, Calendar, Wrench, TrendingUp } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { FailurePrediction } from '@/hooks/useSupervision';
 
 interface PredictionsListProps {
-  predictions: Prediction[];
-  sortBy: string;
-  setSortBy: (value: string) => void;
+  predictions: FailurePrediction[];
+  filters: {
+    region: string;
+    riskLevel: string;
+    equipmentType: string;
+    timeframe: string;
+  };
 }
 
-const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, sortBy, setSortBy }) => {
-  const getRiskColor = (risk: number) => {
-    if (risk >= 80) return "text-red-600 bg-red-50 border-red-200";
-    if (risk >= 60) return "text-orange-600 bg-orange-50 border-orange-200";
-    return "text-yellow-600 bg-yellow-50 border-yellow-200";
-  };
-
-  const getRiskBadge = (risk: number) => {
-    if (risk >= 80) return { color: "🔴", variant: "destructive" as const };
-    if (risk >= 60) return { color: "🔶", variant: "secondary" as const };
-    return { color: "🟢", variant: "default" as const };
-  };
-
-  const sortedPredictions = [...predictions].sort((a, b) => {
-    switch (sortBy) {
-      case 'risk':
-        return b.failureRisk - a.failureRisk;
-      case 'date':
-        return new Date(a.predictedDate).getTime() - new Date(b.predictedDate).getTime();
-      case 'name':
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
+export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, filters }) => {
+  // Filter predictions based on filters
+  const filteredPredictions = predictions.filter(prediction => {
+    if (filters.riskLevel !== 'all') {
+      if (filters.riskLevel === 'high' && prediction.failure_risk < 70) return false;
+      if (filters.riskLevel === 'medium' && (prediction.failure_risk < 40 || prediction.failure_risk >= 70)) return false;
+      if (filters.riskLevel === 'low' && prediction.failure_risk >= 40) return false;
     }
+    return true;
   });
 
+  const getRiskColor = (risk: number) => {
+    if (risk >= 80) return "destructive";
+    if (risk >= 60) return "secondary"; 
+    return "outline";
+  };
+
+  const getRiskLabel = (risk: number) => {
+    if (risk >= 80) return "Critique";
+    if (risk >= 60) return "Élevé";
+    if (risk >= 40) return "Moyen";
+    return "Faible";
+  };
+
+  const getTypeLabel = (type: string) => {
+    return type === 'AF' ? 'Arrêt Forcé' : 'Non Fonctionnel';
+  };
+
   return (
-    <Card className="hover-scale">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-orange-500" />
-          🔮 Prédictions de pannes à venir
-        </CardTitle>
-        <CardDescription>
-          Équipements avec score de risque élevé - Actions préventives recommandées
-        </CardDescription>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-sm text-gray-600">Trier par:</span>
-          <select 
-            value={sortBy} 
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-2 py-1 border rounded text-sm"
-          >
-            <option value="risk">Risque</option>
-            <option value="date">Date prédite</option>
-            <option value="name">Nom</option>
-          </select>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          {sortedPredictions.map((prediction) => {
-            const riskBadge = getRiskBadge(prediction.failureRisk);
-            return (
-              <div
-                key={prediction.id}
-                className={`p-4 rounded-lg border ${getRiskColor(prediction.failureRisk)}`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-semibold flex items-center gap-2">
-                      {riskBadge.color} {prediction.name}
-                    </h3>
-                    <p className="text-sm opacity-75 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {prediction.location}
-                    </p>
-                  </div>
-                  <Badge variant={prediction.type === "AF" ? "destructive" : "secondary"}>
-                    {prediction.type}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                  <div>
-                    <p className="text-sm font-medium">Probabilité de panne</p>
-                    <div className="flex items-center gap-2">
-                      <Progress value={prediction.failureRisk} className="flex-1" />
-                      <span className="text-sm font-bold">{prediction.failureRisk}%</span>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-orange-500" />
+            Prédictions de pannes IA
+          </CardTitle>
+          <CardDescription>
+            Basées sur l'analyse des données historiques et des capteurs IoT
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            {filteredPredictions.map((prediction) => (
+              <div key={prediction.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-lg">{prediction.equipment_name}</h3>
+                      <Badge variant={getRiskColor(prediction.failure_risk)}>
+                        {getRiskLabel(prediction.failure_risk)} - {prediction.failure_risk}%
+                      </Badge>
+                      <Badge variant="outline">{getTypeLabel(prediction.type)}</Badge>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {prediction.location}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        Prédiction: {format(new Date(prediction.predicted_date), 'dd/MM/yyyy', { locale: fr })}
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 mb-3">
+                      <Wrench className="w-4 h-4 text-blue-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Action recommandée:</p>
+                        <p className="text-sm text-gray-600">{prediction.recommended_action}</p>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Date prédite
-                    </p>
-                    <p className="text-sm">{prediction.predictedDate}</p>
+
+                  <div className="flex flex-col gap-2 ml-4">
+                    <Button size="sm" variant="outline">
+                      Programmer intervention
+                    </Button>
+                    <Button size="sm" variant="ghost">
+                      Voir détails
+                    </Button>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium flex items-center gap-1">
-                      <Wrench className="w-3 h-3" />
-                      Action recommandée
-                    </p>
-                    <p className="text-sm">{prediction.recommendedAction}</p>
+                </div>
+
+                {/* Barre de progression du risque */}
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Niveau de risque</span>
+                    <span>{prediction.failure_risk}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all ${
+                        prediction.failure_risk >= 80 ? 'bg-red-500' :
+                        prediction.failure_risk >= 60 ? 'bg-orange-500' : 
+                        'bg-yellow-500'
+                      }`}
+                      style={{ width: `${prediction.failure_risk}%` }}
+                    />
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+
+          {filteredPredictions.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Aucune prédiction ne correspond aux filtres sélectionnés.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
-
-export default PredictionsList;

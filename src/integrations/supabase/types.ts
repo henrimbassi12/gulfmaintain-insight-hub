@@ -122,6 +122,99 @@ export type Database = {
         }
         Relationships: []
       }
+      failure_predictions: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          equipment_name: string
+          failure_risk: number
+          id: string
+          location: string
+          predicted_date: string
+          recommended_action: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          equipment_name: string
+          failure_risk: number
+          id?: string
+          location: string
+          predicted_date: string
+          recommended_action: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          equipment_name?: string
+          failure_risk?: number
+          id?: string
+          location?: string
+          predicted_date?: string
+          recommended_action?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      maintenance_reports: {
+        Row: {
+          cost: number
+          created_at: string
+          date: string
+          description: string
+          duration: string
+          equipment: string
+          id: string
+          location: string
+          parts_used: string[] | null
+          region: string
+          report_id: string
+          status: string
+          technician: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          date: string
+          description: string
+          duration: string
+          equipment: string
+          id?: string
+          location: string
+          parts_used?: string[] | null
+          region: string
+          report_id: string
+          status: string
+          technician: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          date?: string
+          description?: string
+          duration?: string
+          equipment?: string
+          id?: string
+          location?: string
+          parts_used?: string[] | null
+          region?: string
+          report_id?: string
+          status?: string
+          technician?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -156,6 +249,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      technician_recommendations: {
+        Row: {
+          availability: string
+          created_at: string
+          equipment_id: string
+          equipment_name: string
+          experience: string
+          expertise: string[] | null
+          id: string
+          location: string
+          match_score: number
+          success_rate: number
+          technician: string
+          updated_at: string
+        }
+        Insert: {
+          availability: string
+          created_at?: string
+          equipment_id: string
+          equipment_name: string
+          experience: string
+          expertise?: string[] | null
+          id?: string
+          location: string
+          match_score: number
+          success_rate: number
+          technician: string
+          updated_at?: string
+        }
+        Update: {
+          availability?: string
+          created_at?: string
+          equipment_id?: string
+          equipment_name?: string
+          experience?: string
+          expertise?: string[] | null
+          id?: string
+          location?: string
+          match_score?: number
+          success_rate?: number
+          technician?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

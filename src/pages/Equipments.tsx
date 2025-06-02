@@ -1,63 +1,76 @@
 
 import React, { useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import { AddEquipmentForm } from '@/components/AddEquipmentForm';
-import { EquipmentFilters } from '@/components/EquipmentFilters';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Wrench, Plus } from "lucide-react";
 import { EquipmentStats } from '@/components/EquipmentStats';
+import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
+import { AddEquipmentForm } from '@/components/AddEquipmentForm';
 import { useEquipments } from '@/hooks/useEquipments';
 
-export default function Equipments() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const { equipments, isLoading, refetch } = useEquipments();
-
-  const filteredEquipments = equipments.filter(equipment => {
-    const matchesSearch = equipment.equipment_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         equipment.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         equipment.brand.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || equipment.status === statusFilter;
-    return matchesSearch && matchesStatus;
+const Equipments = () => {
+  const [filters, setFilters] = useState({
+    status: 'all',
+    type: 'all',
+    agency: 'all',
+    technician: 'all',
+    search: ''
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-        <div className="flex items-center justify-center h-96">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  const { equipments, isLoading, refetch } = useEquipments();
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Filter equipments based on current filters
+  const filteredEquipments = equipments.filter(equipment => {
+    const matchesStatus = filters.status === 'all' || equipment.status === filters.status;
+    const matchesType = filters.type === 'all' || equipment.type.toLowerCase().includes(filters.type.toLowerCase());
+    const matchesAgency = filters.agency === 'all' || equipment.agency === filters.agency;
+    const matchesTechnician = filters.technician === 'all' || equipment.technician === filters.technician;
+    const matchesSearch = filters.search === '' || 
+      equipment.equipment_id.toLowerCase().includes(filters.search.toLowerCase()) ||
+      equipment.type.toLowerCase().includes(filters.search.toLowerCase()) ||
+      equipment.brand.toLowerCase().includes(filters.search.toLowerCase()) ||
+      equipment.location.toLowerCase().includes(filters.search.toLowerCase());
+
+    return matchesStatus && matchesType && matchesAgency && matchesTechnician && matchesSearch;
+  });
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Équipements</h1>
-          <p className="text-gray-600">Gestion et suivi de vos équipements frigorifiques</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Wrench className="w-8 h-8 text-blue-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Équipements</h1>
+            <p className="text-gray-600">Gestion et suivi de tous les équipements</p>
+          </div>
         </div>
         <AddEquipmentForm onSuccess={refetch} />
       </div>
 
+      {/* Statistics */}
+      <EquipmentStats equipments={equipments} isLoading={isLoading} />
+
       {/* Filters */}
-      <EquipmentFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+      <EquipmentFilters 
+        filters={filters} 
+        onFilterChange={handleFilterChange}
+        equipments={equipments}
       />
 
-      {/* Statistics */}
-      <EquipmentStats equipments={equipments} />
-
       {/* Equipment List */}
-      <EquipmentList
+      <EquipmentList 
         equipments={equipments}
         filteredEquipments={filteredEquipments}
         isLoading={isLoading}
       />
     </div>
   );
-}
+};
+
+export default Equipments;

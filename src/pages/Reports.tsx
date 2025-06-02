@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,21 +20,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-interface MaintenanceReport {
-  id: string;
-  date: string;
-  technician: string;
-  equipment: string;
-  location: string;
-  region: string;
-  type: "Préventive" | "Corrective" | "Urgente";
-  status: "Terminé" | "En cours" | "Planifié";
-  duration: string;
-  description: string;
-  parts_used: string[];
-  cost: number;
-}
+import { useReports } from '@/hooks/useReports';
 
 const Reports = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,70 +30,13 @@ const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Mock data for maintenance reports
-  const maintenanceReports: MaintenanceReport[] = [
-    {
-      id: "RPT-001",
-      date: "2024-01-10",
-      technician: "Ahmed Ben Ali",
-      equipment: "Climatiseur Bureau A1",
-      location: "Bâtiment A - Étage 1",
-      region: "Tunis Centre",
-      type: "Préventive",
-      status: "Terminé",
-      duration: "2h 30min",
-      description: "Nettoyage des filtres et vérification du gaz réfrigérant",
-      parts_used: ["Filtre air", "Gaz R410A"],
-      cost: 85.50
-    },
-    {
-      id: "RPT-002",
-      date: "2024-01-12",
-      technician: "Fatma Trabelsi",
-      equipment: "Groupe électrogène Principal",
-      location: "Sous-sol technique",
-      region: "Tunis Nord",
-      type: "Corrective",
-      status: "Terminé",
-      duration: "4h 15min",
-      description: "Remplacement du démarreur et mise à jour logicielle",
-      parts_used: ["Démarreur", "Huile moteur"],
-      cost: 245.75
-    },
-    {
-      id: "RPT-003",
-      date: "2024-01-15",
-      technician: "Mohamed Khelifi",
-      equipment: "Ascenseur Tour B",
-      location: "Tour B - Tous étages",
-      region: "Tunis Centre",
-      type: "Urgente",
-      status: "En cours",
-      duration: "1h 45min",
-      description: "Panne d'arrêt d'urgence - Vérification sécurité",
-      parts_used: ["Capteur sécurité"],
-      cost: 120.00
-    },
-    {
-      id: "RPT-004",
-      date: "2024-01-18",
-      technician: "Leila Mansouri",
-      equipment: "Système de ventilation",
-      location: "Bâtiment C - RDC",
-      region: "Sfax",
-      type: "Préventive",
-      status: "Planifié",
-      duration: "3h 00min",
-      description: "Maintenance trimestrielle - Nettoyage conduits",
-      parts_used: [],
-      cost: 150.00
-    }
-  ];
+  const { reports, isLoading } = useReports();
 
-  const technicians = ["Ahmed Ben Ali", "Fatma Trabelsi", "Mohamed Khelifi", "Leila Mansouri"];
-  const regions = ["Tunis Centre", "Tunis Nord", "Sfax", "Sousse", "Gabès"];
+  // Extract unique technicians and regions from reports
+  const technicians = Array.from(new Set(reports.map(report => report.technician)));
+  const regions = Array.from(new Set(reports.map(report => report.region)));
 
-  const filteredReports = maintenanceReports.filter(report => {
+  const filteredReports = reports.filter(report => {
     const matchesSearch = searchTerm === "" || 
       report.equipment.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -153,6 +83,16 @@ const Reports = () => {
     console.log(`Downloading report ${reportId}`);
     // Ici vous pourriez implémenter le téléchargement
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Chargement des rapports...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-fade-in">
@@ -347,7 +287,7 @@ const Reports = () => {
                       <Button variant="ghost" size="sm" onClick={() => console.log(`View ${report.id}`)}>
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => downloadReport(report.id)}>
+                      <Button variant="ghost" size="sm" onClick={() => downloadReport(report.report_id)}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
