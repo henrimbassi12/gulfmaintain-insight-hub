@@ -13,6 +13,7 @@ interface DashboardCardProps {
     isPositive: boolean;
   };
   className?: string;
+  onClick?: () => void;
 }
 
 export function DashboardCard({ 
@@ -21,10 +22,14 @@ export function DashboardCard({
   subtitle, 
   icon: Icon, 
   trend, 
-  className = "" 
+  className = "",
+  onClick
 }: DashboardCardProps) {
   return (
-    <Card className={`transition-all duration-200 hover:shadow-lg ${className}`}>
+    <Card 
+      className={`transition-all duration-200 hover:shadow-lg ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      onClick={onClick}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
         <Icon className="h-4 w-4 text-slate-400" />
