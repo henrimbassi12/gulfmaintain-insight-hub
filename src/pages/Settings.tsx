@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, User, Bell, Shield, Database, Save, Eye, EyeOff } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Shield, Database, Save, Eye, EyeOff, Palette } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +8,13 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { t } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -125,18 +128,40 @@ const Settings = () => {
       <div className="flex items-center gap-3 mb-6">
         <SettingsIcon className="w-8 h-8 text-blue-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Paramètres</h1>
-          <p className="text-gray-600">Configuration de votre compte et préférences</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('settings')}</h1>
+          <p className="text-gray-600 dark:text-gray-300">{t('settingsDescription')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Apparence et langue */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="w-5 h-5 text-purple-500" />
+              {t('appearance')}
+            </CardTitle>
+            <CardDescription>{t('themeDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('theme')}</Label>
+              <ThemeToggle />
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <Label>{t('language')}</Label>
+              <LanguageSelector />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Profil utilisateur */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5 text-blue-500" />
-              Profil utilisateur
+              {t('profile')}
             </CardTitle>
             <CardDescription>Informations personnelles et contact</CardDescription>
           </CardHeader>
@@ -187,7 +212,7 @@ const Settings = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-orange-500" />
-              Notifications
+              {t('notifications')}
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -262,7 +287,7 @@ const Settings = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="w-5 h-5 text-green-500" />
-              Préférences système
+              {t('systemPreferences')}
             </CardTitle>
             <CardDescription>Configuration générale de l'application</CardDescription>
           </CardHeader>
@@ -332,90 +357,92 @@ const Settings = () => {
         </Card>
 
         {/* Sécurité */}
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-red-500" />
-              Sécurité
+              {t('security')}
             </CardTitle>
             <CardDescription>Paramètres de sécurité et confidentialité</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Mot de passe actuel</Label>
-              <div className="relative">
-                <Input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="Entrez votre mot de passe actuel"
-                  value={passwords.current}
-                  onChange={(e) => setPasswords(prev => ({ ...prev, current: e.target.value }))}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Mot de passe actuel</Label>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Entrez votre mot de passe actuel"
+                    value={passwords.current}
+                    onChange={(e) => setPasswords(prev => ({ ...prev, current: e.target.value }))}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Nouveau mot de passe</Label>
+                <div className="relative">
+                  <Input 
+                    type={showNewPassword ? "text" : "password"} 
+                    placeholder="Nouveau mot de passe"
+                    value={passwords.new}
+                    onChange={(e) => setPasswords(prev => ({ ...prev, new: e.target.value }))}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Confirmer le mot de passe</Label>
+                <div className="relative">
+                  <Input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    placeholder="Confirmer le nouveau mot de passe"
+                    value={passwords.confirm}
+                    onChange={(e) => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Nouveau mot de passe</Label>
-              <div className="relative">
-                <Input 
-                  type={showNewPassword ? "text" : "password"} 
-                  placeholder="Nouveau mot de passe"
-                  value={passwords.new}
-                  onChange={(e) => setPasswords(prev => ({ ...prev, new: e.target.value }))}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Confirmer le mot de passe</Label>
-              <div className="relative">
-                <Input 
-                  type={showConfirmPassword ? "text" : "password"} 
-                  placeholder="Confirmer le nouveau mot de passe"
-                  value={passwords.confirm}
-                  onChange={(e) => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-            <Button onClick={handleChangePassword} className="w-full">
+            <Button onClick={handleChangePassword} className="w-full md:w-auto">
               Changer le mot de passe
             </Button>
             <Separator />
             <div className="space-y-3">
               <h4 className="font-medium">Sessions actives</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
                   <div>
                     <p className="font-medium">Navigateur actuel</p>
                     <p className="text-gray-500">Chrome sur Windows - IP: 192.168.1.10</p>
                   </div>
                   <span className="text-green-600 text-xs">Actuelle</span>
                 </div>
-                <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
                   <div>
                     <p className="font-medium">Application mobile</p>
                     <p className="text-gray-500">iPhone - Dernière activité: il y a 2h</p>
@@ -435,13 +462,13 @@ const Settings = () => {
       </div>
 
       {/* Boutons d'action */}
-      <div className="flex justify-end gap-3 pt-6 border-t">
+      <div className="flex justify-end gap-3 pt-6 border-t dark:border-gray-700">
         <Button variant="outline">
-          Annuler
+          {t('cancel')}
         </Button>
         <Button onClick={handleSaveSettings} className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
-          Sauvegarder les modifications
+          {t('save')} les modifications
         </Button>
       </div>
     </div>
