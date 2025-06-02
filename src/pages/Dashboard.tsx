@@ -1,8 +1,11 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { DashboardCard } from '@/components/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import TechnicianPerformance from '@/components/dashboard/TechnicianPerformance';
 import RegionMap from '@/components/dashboard/RegionMap';
 import EquipmentTypeBreakdown from '@/components/dashboard/EquipmentTypeBreakdown';
@@ -16,36 +19,55 @@ import {
   AlertTriangle, 
   TrendingUp, 
   Clock,
-  MapPin,
   Bell,
   Calendar,
-  Users
+  Users,
+  Download,
+  RefreshCw
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const alerts = [
-    {
-      id: 1,
-      type: 'critical',
-      message: 'Frigo #FR-2024-045 - Température critique détectée',
-      location: 'Agence Casablanca Nord',
-      time: 'Il y a 5 min'
-    },
-    {
-      id: 2,
-      type: 'warning',
-      message: 'Maintenance préventive due dans 2 jours',
-      location: 'Agence Rabat Centre',
-      time: 'Il y a 1h'
-    },
-    {
-      id: 3,
-      type: 'info',
-      message: 'Rapport de maintenance disponible',
-      location: 'Équipe Technique A',
-      time: 'Il y a 2h'
-    }
-  ];
+  const { toast } = useToast();
+  const [timeRange, setTimeRange] = useState("today");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleNewAlert = () => {
+    toast({
+      title: "Nouvelle alerte créée",
+      description: "L'alerte a été ajoutée au système de surveillance.",
+    });
+  };
+
+  const handleExportData = () => {
+    toast({
+      title: "Export en cours",
+      description: "Génération du rapport en cours...",
+    });
+    
+    // Simuler l'export
+    setTimeout(() => {
+      toast({
+        title: "Export terminé",
+        description: "Le rapport a été téléchargé avec succès.",
+      });
+    }, 2000);
+  };
+
+  const handleRefreshData = () => {
+    setRefreshing(true);
+    toast({
+      title: "Actualisation",
+      description: "Mise à jour des données en cours...",
+    });
+    
+    setTimeout(() => {
+      setRefreshing(false);
+      toast({
+        title: "Données actualisées",
+        description: "Les données ont été mises à jour avec succès.",
+      });
+    }, 1500);
+  };
 
   const recentInterventions = [
     {
@@ -83,11 +105,38 @@ export default function Dashboard() {
           <p className="text-gray-600">Vue d'ensemble de votre activité de maintenance</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" size="sm">
-            <Calendar className="w-4 h-4 mr-2" />
-            Aujourd'hui
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Aujourd'hui</SelectItem>
+              <SelectItem value="week">Cette semaine</SelectItem>
+              <SelectItem value="month">Ce mois</SelectItem>
+              <SelectItem value="quarter">Ce trimestre</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleExportData}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exporter
           </Button>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefreshData}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Actualiser
+          </Button>
+          
+          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleNewAlert}>
             <Bell className="w-4 h-4 mr-2" />
             Nouvelle alerte
           </Button>
@@ -102,7 +151,8 @@ export default function Dashboard() {
           subtitle="Ce mois"
           icon={Wrench}
           trend={{ value: 12, isPositive: true }}
-          className="border-l-4 border-l-blue-500"
+          className="border-l-4 border-l-blue-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => toast({ title: "Navigation", description: "Redirection vers la page Maintenance..." })}
         />
         <DashboardCard
           title="En cours"
@@ -110,7 +160,8 @@ export default function Dashboard() {
           subtitle="Interventions actives"
           icon={Clock}
           trend={{ value: -25, isPositive: true }}
-          className="border-l-4 border-l-orange-500"
+          className="border-l-4 border-l-orange-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => toast({ title: "Navigation", description: "Affichage des interventions en cours..." })}
         />
         <DashboardCard
           title="AF Terminées"
@@ -118,7 +169,8 @@ export default function Dashboard() {
           subtitle="Pannes avec Accord de Fin"
           icon={TrendingUp}
           trend={{ value: 3, isPositive: true }}
-          className="border-l-4 border-l-green-500"
+          className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => toast({ title: "Navigation", description: "Affichage des interventions terminées..." })}
         />
         <DashboardCard
           title="NF Terminées"
@@ -126,7 +178,8 @@ export default function Dashboard() {
           subtitle="Pannes Non-Fermées à surveiller"
           icon={AlertTriangle}
           trend={{ value: -8, isPositive: true }}
-          className="border-l-4 border-l-red-500"
+          className="border-l-4 border-l-red-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => toast({ title: "Navigation", description: "Affichage des pannes non-fermées..." })}
         />
       </div>
 
@@ -155,11 +208,14 @@ export default function Dashboard() {
       </div>
 
       {/* Interventions récentes */}
-      <Card>
+      <Card className="hover:shadow-lg transition-shadow">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5 text-green-500" />
             Interventions récentes
+            <Badge variant="secondary" className="ml-auto">
+              {recentInterventions.length} interventions
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -173,13 +229,16 @@ export default function Dashboard() {
                   <th className="pb-3 font-medium">Type</th>
                   <th className="pb-3 font-medium">Statut</th>
                   <th className="pb-3 font-medium">Durée</th>
+                  <th className="pb-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {recentInterventions.map((intervention) => (
-                  <tr key={intervention.id} className="border-b last:border-0 hover:bg-gray-50">
+                  <tr key={intervention.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                     <td className="py-3">
-                      <span className="font-mono text-sm text-blue-600">{intervention.id}</span>
+                      <span className="font-mono text-sm text-blue-600 cursor-pointer hover:underline">
+                        {intervention.id}
+                      </span>
                     </td>
                     <td className="py-3">
                       <span className="font-medium">{intervention.equipment}</span>
@@ -197,6 +256,18 @@ export default function Dashboard() {
                       </Badge>
                     </td>
                     <td className="py-3 text-sm text-gray-600">{intervention.duration}</td>
+                    <td className="py-3">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => toast({ 
+                          title: "Détails", 
+                          description: `Affichage des détails de l'intervention ${intervention.id}` 
+                        })}
+                      >
+                        Voir détails
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

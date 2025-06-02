@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, User, Bell, Shield, Database, Save } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Shield, Database, Save, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const [userSettings, setUserSettings] = useState({
     name: "Tech Manager",
     email: "manager@gulfmaintain.com",
@@ -37,6 +41,12 @@ const Settings = () => {
     maintenanceReminders: true
   });
 
+  const [passwords, setPasswords] = useState({
+    current: "",
+    new: "",
+    confirm: ""
+  });
+
   const handleSaveSettings = () => {
     toast({
       title: "Paramètres sauvegardés",
@@ -44,12 +54,70 @@ const Settings = () => {
     });
   };
 
+  const handleChangePassword = () => {
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs du mot de passe.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      toast({
+        title: "Erreur",
+        description: "Les nouveaux mots de passe ne correspondent pas.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (passwords.new.length < 8) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 8 caractères.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Mot de passe modifié",
+      description: "Votre mot de passe a été mis à jour avec succès.",
+    });
+
+    setPasswords({ current: "", new: "", confirm: "" });
+  };
+
+  const handleDisconnectSession = (sessionName: string) => {
+    toast({
+      title: "Session déconnectée",
+      description: `La session "${sessionName}" a été fermée.`,
+    });
+  };
+
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Notification mise à jour",
+      description: `Préférence "${key}" ${value ? 'activée' : 'désactivée'}.`,
+    });
   };
 
   const handleSystemChange = (key: string, value: boolean | string) => {
     setSystemSettings(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Paramètre système mis à jour",
+      description: `Configuration "${key}" modifiée.`,
+    });
+  };
+
+  const handleTestNotification = () => {
+    toast({
+      title: "Notification de test",
+      description: "Ceci est une notification de test pour vérifier vos paramètres.",
+    });
   };
 
   return (
@@ -120,6 +188,14 @@ const Settings = () => {
             <CardTitle className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-orange-500" />
               Notifications
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="ml-auto"
+                onClick={handleTestNotification}
+              >
+                Tester
+              </Button>
             </CardTitle>
             <CardDescription>Gérer vos préférences de notification</CardDescription>
           </CardHeader>
@@ -267,16 +343,67 @@ const Settings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Mot de passe actuel</Label>
-              <Input type="password" placeholder="Entrez votre mot de passe actuel" />
+              <div className="relative">
+                <Input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Entrez votre mot de passe actuel"
+                  value={passwords.current}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, current: e.target.value }))}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Nouveau mot de passe</Label>
-              <Input type="password" placeholder="Nouveau mot de passe" />
+              <div className="relative">
+                <Input 
+                  type={showNewPassword ? "text" : "password"} 
+                  placeholder="Nouveau mot de passe"
+                  value={passwords.new}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, new: e.target.value }))}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Confirmer le mot de passe</Label>
-              <Input type="password" placeholder="Confirmer le nouveau mot de passe" />
+              <div className="relative">
+                <Input 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  placeholder="Confirmer le nouveau mot de passe"
+                  value={passwords.confirm}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
+            <Button onClick={handleChangePassword} className="w-full">
+              Changer le mot de passe
+            </Button>
             <Separator />
             <div className="space-y-3">
               <h4 className="font-medium">Sessions actives</h4>
@@ -293,7 +420,13 @@ const Settings = () => {
                     <p className="font-medium">Application mobile</p>
                     <p className="text-gray-500">iPhone - Dernière activité: il y a 2h</p>
                   </div>
-                  <Button variant="outline" size="sm">Déconnecter</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDisconnectSession("Application mobile")}
+                  >
+                    Déconnecter
+                  </Button>
                 </div>
               </div>
             </div>

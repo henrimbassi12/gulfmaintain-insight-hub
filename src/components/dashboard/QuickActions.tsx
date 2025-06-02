@@ -4,16 +4,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, List, UserCheck, Calendar, FileText, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const QuickActions: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleAction = (actionName: string, path?: string) => {
+    if (path) {
+      navigate(path);
+    }
+    toast({
+      title: "Action exécutée",
+      description: `${actionName} - Navigation en cours...`,
+    });
+  };
 
   const actions = [
     {
       title: "Créer une intervention",
       description: "Nouvelle intervention de maintenance",
       icon: Plus,
-      action: () => navigate("/maintenance"),
+      action: () => handleAction("Création d'intervention", "/maintenance"),
       color: "bg-blue-500 hover:bg-blue-600",
       primary: true
     },
@@ -21,35 +33,35 @@ const QuickActions: React.FC = () => {
       title: "Liste complète",
       description: "Voir toutes les interventions",
       icon: List,
-      action: () => navigate("/maintenance"),
+      action: () => handleAction("Liste des interventions", "/maintenance"),
       color: "bg-green-500 hover:bg-green-600"
     },
     {
       title: "Attribuer technicien",
       description: "Affecter à un technicien",
       icon: UserCheck,
-      action: () => navigate("/maintenance"),
+      action: () => handleAction("Attribution technicien", "/maintenance"),
       color: "bg-orange-500 hover:bg-orange-600"
     },
     {
       title: "Planifier maintenance",
       description: "Programmer maintenance préventive",
       icon: Calendar,
-      action: () => navigate("/maintenance"),
+      action: () => handleAction("Planification maintenance", "/maintenance"),
       color: "bg-purple-500 hover:bg-purple-600"
     },
     {
       title: "Générer rapport",
       description: "Créer un rapport d'activité",
       icon: FileText,
-      action: () => navigate("/reports"),
+      action: () => handleAction("Génération de rapport", "/reports"),
       color: "bg-indigo-500 hover:bg-indigo-600"
     },
     {
       title: "Supervision IA",
       description: "Voir les prédictions IA",
       icon: Settings,
-      action: () => navigate("/supervision"),
+      action: () => handleAction("Supervision IA", "/supervision"),
       color: "bg-teal-500 hover:bg-teal-600"
     }
   ];
@@ -66,8 +78,8 @@ const QuickActions: React.FC = () => {
             <Button
               key={index}
               variant={action.primary ? "default" : "outline"}
-              className={`h-auto p-4 flex flex-col items-center gap-2 ${
-                action.primary ? action.color : 'hover:bg-gray-50'
+              className={`h-auto p-4 flex flex-col items-center gap-2 transition-all duration-200 hover:scale-105 ${
+                action.primary ? action.color : 'hover:bg-gray-50 hover:border-gray-300'
               }`}
               onClick={action.action}
             >
