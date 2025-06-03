@@ -42,9 +42,9 @@ const SupervisionFilters: React.FC<SupervisionFiltersProps> = ({ filters, onFilt
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les niveaux</SelectItem>
-              <SelectItem value="high">Élevé (>70%)</SelectItem>
+              <SelectItem value="high">Élevé (&gt;70%)</SelectItem>
               <SelectItem value="medium">Moyen (30-70%)</SelectItem>
-              <SelectItem value="low">Faible (<30%)</SelectItem>
+              <SelectItem value="low">Faible (&lt;30%)</SelectItem>
             </SelectContent>
           </Select>
 
