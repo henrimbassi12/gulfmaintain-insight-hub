@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Brain, TrendingUp, AlertTriangle, Settings, Clock } from "lucide-react";
-import { AIReliabilityScore } from '@/components/supervision/AIReliabilityScore';
+import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { PredictionsList } from '@/components/supervision/PredictionsList';
 import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
 import { RecurrenceAnalysis } from '@/components/supervision/RecurrenceAnalysis';
@@ -22,6 +22,16 @@ const Supervision = () => {
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Mock metrics for AI Reliability Score
+  const aiMetrics = {
+    predictionAccuracy: 87,
+    confidenceScore: 92,
+    totalPredictions: 150,
+    correctPredictions: 131,
+    modelVersion: "v2.1.3",
+    lastUpdated: "2024-01-20 14:30"
   };
 
   if (isLoading) {
@@ -52,7 +62,7 @@ const Supervision = () => {
       />
 
       {/* Score de fiabilité global */}
-      <AIReliabilityScore />
+      <AIReliabilityScore metrics={aiMetrics} />
 
       {/* Contenu principal sous forme d'onglets */}
       <Tabs defaultValue="predictions" className="w-full">
