@@ -8,27 +8,36 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Search, Filter, X } from 'lucide-react';
+import { Equipment } from '@/hooks/useEquipments';
 
 interface EquipmentFiltersProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  statusFilter: string;
-  setStatusFilter: (value: string) => void;
+  onFilterChange: (key: string, value: string) => void;
+  equipments: Equipment[];
 }
 
 export function EquipmentFilters({ 
-  searchTerm, 
-  setSearchTerm, 
-  statusFilter, 
-  setStatusFilter 
+  onFilterChange,
+  equipments
 }: EquipmentFiltersProps) {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [advancedFilters, setAdvancedFilters] = useState({
     brands: [] as string[],
     types: [] as string[],
     agencies: [] as string[],
     maintenanceStatus: [] as string[]
   });
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    onFilterChange('search', value);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
+    onFilterChange('status', value);
+  };
 
   const brandOptions = ['Samsung', 'LG', 'Whirlpool', 'Bosch', 'Electrolux'];
   const typeOptions = ['Réfrigérateur', 'Congélateur', 'Vitrine réfrigérée', 'Chambre froide'];
@@ -47,6 +56,8 @@ export function EquipmentFilters({
   const clearFilters = () => {
     setSearchTerm('');
     setStatusFilter('all');
+    onFilterChange('search', '');
+    onFilterChange('status', 'all');
     setAdvancedFilters({
       brands: [],
       types: [],
@@ -69,12 +80,12 @@ export function EquipmentFilters({
               <Input
                 placeholder="Rechercher par ID, localisation, marque..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-9"
               />
             </div>
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
