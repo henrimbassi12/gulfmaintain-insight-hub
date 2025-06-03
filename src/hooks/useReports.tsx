@@ -36,7 +36,14 @@ export function useReports() {
         throw error;
       }
 
-      setReports(data || []);
+      // Type assertions to ensure proper typing
+      const typedReports = (data || []).map(item => ({
+        ...item,
+        type: item.type as "Préventive" | "Corrective" | "Urgente",
+        status: item.status as "Terminé" | "En cours" | "Planifié"
+      })) as MaintenanceReport[];
+
+      setReports(typedReports);
     } catch (error) {
       console.error('Erreur lors de la récupération des rapports:', error);
       toast.error('Erreur lors de la récupération des rapports');

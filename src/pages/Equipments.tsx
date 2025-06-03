@@ -54,11 +54,10 @@ const Equipments = () => {
       </div>
 
       {/* Statistics */}
-      <EquipmentStats equipments={equipments} isLoading={isLoading} />
+      <EquipmentStats equipments={equipments} />
 
       {/* Filters */}
       <EquipmentFilters 
-        filters={filters} 
         onFilterChange={handleFilterChange}
         equipments={equipments}
       />

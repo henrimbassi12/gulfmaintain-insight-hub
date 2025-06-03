@@ -6,8 +6,8 @@ import { Brain, TrendingUp, AlertTriangle, Settings, Clock } from "lucide-react"
 import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { PredictionsList } from '@/components/supervision/PredictionsList';
 import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
-import { RecurrenceAnalysis } from '@/components/supervision/RecurrenceAnalysis';
-import { SupervisionFilters } from '@/components/supervision/SupervisionFilters';
+import RecurrenceAnalysis from '@/components/supervision/RecurrenceAnalysis';
+import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { useSupervision } from '@/hooks/useSupervision';
 
 const Supervision = () => {
@@ -33,6 +33,31 @@ const Supervision = () => {
     modelVersion: "v2.1.3",
     lastUpdated: "2024-01-20 14:30"
   };
+
+  // Mock data for RecurrenceAnalysis
+  const recurrenceData = [
+    {
+      equipment: "Climatiseur Bureau A1",
+      recurrenceRate: 45,
+      category: "Critique",
+      totalFailures: 8,
+      avgTimeBetweenFailures: 25
+    },
+    {
+      equipment: "Groupe électrogène Principal",
+      recurrenceRate: 30,
+      category: "Modéré",
+      totalFailures: 5,
+      avgTimeBetweenFailures: 45
+    },
+    {
+      equipment: "Ascenseur Tour B",
+      recurrenceRate: 15,
+      category: "Faible",
+      totalFailures: 3,
+      avgTimeBetweenFailures: 90
+    }
+  ];
 
   if (isLoading) {
     return (
@@ -90,7 +115,7 @@ const Supervision = () => {
         </TabsContent>
 
         <TabsContent value="analysis" className="space-y-4">
-          <RecurrenceAnalysis />
+          <RecurrenceAnalysis data={recurrenceData} />
         </TabsContent>
       </Tabs>
     </div>

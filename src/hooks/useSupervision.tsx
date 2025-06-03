@@ -56,8 +56,16 @@ export function useSupervision() {
         throw recommendationsResult.error;
       }
 
-      setPredictions(predictionsResult.data || []);
-      setRecommendations(recommendationsResult.data || []);
+      // Type assertions to ensure proper typing
+      const typedPredictions = (predictionsResult.data || []).map(item => ({
+        ...item,
+        type: item.type as 'AF' | 'NF'
+      })) as FailurePrediction[];
+
+      const typedRecommendations = (recommendationsResult.data || []) as TechnicianRecommendation[];
+
+      setPredictions(typedPredictions);
+      setRecommendations(typedRecommendations);
     } catch (error) {
       console.error('Erreur lors de la récupération des données de supervision:', error);
       toast.error('Erreur lors de la récupération des données de supervision');
