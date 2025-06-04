@@ -15,6 +15,7 @@ import { UserProfile } from "@/components/UserProfile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { DataExport } from "@/components/DataExport";
+import { NotificationSystem } from "@/components/NotificationSystem";
 import {
   Home,
   Wrench,
@@ -23,7 +24,10 @@ import {
   Settings,
   Eye,
   FileText,
-  Shield
+  Shield,
+  Calendar,
+  MapPin,
+  Clock
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 
@@ -31,6 +35,9 @@ const menuItems = [
   { icon: Home, label: "Tableau de bord", href: "/" },
   { icon: Wrench, label: "Équipements", href: "/equipments" },
   { icon: Settings, label: "Maintenance", href: "/maintenance" },
+  { icon: Calendar, label: "Planning", href: "/calendar" },
+  { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
+  { icon: Clock, label: "Historique", href: "/history" },
   { icon: MessageSquare, label: "Messages", href: "/messages" },
   { icon: Eye, label: "Supervision", href: "/supervision" },
   { icon: FileText, label: "Rapports", href: "/reports" },
@@ -90,7 +97,10 @@ export function AppSidebar() {
         <div className="mt-6 pt-4 border-t">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Actions rapides</h3>
           <div className="space-y-2">
-            <DataExport />
+            <div className="flex gap-2">
+              <NotificationSystem />
+              <DataExport />
+            </div>
             <div className="mobile-hidden">
               <ThemeToggle />
             </div>
