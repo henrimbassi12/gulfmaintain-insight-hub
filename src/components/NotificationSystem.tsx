@@ -74,8 +74,21 @@ export function NotificationSystem() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
+  // Fermer les notifications quand on clique à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isOpen && !target.closest('[data-notification-panel]')) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
   return (
-    <div className="relative">
+    <div className="relative" data-notification-panel>
       <Button
         variant="outline"
         size="sm"
@@ -94,55 +107,62 @@ export function NotificationSystem() {
       </Button>
 
       {isOpen && (
-        <Card className="absolute right-0 top-12 w-80 max-h-96 overflow-y-auto z-50 shadow-lg">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Notifications</h3>
-              <div className="flex gap-2">
-                {unreadCount > 0 && (
-                  <Button size="sm" variant="ghost" onClick={markAllAsRead}>
-                    Tout marquer lu
+        <>
+          {/* Overlay pour mobile */}
+          <div className="fixed inset-0 bg-black/20 z-40 md:hidden" onClick={() => setIsOpen(false)} />
+          
+          <Card className="absolute right-0 top-12 w-80 max-w-[90vw] max-h-96 overflow-y-auto z-50 shadow-xl border bg-white dark:bg-gray-800 md:w-96">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                <div className="flex gap-2">
+                  {unreadCount > 0 && (
+                    <Button size="sm" variant="ghost" onClick={markAllAsRead}>
+                      Tout marquer lu
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)}>
+                    <X className="w-4 h-4" />
                   </Button>
-                )}
-                <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)}>
-                  <X className="w-4 h-4" />
-                </Button>
+                </div>
               </div>
-            </div>
-            
-            <div className="space-y-3">
-              {notifications.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Aucune notification</p>
-              ) : (
-                notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                      notification.read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'
-                    }`}
-                    onClick={() => markAsRead(notification.id)}
-                  >
-                    <div className="flex items-start gap-3">
-                      {getNotificationIcon(notification.type)}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{notification.title}</p>
-                        <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
-                        {notification.equipment && (
-                          <p className="text-xs text-blue-600 mt-1">
-                            {notification.equipment} - {notification.location}
+              
+              <div className="space-y-3">
+                {notifications.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">Aucune notification</p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                        notification.read 
+                          ? 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600' 
+                          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-600'
+                      }`}
+                      onClick={() => markAsRead(notification.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        {getNotificationIcon(notification.type)}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm text-gray-900 dark:text-white">{notification.title}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{notification.message}</p>
+                          {notification.equipment && (
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                              {notification.equipment} - {notification.location}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                            {notification.timestamp.toLocaleTimeString('fr-FR')}
                           </p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-2">
-                          {notification.timestamp.toLocaleTimeString('fr-FR')}
-                        </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
