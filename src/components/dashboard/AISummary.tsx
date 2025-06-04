@@ -2,97 +2,135 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Target, Lightbulb, CheckCircle } from "lucide-react";
+import { Brain, TrendingUp, AlertCircle, CheckCircle, Clock } from "lucide-react";
 
 const AISummary: React.FC = () => {
-  const aiMetrics = {
-    accuracy: 87.3,
-    predictions: 156,
-    correctPredictions: 136,
-    lastUpdate: "2024-01-15",
-    confidence: 91.2
+  const insights = [
+    {
+      type: 'prediction',
+      icon: TrendingUp,
+      title: 'Prédiction de panne',
+      description: 'Équipement FR-2024-089 risque de panne dans 5 jours',
+      confidence: 87,
+      priority: 'high',
+      action: 'Planifier maintenance préventive'
+    },
+    {
+      type: 'optimization',
+      icon: Clock,
+      title: 'Optimisation des tournées',
+      description: 'Réorganisation des routes peut économiser 2h30/jour',
+      confidence: 94,
+      priority: 'medium',
+      action: 'Appliquer nouveau planning'
+    },
+    {
+      type: 'alert',
+      icon: AlertCircle,
+      title: 'Récurrence détectée',
+      description: 'Même panne sur 3 équipements Samsung cette semaine',
+      confidence: 96,
+      priority: 'high',
+      action: 'Investigation approfondie requise'
+    },
+    {
+      type: 'success',
+      icon: CheckCircle,
+      title: 'Performance améliorée',
+      description: 'Taux de résolution en première intervention: +15%',
+      confidence: 100,
+      priority: 'low',
+      action: 'Maintenir les bonnes pratiques'
+    }
+  ];
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-orange-100 text-orange-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const recentPredictions = [
-    { equipment: "FR-2024-045", risk: 87, action: "Vérifier compresseur", status: "pending" },
-    { equipment: "FR-2024-089", risk: 92, action: "Remplacement préventif", status: "completed" },
-    { equipment: "FR-2024-112", risk: 78, action: "Contrôle température", status: "in-progress" }
-  ];
-
-  const recommendations = [
-    "Planifier maintenance préventive pour 3 équipements Samsung",
-    "Affecter Ahmed Benali aux interventions critiques (taux de réussite 96%)",
-    "Surveiller les équipements de Casablanca Nord (pic d'activité détecté)"
-  ];
+  const getIconColor = (type: string) => {
+    switch (type) {
+      case 'prediction':
+        return 'text-blue-500';
+      case 'optimization':
+        return 'text-purple-500';
+      case 'alert':
+        return 'text-red-500';
+      case 'success':
+        return 'text-green-500';
+      default:
+        return 'text-gray-500';
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Brain className="w-5 h-5 text-indigo-500" />
-          Résumé de l'intelligence artificielle
+          <Brain className="w-5 h-5 text-purple-500" />
+          Résumé IA
+          <Badge variant="outline" className="ml-auto bg-purple-50 text-purple-700 border-purple-200">
+            Mise à jour en temps réel
+          </Badge>
         </CardTitle>
-        <CardDescription>Performance du modèle et recommandations</CardDescription>
+        <CardDescription>Insights et recommandations basés sur l'intelligence artificielle</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {/* Métriques IA */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-indigo-50 rounded-lg text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Target className="w-4 h-4 text-indigo-500" />
-                <span className="text-sm text-indigo-600">Précision</span>
-              </div>
-              <div className="text-2xl font-bold text-indigo-700">{aiMetrics.accuracy}%</div>
-              <div className="text-xs text-indigo-600">{aiMetrics.correctPredictions}/{aiMetrics.predictions} prédictions</div>
-            </div>
-            <div className="p-3 bg-blue-50 rounded-lg text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Brain className="w-4 h-4 text-blue-500" />
-                <span className="text-sm text-blue-600">Confiance</span>
-              </div>
-              <div className="text-2xl font-bold text-blue-700">{aiMetrics.confidence}%</div>
-              <div className="text-xs text-blue-600">Score global</div>
-            </div>
-          </div>
-
-          {/* Prédictions récentes */}
-          <div>
-            <h3 className="font-medium mb-3">Dernières prédictions</h3>
-            <div className="space-y-2">
-              {recentPredictions.map((pred, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div>
-                    <span className="font-medium text-sm">{pred.equipment}</span>
-                    <span className="text-xs text-gray-600 ml-2">{pred.action}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={pred.risk >= 85 ? "destructive" : "secondary"}>
-                      {pred.risk}%
-                    </Badge>
-                    <div className={`w-2 h-2 rounded-full ${
-                      pred.status === 'completed' ? 'bg-green-500' :
-                      pred.status === 'in-progress' ? 'bg-orange-500' : 'bg-gray-400'
-                    }`}></div>
+        <div className="space-y-4">
+          {insights.map((insight, index) => {
+            const IconComponent = insight.icon;
+            return (
+              <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-start gap-3">
+                  <IconComponent className={`w-5 h-5 mt-0.5 ${getIconColor(insight.type)}`} />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">{insight.title}</h3>
+                      <Badge className={getPriorityColor(insight.priority)} variant="outline">
+                        {insight.priority === 'high' ? 'Priorité élevée' : 
+                         insight.priority === 'medium' ? 'Priorité moyenne' : 'Info'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{insight.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">
+                        Confiance: {insight.confidence}%
+                      </span>
+                      <span className="text-xs font-medium text-blue-600">
+                        {insight.action}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Résumé global */}
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <h3 className="font-semibold text-blue-900 mb-2">Résumé de la journée</h3>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="text-center">
+              <div className="text-lg font-bold text-blue-600">12</div>
+              <div className="text-blue-700">Recommandations</div>
             </div>
-          </div>
-
-          {/* Recommandations */}
-          <div>
-            <h3 className="font-medium mb-3 flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-yellow-500" />
-              Recommandations
-            </h3>
-            <div className="space-y-2">
-              {recommendations.map((rec, index) => (
-                <div key={index} className="flex items-start gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">{rec}</span>
-                </div>
-              ))}
+            <div className="text-center">
+              <div className="text-lg font-bold text-green-600">8</div>
+              <div className="text-blue-700">Actions appliquées</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-orange-600">4</div>
+              <div className="text-blue-700">En attente</div>
             </div>
           </div>
         </div>
