@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -97,5 +91,72 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Amélioration pour mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Optimisations mobile */
+  @media (max-width: 768px) {
+    .sidebar-trigger {
+      @apply fixed top-4 left-4 z-50;
+    }
+    
+    .main-content {
+      @apply px-2 py-4;
+    }
+    
+    .card-grid {
+      @apply grid-cols-1 gap-4;
+    }
+    
+    .dialog-content {
+      @apply m-4 max-w-[calc(100vw-2rem)];
+    }
+  }
+
+  /* Améliorations tactiles */
+  @media (hover: none) and (pointer: coarse) {
+    .hover-item {
+      @apply active:bg-accent active:text-accent-foreground;
+    }
+    
+    button, .button {
+      @apply min-h-[44px] min-w-[44px];
+    }
+  }
+}
+
+@layer components {
+  /* Classes utilitaires pour le responsive */
+  .mobile-hidden {
+    @apply hidden md:block;
+  }
+  
+  .mobile-only {
+    @apply block md:hidden;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  .responsive-text {
+    @apply text-sm md:text-base;
+  }
+  
+  .mobile-drawer {
+    @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t md:relative md:border-0;
+  }
+}
+
+/* Animations pour les interactions mobiles */
+@layer utilities {
+  .touch-action-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .tap-highlight-transparent {
+    -webkit-tap-highlight-color: transparent;
   }
 }

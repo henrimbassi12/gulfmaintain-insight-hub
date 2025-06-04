@@ -12,6 +12,9 @@ import {
   SidebarMenuItem 
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/UserProfile";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { DataExport } from "@/components/DataExport";
 import {
   Home,
   Wrench,
@@ -51,6 +54,11 @@ export function AppSidebar() {
             </p>
           </div>
         </div>
+        
+        {/* Recherche globale - masquée sur mobile */}
+        <div className="mt-4 mobile-hidden">
+          <GlobalSearch />
+        </div>
       </SidebarHeader>
       
       <SidebarContent className="p-4">
@@ -60,7 +68,7 @@ export function AppSidebar() {
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={isActive}>
-                  <Link to={item.href} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+                  <Link to={item.href} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors touch-action-manipulation">
                     <item.icon className={cn(
                       "w-5 h-5",
                       isActive ? "text-blue-600" : "text-gray-500"
@@ -77,6 +85,17 @@ export function AppSidebar() {
             );
           })}
         </SidebarMenu>
+
+        {/* Actions rapides */}
+        <div className="mt-6 pt-4 border-t">
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Actions rapides</h3>
+          <div className="space-y-2">
+            <DataExport />
+            <div className="mobile-hidden">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
       </SidebarContent>
 
       <SidebarFooter>

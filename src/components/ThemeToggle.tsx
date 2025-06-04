@@ -12,17 +12,18 @@ export function ThemeToggle() {
       variant="outline"
       size="sm"
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 transition-all duration-200 hover:scale-105"
+      title={theme === 'light' ? t('darkMode') : t('lightMode')}
     >
       {theme === 'light' ? (
         <>
           <Moon className="w-4 h-4" />
-          {t('darkMode')}
+          <span className="hidden sm:inline">{t('darkMode')}</span>
         </>
       ) : (
         <>
           <Sun className="w-4 h-4" />
-          {t('lightMode')}
+          <span className="hidden sm:inline">{t('lightMode')}</span>
         </>
       )}
     </Button>
