@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { FormField } from "@/components/ui/form-field";
+import { useFormValidation } from "@/hooks/useFormValidation";
+import { useOfflineStorage } from "@/hooks/useOfflineStorage";
+import { useToast } from "@/hooks/use-toast";
 
 interface RefrigeratorMaintenanceFormProps {
   isOpen: boolean;
@@ -14,6 +15,9 @@ interface RefrigeratorMaintenanceFormProps {
 }
 
 export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: RefrigeratorMaintenanceFormProps) {
+  const { toast } = useToast();
+  const { isOnline, saveOfflineData } = useOfflineStorage('refrigerator_maintenance');
+  
   const [formData, setFormData] = useState({
     refrigeratorId: '',
     date: '',
@@ -40,8 +44,58 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
     clientSignature: ''
   });
 
-  const handleSave = () => {
-    onSave(formData);
+  const validationRules = {
+    refrigeratorId: { required: true, minLength: 3 },
+    date: { required: true },
+    technician: { required: true, minLength: 2 },
+    agency: { required: true },
+    location: { required: true },
+    temperature: { 
+      required: true, 
+      custom: (value: string) => {
+        const num = parseFloat(value);
+        if (isNaN(num)) return 'Température invalide';
+        if (num < -50 || num > 50) return 'Température hors limites (-50°C à 50°C)';
+        return null;
+      }
+    },
+    nextMaintenanceDate: { required: true }
+  };
+
+  const { errors, validateForm, clearFieldError } = useFormValidation(validationRules);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    clearFieldError(field);
+  };
+
+  const handleSave = async () => {
+    if (!validateForm(formData)) {
+      toast({
+        title: "Erreurs de validation",
+        description: "Veuillez corriger les erreurs avant de sauvegarder",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const dataToSave = {
+      ...formData,
+      type: 'refrigerator_maintenance',
+      created_at: new Date().toISOString()
+    };
+
+    if (!isOnline) {
+      const offlineId = saveOfflineData(dataToSave);
+      toast({
+        title: "Sauvegardé hors-ligne",
+        description: "Les données seront synchronisées lors de la reconnexion",
+        variant: "default"
+      });
+    } else {
+      onSave(dataToSave);
+    }
+    
     onClose();
   };
 
@@ -53,56 +107,61 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
         <CardHeader className="bg-blue-50">
           <CardTitle className="flex justify-between items-center">
             <span>Fiche d'Entretien des Réfrigérateurs</span>
-            <Button variant="ghost" onClick={onClose}>×</Button>
+            <div className="flex items-center gap-2">
+              {!isOnline && (
+                <span className="text-orange-600 text-sm">Mode hors-ligne</span>
+              )}
+              <Button variant="ghost" onClick={onClose}>×</Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           {/* En-tête */}
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="refrigeratorId">ID Réfrigérateur</Label>
-              <Input 
-                id="refrigeratorId"
-                value={formData.refrigeratorId}
-                onChange={(e) => setFormData({...formData, refrigeratorId: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="date">Date</Label>
-              <Input 
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="technician">Technicien</Label>
-              <Input 
-                id="technician"
-                value={formData.technician}
-                onChange={(e) => setFormData({...formData, technician: e.target.value})}
-              />
-            </div>
+            <FormField
+              label="ID Réfrigérateur"
+              name="refrigeratorId"
+              value={formData.refrigeratorId}
+              onChange={(value) => handleInputChange('refrigeratorId', value)}
+              error={errors.refrigeratorId}
+              required
+            />
+            <FormField
+              label="Date"
+              name="date"
+              type="date"
+              value={formData.date}
+              onChange={(value) => handleInputChange('date', value)}
+              error={errors.date}
+              required
+            />
+            <FormField
+              label="Technicien"
+              name="technician"
+              value={formData.technician}
+              onChange={(value) => handleInputChange('technician', value)}
+              error={errors.technician}
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="agency">Agence</Label>
-              <Input 
-                id="agency"
-                value={formData.agency}
-                onChange={(e) => setFormData({...formData, agency: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="location">Emplacement</Label>
-              <Input 
-                id="location"
-                value={formData.location}
-                onChange={(e) => setFormData({...formData, location: e.target.value})}
-              />
-            </div>
+            <FormField
+              label="Agence"
+              name="agency"
+              value={formData.agency}
+              onChange={(value) => handleInputChange('agency', value)}
+              error={errors.agency}
+              required
+            />
+            <FormField
+              label="Emplacement"
+              name="location"
+              value={formData.location}
+              onChange={(value) => handleInputChange('location', value)}
+              error={errors.location}
+              required
+            />
           </div>
 
           <Separator />
@@ -111,38 +170,30 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
           <div>
             <h3 className="text-lg font-semibold mb-4">Contrôles Visuels</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="exteriorCleaning">Nettoyage Extérieur</Label>
-                <Input 
-                  id="exteriorCleaning"
-                  value={formData.exteriorCleaning}
-                  onChange={(e) => setFormData({...formData, exteriorCleaning: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="interiorCleaning">Nettoyage Intérieur</Label>
-                <Input 
-                  id="interiorCleaning"
-                  value={formData.interiorCleaning}
-                  onChange={(e) => setFormData({...formData, interiorCleaning: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="doorSeals">Joints de Porte</Label>
-                <Input 
-                  id="doorSeals"
-                  value={formData.doorSeals}
-                  onChange={(e) => setFormData({...formData, doorSeals: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="lighting">Éclairage</Label>
-                <Input 
-                  id="lighting"
-                  value={formData.lighting}
-                  onChange={(e) => setFormData({...formData, lighting: e.target.value})}
-                />
-              </div>
+              <FormField
+                label="Nettoyage Extérieur"
+                name="exteriorCleaning"
+                value={formData.exteriorCleaning}
+                onChange={(value) => handleInputChange('exteriorCleaning', value)}
+              />
+              <FormField
+                label="Nettoyage Intérieur"
+                name="interiorCleaning"
+                value={formData.interiorCleaning}
+                onChange={(value) => handleInputChange('interiorCleaning', value)}
+              />
+              <FormField
+                label="Joints de Porte"
+                name="doorSeals"
+                value={formData.doorSeals}
+                onChange={(value) => handleInputChange('doorSeals', value)}
+              />
+              <FormField
+                label="Éclairage"
+                name="lighting"
+                value={formData.lighting}
+                onChange={(value) => handleInputChange('lighting', value)}
+              />
             </div>
           </div>
 
@@ -152,55 +203,45 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
           <div>
             <h3 className="text-lg font-semibold mb-4">Contrôles Techniques</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="temperature">Température (°C)</Label>
-                <Input 
-                  id="temperature"
-                  type="number"
-                  value={formData.temperature}
-                  onChange={(e) => setFormData({...formData, temperature: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="compressor">Compresseur</Label>
-                <Input 
-                  id="compressor"
-                  value={formData.compressor}
-                  onChange={(e) => setFormData({...formData, compressor: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="condenserCleaning">Nettoyage Condenseur</Label>
-                <Input 
-                  id="condenserCleaning"
-                  value={formData.condenserCleaning}
-                  onChange={(e) => setFormData({...formData, condenserCleaning: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="evaporatorCleaning">Nettoyage Évaporateur</Label>
-                <Input 
-                  id="evaporatorCleaning"
-                  value={formData.evaporatorCleaning}
-                  onChange={(e) => setFormData({...formData, evaporatorCleaning: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="refrigerantLevel">Niveau Réfrigérant</Label>
-                <Input 
-                  id="refrigerantLevel"
-                  value={formData.refrigerantLevel}
-                  onChange={(e) => setFormData({...formData, refrigerantLevel: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="electricalConnections">Connexions Électriques</Label>
-                <Input 
-                  id="electricalConnections"
-                  value={formData.electricalConnections}
-                  onChange={(e) => setFormData({...formData, electricalConnections: e.target.value})}
-                />
-              </div>
+              <FormField
+                label="Température (°C)"
+                name="temperature"
+                type="number"
+                value={formData.temperature}
+                onChange={(value) => handleInputChange('temperature', value)}
+                error={errors.temperature}
+                required
+              />
+              <FormField
+                label="Compresseur"
+                name="compressor"
+                value={formData.compressor}
+                onChange={(value) => handleInputChange('compressor', value)}
+              />
+              <FormField
+                label="Nettoyage Condenseur"
+                name="condenserCleaning"
+                value={formData.condenserCleaning}
+                onChange={(value) => handleInputChange('condenserCleaning', value)}
+              />
+              <FormField
+                label="Nettoyage Évaporateur"
+                name="evaporatorCleaning"
+                value={formData.evaporatorCleaning}
+                onChange={(value) => handleInputChange('evaporatorCleaning', value)}
+              />
+              <FormField
+                label="Niveau Réfrigérant"
+                name="refrigerantLevel"
+                value={formData.refrigerantLevel}
+                onChange={(value) => handleInputChange('refrigerantLevel', value)}
+              />
+              <FormField
+                label="Connexions Électriques"
+                name="electricalConnections"
+                value={formData.electricalConnections}
+                onChange={(value) => handleInputChange('electricalConnections', value)}
+              />
             </div>
           </div>
 
@@ -208,60 +249,54 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
 
           {/* Observations et recommandations */}
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="observations">Observations</Label>
-              <Textarea 
-                id="observations"
-                rows={3}
-                value={formData.observations}
-                onChange={(e) => setFormData({...formData, observations: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="recommendations">Recommandations</Label>
-              <Textarea 
-                id="recommendations"
-                rows={3}
-                value={formData.recommendations}
-                onChange={(e) => setFormData({...formData, recommendations: e.target.value})}
-              />
-            </div>
+            <FormField
+              label="Observations"
+              name="observations"
+              type="textarea"
+              value={formData.observations}
+              onChange={(value) => handleInputChange('observations', value)}
+            />
+            <FormField
+              label="Recommandations"
+              name="recommendations"
+              type="textarea"
+              value={formData.recommendations}
+              onChange={(value) => handleInputChange('recommendations', value)}
+            />
           </div>
 
           <Separator />
 
           {/* Signatures et date de prochain entretien */}
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="nextMaintenanceDate">Prochain Entretien</Label>
-              <Input 
-                id="nextMaintenanceDate"
-                type="date"
-                value={formData.nextMaintenanceDate}
-                onChange={(e) => setFormData({...formData, nextMaintenanceDate: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="technicianSignature">Signature Technicien</Label>
-              <Input 
-                id="technicianSignature"
-                value={formData.technicianSignature}
-                onChange={(e) => setFormData({...formData, technicianSignature: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="clientSignature">Signature Client</Label>
-              <Input 
-                id="clientSignature"
-                value={formData.clientSignature}
-                onChange={(e) => setFormData({...formData, clientSignature: e.target.value})}
-              />
-            </div>
+            <FormField
+              label="Prochain Entretien"
+              name="nextMaintenanceDate"
+              type="date"
+              value={formData.nextMaintenanceDate}
+              onChange={(value) => handleInputChange('nextMaintenanceDate', value)}
+              error={errors.nextMaintenanceDate}
+              required
+            />
+            <FormField
+              label="Signature Technicien"
+              name="technicianSignature"
+              value={formData.technicianSignature}
+              onChange={(value) => handleInputChange('technicianSignature', value)}
+            />
+            <FormField
+              label="Signature Client"
+              name="clientSignature"
+              value={formData.clientSignature}
+              onChange={(value) => handleInputChange('clientSignature', value)}
+            />
           </div>
 
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="outline" onClick={onClose}>Annuler</Button>
-            <Button onClick={handleSave}>Enregistrer</Button>
+            <Button onClick={handleSave}>
+              {isOnline ? 'Enregistrer' : 'Sauvegarder hors-ligne'}
+            </Button>
           </div>
         </CardContent>
       </Card>

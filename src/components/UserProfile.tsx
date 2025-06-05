@@ -3,8 +3,9 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 
 export function UserProfile() {
   const { user, signOut } = useAuth();
@@ -28,6 +29,17 @@ export function UserProfile() {
     }
   };
 
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return <Shield className="w-3 h-3" />;
+      case 'manager':
+        return <User className="w-3 h-3" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="border-t p-4 mt-auto">
       <div className="flex items-center gap-3 mb-3">
@@ -48,9 +60,11 @@ export function UserProfile() {
       </div>
       
       <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline" className={getRoleBadgeColor(user.user_metadata?.role || 'technician')}>
+        <Badge variant="outline" className={`gap-1 ${getRoleBadgeColor(user.user_metadata?.role || 'technician')}`}>
+          {getRoleIcon(user.user_metadata?.role || 'technician')}
           {user.user_metadata?.role || 'technician'}
         </Badge>
+        <OfflineIndicator />
       </div>
 
       <Button 
