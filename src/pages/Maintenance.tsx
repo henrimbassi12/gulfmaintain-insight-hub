@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,17 +10,25 @@ import {
   Wrench,
   Plus,
   MapPin,
-  Brain
+  Brain,
+  FileText,
+  Truck
 } from 'lucide-react';
 import MaintenanceFilters from '@/components/maintenance/MaintenanceFilters';
 import MaintenanceForm from '@/components/maintenance/MaintenanceForm';
 import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
+import { RepairForm } from '@/components/forms/RepairForm';
+import { MovementForm } from '@/components/forms/MovementForm';
+import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
 
 export default function Maintenance() {
   const [view, setView] = useState('calendar');
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isRepairFormOpen, setIsRepairFormOpen] = useState(false);
+  const [isMovementFormOpen, setIsMovementFormOpen] = useState(false);
+  const [isTrackingFormOpen, setIsTrackingFormOpen] = useState(false);
   
   const [filters, setFilters] = useState({
     technician: 'all',
@@ -112,12 +119,14 @@ export default function Maintenance() {
 
   const handleUpdateStatus = (status: string) => {
     console.log('Updating status to:', status);
-    // Implement status update logic
   };
 
   const handleSaveMaintenance = (data: any) => {
     console.log('Saving maintenance:', data);
-    // Implement save logic
+  };
+
+  const handleSaveForm = (data: any) => {
+    console.log('Saving form data:', data);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -168,6 +177,30 @@ export default function Maintenance() {
           <p className="text-gray-600">Planification et suivi des interventions</p>
         </div>
         <div className="flex gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => setIsRepairFormOpen(true)}
+            className="bg-blue-50 hover:bg-blue-100"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Fiche Réparation
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => setIsMovementFormOpen(true)}
+            className="bg-green-50 hover:bg-green-100"
+          >
+            <Truck className="w-4 h-4 mr-2" />
+            Fiche Mouvement
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => setIsTrackingFormOpen(true)}
+            className="bg-purple-50 hover:bg-purple-100"
+          >
+            <Wrench className="w-4 h-4 mr-2" />
+            Fiche Suivi
+          </Button>
           <Button 
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => {
@@ -390,6 +423,24 @@ export default function Maintenance() {
         maintenance={selectedMaintenance}
         onEdit={handleEditMaintenance}
         onUpdateStatus={handleUpdateStatus}
+      />
+
+      <RepairForm 
+        isOpen={isRepairFormOpen}
+        onClose={() => setIsRepairFormOpen(false)}
+        onSave={handleSaveForm}
+      />
+
+      <MovementForm 
+        isOpen={isMovementFormOpen}
+        onClose={() => setIsMovementFormOpen(false)}
+        onSave={handleSaveForm}
+      />
+
+      <MaintenanceTrackingForm 
+        isOpen={isTrackingFormOpen}
+        onClose={() => setIsTrackingFormOpen(false)}
+        onSave={handleSaveForm}
       />
     </div>
   );
