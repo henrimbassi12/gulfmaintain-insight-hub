@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, Route, Clock } from 'lucide-react';
+import { MapPin, Navigation, Route, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface TechnicianLocation {
   id: string;
@@ -27,6 +28,9 @@ interface MaintenanceLocation {
 
 export function GeolocationSystem() {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  
   const [technicians] = useState<TechnicianLocation[]>([
     { id: '1', name: 'Ahmed Benali', lat: 33.5731, lng: -7.5898, status: 'available' },
     { id: '2', name: 'Fatima Zahra', lat: 34.0209, lng: -6.8416, status: 'busy', currentTask: 'FR-2024-012' },
@@ -56,26 +60,78 @@ export function GeolocationSystem() {
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          toast({
-            title: "Géolocalisation",
-            description: "Impossible d'obtenir votre position",
-            variant: "destructive"
-          });
-        }
-      );
+  // Position par défaut (Casablanca, Maroc) si la géolocalisation échoue
+  const defaultLocation = { lat: 33.5731, lng: -7.5898 };
+
+  const getCurrentLocation = () => {
+    setIsLoadingLocation(true);
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError("La géolocalisation n'est pas supportée par ce navigateur");
+      setUserLocation(defaultLocation);
+      setIsLoadingLocation(false);
+      toast({
+        title: "Géolocalisation non supportée",
+        description: "Utilisation de la position par défaut (Casablanca)",
+        variant: "destructive"
+      });
+      return;
     }
-  }, [toast]);
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000 // 5 minutes
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('Position obtenue:', position.coords);
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setLocationError(null);
+        setIsLoadingLocation(false);
+        toast({
+          title: "Position obtenue",
+          description: "Votre position a été déterminée avec succès",
+        });
+      },
+      (error) => {
+        console.error('Erreur de géolocalisation:', error);
+        let errorMessage = "Erreur inconnue";
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Permission de géolocalisation refusée. Veuillez autoriser l'accès à votre position.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Position non disponible. Vérifiez votre connexion.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Délai d'attente dépassé pour obtenir votre position.";
+            break;
+        }
+        
+        setLocationError(errorMessage);
+        setUserLocation(defaultLocation);
+        setIsLoadingLocation(false);
+        
+        toast({
+          title: "Erreur de géolocalisation",
+          description: `${errorMessage} Position par défaut utilisée.`,
+          variant: "destructive"
+        });
+      },
+      options
+    );
+  };
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
 
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     const R = 6371; // Earth's radius in km
@@ -133,12 +189,38 @@ export function GeolocationSystem() {
             <Route className="w-4 h-4" />
             Optimiser les routes
           </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={getCurrentLocation}
+            disabled={isLoadingLocation}
+          >
             <Navigation className="w-4 h-4" />
-            Ma position
+            {isLoadingLocation ? 'Localisation...' : 'Ma position'}
           </Button>
         </div>
       </div>
+
+      {/* Status de géolocalisation */}
+      {locationError && (
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            {locationError}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {userLocation && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+          <p className="text-green-800 text-sm">
+            Position actuelle: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            {userLocation.lat === defaultLocation.lat && userLocation.lng === defaultLocation.lng && 
+              " (Position par défaut - Casablanca)"
+            }
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Technicians Map */}
@@ -245,6 +327,11 @@ export function GeolocationSystem() {
               <MapPin className="w-12 h-12 mx-auto mb-2" />
               <p>Carte interactive (intégration Mapbox)</p>
               <p className="text-sm">Affichage en temps réel des positions</p>
+              {userLocation && (
+                <p className="text-xs mt-2 text-green-600">
+                  Position détectée: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
