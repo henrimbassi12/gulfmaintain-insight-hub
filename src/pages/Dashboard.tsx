@@ -25,6 +25,8 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react';
+import { PermissionCheck } from '@/components/auth/PermissionCheck';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -98,10 +100,13 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      {/* Header */}
+      {/* Header avec statut de connexion */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tableau de bord</h1>
+          <div className="flex items-center gap-2 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
+            <OfflineIndicator />
+          </div>
           <p className="text-gray-600">Vue d'ensemble de votre activité de maintenance</p>
         </div>
         <div className="flex gap-3">
@@ -136,10 +141,12 @@ export default function Dashboard() {
             Actualiser
           </Button>
           
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleNewAlert}>
-            <Bell className="w-4 h-4 mr-2" />
-            Nouvelle alerte
-          </Button>
+          <PermissionCheck requiredRole="admin">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleNewAlert}>
+              <Bell className="w-4 h-4 mr-2" />
+              Nouvelle alerte
+            </Button>
+          </PermissionCheck>
         </div>
       </div>
 
