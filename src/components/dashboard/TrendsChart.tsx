@@ -33,7 +33,7 @@ const TrendsChart: React.FC = () => {
   const timeTrend = calculateTrend(maintenanceData, 'avgTime');
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -41,10 +41,10 @@ const TrendsChart: React.FC = () => {
         </CardTitle>
         <CardDescription>Évolution des interventions et temps de résolution</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
         {/* Graphique des interventions */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
             <h3 className="font-medium text-sm">Nombre d'interventions</h3>
             <div className="flex items-center gap-1">
               {interventionsTrend > 0 ? (
@@ -57,7 +57,7 @@ const TrendsChart: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="h-[180px]">
+          <div className="h-48 w-full">
             <ChartContainer 
               config={{
                 interventions: {
@@ -70,10 +70,24 @@ const TrendsChart: React.FC = () => {
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={maintenanceData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                <BarChart 
+                  data={maintenanceData} 
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs" />
-                  <YAxis tickLine={false} axisLine={false} className="text-xs" />
+                  <XAxis 
+                    dataKey="month" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar 
                     dataKey="interventions" 
@@ -88,8 +102,8 @@ const TrendsChart: React.FC = () => {
         </div>
 
         {/* Graphique du temps moyen de résolution */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
             <h3 className="font-medium text-sm">Temps moyen de résolution (heures)</h3>
             <div className="flex items-center gap-1">
               {timeTrend < 0 ? (
@@ -102,7 +116,7 @@ const TrendsChart: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="h-[180px]">
+          <div className="h-48 w-full">
             <ChartContainer
               config={{
                 avgTime: {
@@ -122,12 +136,28 @@ const TrendsChart: React.FC = () => {
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={maintenanceData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                <LineChart 
+                  data={maintenanceData} 
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs" />
-                  <YAxis tickLine={false} axisLine={false} className="text-xs" />
+                  <XAxis 
+                    dataKey="month" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="avgTime" 
