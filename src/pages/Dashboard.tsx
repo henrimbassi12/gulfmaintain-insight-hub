@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DashboardCard } from '@/components/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +13,7 @@ import UrgentAlerts from '@/components/dashboard/UrgentAlerts';
 import TrendsChart from '@/components/dashboard/TrendsChart';
 import AISummary from '@/components/dashboard/AISummary';
 import QuickActions from '@/components/dashboard/QuickActions';
+import { NotificationSystem } from '@/components/NotificationSystem';
 import { 
   Wrench, 
   AlertTriangle, 
@@ -109,7 +109,7 @@ export default function Dashboard() {
           </div>
           <p className="text-gray-600">Vue d'ensemble de votre activité de maintenance</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -140,6 +140,8 @@ export default function Dashboard() {
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Actualiser
           </Button>
+          
+          <NotificationSystem />
           
           <PermissionCheck requiredRole="admin">
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleNewAlert}>
