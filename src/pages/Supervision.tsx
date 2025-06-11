@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,7 @@ import { TechnicianRecommendations } from '@/components/supervision/TechnicianRe
 import RecurrenceAnalysis from '@/components/supervision/RecurrenceAnalysis';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { useSupervision } from '@/hooks/useSupervision';
+import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
 
 const Supervision = () => {
   const [filters, setFilters] = useState({
@@ -91,10 +91,14 @@ const Supervision = () => {
 
       {/* Contenu principal sous forme d'onglets */}
       <Tabs defaultValue="predictions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="predictions" className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
             Prédictions de pannes
+          </TabsTrigger>
+          <TabsTrigger value="ai-prediction" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            Prédiction IA
           </TabsTrigger>
           <TabsTrigger value="recommendations" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
@@ -108,6 +112,10 @@ const Supervision = () => {
 
         <TabsContent value="predictions" className="space-y-4">
           <PredictionsList predictions={predictions} filters={filters} />
+        </TabsContent>
+
+        <TabsContent value="ai-prediction" className="space-y-4">
+          <AIPredictionPanel />
         </TabsContent>
 
         <TabsContent value="recommendations" className="space-y-4">
