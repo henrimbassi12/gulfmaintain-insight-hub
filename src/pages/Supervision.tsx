@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,7 +62,7 @@ const Supervision = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-3 md:p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Chargement des données de supervision...</div>
         </div>
@@ -70,13 +71,13 @@ const Supervision = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 animate-fade-in">
+    <div className="container mx-auto p-3 md:p-6 space-y-4 md:space-y-6 animate-fade-in pt-16 md:pt-0">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Brain className="w-8 h-8 text-purple-600" />
+      <div className="flex items-center gap-3 mb-4 md:mb-6">
+        <Brain className="w-6 h-6 md:w-8 md:h-8 text-purple-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Supervision IA</h1>
-          <p className="text-gray-600">Prédictions et analyse prédictive des équipements</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Supervision IA</h1>
+          <p className="text-sm md:text-base text-gray-600">Prédictions et analyse prédictive des équipements</p>
         </div>
       </div>
 
@@ -91,22 +92,26 @@ const Supervision = () => {
 
       {/* Contenu principal sous forme d'onglets */}
       <Tabs defaultValue="predictions" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="predictions" className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            Prédictions de pannes
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
+          <TabsTrigger value="predictions" className="flex items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
+            <AlertTriangle className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Prédictions de pannes</span>
+            <span className="sm:hidden">Prédictions</span>
           </TabsTrigger>
-          <TabsTrigger value="ai-prediction" className="flex items-center gap-2">
-            <Brain className="w-4 h-4" />
-            Prédiction IA
+          <TabsTrigger value="ai-prediction" className="flex items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
+            <Brain className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Prédiction IA</span>
+            <span className="sm:hidden">IA</span>
           </TabsTrigger>
-          <TabsTrigger value="recommendations" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Recommandations techniciens
+          <TabsTrigger value="recommendations" className="flex items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
+            <Settings className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Recommandations techniciens</span>
+            <span className="sm:hidden">Techniciens</span>
           </TabsTrigger>
-          <TabsTrigger value="analysis" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Analyse récurrence
+          <TabsTrigger value="analysis" className="flex items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
+            <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Analyse récurrence</span>
+            <span className="sm:hidden">Analyse</span>
           </TabsTrigger>
         </TabsList>
 

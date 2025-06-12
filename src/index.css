@@ -94,36 +94,88 @@
     /* Amélioration pour mobile */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prévention du zoom sur les inputs mobiles */
+    font-size: 16px;
   }
 
-  /* Optimisations mobile */
+  /* Optimisations mobiles globales */
   @media (max-width: 768px) {
     .sidebar-trigger {
       @apply fixed top-4 left-4 z-50;
     }
     
     .main-content {
-      @apply px-2 py-4;
+      @apply px-3 py-4;
     }
     
     .card-grid {
-      @apply grid-cols-1 gap-4;
+      @apply grid-cols-1 gap-3;
     }
     
     .dialog-content {
       @apply m-4 max-w-[calc(100vw-2rem)];
     }
+
+    /* Amélioration de l'espacement mobile */
+    .container {
+      @apply px-3;
+    }
+
+    /* Optimisation des cards mobiles */
+    .card {
+      @apply shadow-sm;
+    }
+
+    /* Amélioration des boutons mobiles */
+    button {
+      @apply min-h-[44px];
+    }
+
+    /* Amélioration de la lisibilité mobile */
+    h1, h2, h3 {
+      @apply leading-tight;
+    }
+
+    /* Optimisation des tabs mobiles */
+    [role="tablist"] {
+      @apply overflow-x-auto scrollbar-hide;
+    }
+
+    /* Amélioration des formulaires mobiles */
+    input, textarea, select {
+      @apply text-base; /* Prévient le zoom sur iOS */
+    }
   }
 
-  /* Améliorations tactiles */
+  /* Améliorations tactiles pour tous les écrans tactiles */
   @media (hover: none) and (pointer: coarse) {
     .hover-item {
       @apply active:bg-accent active:text-accent-foreground;
     }
     
-    button, .button {
+    button, .button, [role="button"] {
       @apply min-h-[44px] min-w-[44px];
     }
+
+    /* Amélioration des zones de tap */
+    a, button, [role="button"], [role="tab"] {
+      @apply relative;
+    }
+
+    a::after, button::after, [role="button"]::after, [role="tab"]::after {
+      content: '';
+      @apply absolute inset-0 min-h-[44px] min-w-[44px];
+    }
+  }
+
+  /* Prévention des problèmes de scroll mobile */
+  html {
+    @apply overflow-x-hidden;
+  }
+
+  /* Amélioration des transitions mobiles */
+  .transition-all, .transition-colors, .transition-transform {
+    @apply duration-200 ease-out;
   }
 }
 
@@ -138,7 +190,7 @@
   }
   
   .responsive-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4;
   }
   
   .responsive-text {
@@ -147,6 +199,38 @@
   
   .mobile-drawer {
     @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t md:relative md:border-0;
+  }
+
+  /* Amélioration de la navigation mobile */
+  .mobile-nav {
+    @apply flex items-center justify-between p-3 bg-background border-b sticky top-0 z-40;
+  }
+
+  /* Amélioration des conteneurs mobiles */
+  .mobile-container {
+    @apply px-3 py-4 space-y-4;
+  }
+
+  /* Amélioration des cards mobiles */
+  .mobile-card {
+    @apply p-3 space-y-3 rounded-lg border bg-card;
+  }
+
+  /* Amélioration des boutons mobiles */
+  .mobile-button {
+    @apply px-4 py-3 text-sm font-medium rounded-lg touch-action-manipulation;
+  }
+
+  /* Grille responsive améliorée */
+  .responsive-grid-auto {
+    @apply grid gap-3 md:gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    .responsive-grid-auto {
+      grid-template-columns: 1fr;
+    }
   }
 }
 
@@ -158,5 +242,73 @@
   
   .tap-highlight-transparent {
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Masquage de la scrollbar sur mobile */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Amélioration de la sélection de texte mobile */
+  .select-none-mobile {
+    @apply select-none md:select-auto;
+  }
+
+  /* Amélioration des animations mobiles */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Amélioration du focus mobile */
+  .focus-mobile {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  /* Amélioration des états actifs mobiles */
+  .active-mobile {
+    @apply active:scale-95 active:bg-accent;
+  }
+}
+
+/* Optimisations spécifiques pour les très petits écrans */
+@media (max-width: 375px) {
+  .container {
+    @apply px-2;
+  }
+
+  h1 {
+    @apply text-xl;
+  }
+
+  h2 {
+    @apply text-lg;
+  }
+
+  h3 {
+    @apply text-base;
+  }
+
+  .card {
+    @apply p-3;
+  }
+
+  button {
+    @apply text-xs px-3 py-2;
   }
 }
