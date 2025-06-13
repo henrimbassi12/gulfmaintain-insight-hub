@@ -43,7 +43,7 @@ export function useAIPredictions(): UseAIPredictionsReturn {
   const [error, setError] = useState<string | null>(null);
 
   // URL de votre API - à configurer selon votre déploiement
-  const API_BASE_URL = process.env.REACT_APP_AI_API_URL || 'http://localhost:8000';
+  const API_BASE_URL = import.meta.env.VITE_AI_API_URL || 'http://localhost:8000';
 
   const getPrediction = useCallback(async (input: MaintenancePredictionInput): Promise<MaintenancePrediction | null> => {
     try {
@@ -54,7 +54,7 @@ export function useAIPredictions(): UseAIPredictionsReturn {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.REACT_APP_AI_API_KEY || ''}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_AI_API_KEY || ''}`,
         },
         body: JSON.stringify(input),
       });
@@ -96,7 +96,7 @@ export function useAIPredictions(): UseAIPredictionsReturn {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.REACT_APP_AI_API_KEY || ''}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_AI_API_KEY || ''}`,
         },
         body: JSON.stringify({ predictions: inputs }),
       });
