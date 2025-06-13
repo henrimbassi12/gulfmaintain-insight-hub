@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -171,45 +172,53 @@ export function MaintenanceCalendar() {
         </div>
       </div>
 
-      {/* Main Calendar - Full Width */}
-      <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>
-            {selectedDate ? selectedDate.toLocaleDateString('fr-FR', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            }) : 'Planning'}
-          </CardTitle>
-          
-          {/* Mini Calendar and Legend in Header */}
-          <div className="flex gap-6">
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Légende</h4>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 border-l-4 border-l-red-500 bg-white"></div>
-                  Priorité haute
+      {/* Mini Calendar and Legend - Above Main Calendar */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Navigation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-md border w-full"
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Légende</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 border-l-4 border-l-red-500 bg-white border border-gray-200"></div>
+                  <span>Priorité haute</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 border-l-4 border-l-yellow-500 bg-white"></div>
-                  Priorité moyenne
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 border-l-4 border-l-yellow-500 bg-white border border-gray-200"></div>
+                  <span>Priorité moyenne</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 border-l-4 border-l-green-500 bg-white"></div>
-                  Priorité faible
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 border-l-4 border-l-green-500 bg-white border border-gray-200"></div>
+                  <span>Priorité faible</span>
                 </div>
               </div>
-            </div>
-            
-            <CalendarComponent
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-md border"
-            />
-          </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Main Calendar - Full Width */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Planning</CardTitle>
         </CardHeader>
         <CardContent>
           {view === 'day' && selectedDate ? (
