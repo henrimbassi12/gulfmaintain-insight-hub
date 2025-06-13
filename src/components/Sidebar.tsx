@@ -1,7 +1,6 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -13,7 +12,6 @@ import {
   SidebarTrigger 
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/UserProfile";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import {
@@ -30,10 +28,8 @@ import {
   Clock,
   Menu
 } from "lucide-react";
-import { useLocation, Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useLocation, Link } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
-import { LanguageSelector } from "@/components/LanguageSelector";
 
 const menuItems = [
   { icon: Home, label: "Tableau de bord", href: "/" },
@@ -50,9 +46,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { theme, setTheme, language, setLanguage, t } = useTheme();
+  const { t } = useTheme();
 
   return (
     <Sidebar collapsible="icon">
@@ -65,24 +59,23 @@ export function AppSidebar() {
           
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-blue-600" />
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h1 className="text-lg font-bold text-gray-900">
               Gulf Maintain
             </h1>
           </div>
           
           <div className="flex items-center gap-1">
             <NotificationSystem />
-            <ThemeToggle />
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
           <div>
-            <h1 className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
+            <h1 className="text-base md:text-lg font-bold text-gray-900">
               Gulf Maintain
             </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500">
               Gestion de maintenance
             </p>
           </div>
@@ -103,7 +96,7 @@ export function AppSidebar() {
                     )} />
                     <span className={cn(
                       "font-medium text-sm md:text-base",
-                      isActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
+                      isActive ? "text-blue-600" : "text-gray-700"
                     )}>
                       {item.label}
                     </span>
@@ -117,21 +110,9 @@ export function AppSidebar() {
       
       <SidebarFooter>
         <SidebarMenu>
-          {/* Theme and Language Controls */}
           <SidebarMenuItem>
-            <div className="px-2 py-1 space-y-2">
-              <ThemeToggle />
-              <LanguageSelector />
-            </div>
-          </SidebarMenuItem>
-          
-          {/* User Menu */}
-          <SidebarMenuItem>
-            <div className="px-2 py-1 space-y-2">
+            <div className="px-2 py-1">
               <UserProfile />
-              <Button onClick={signOut} variant="ghost">
-                Se déconnecter
-              </Button>
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

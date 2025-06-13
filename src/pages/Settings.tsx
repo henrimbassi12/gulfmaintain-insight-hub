@@ -7,17 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, RefreshCw, Activity, User, Bell, Shield, Palette } from 'lucide-react';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { Settings as SettingsIcon, RefreshCw, User, Bell, Shield } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
-import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Settings() {
   const [refreshing, setRefreshing] = useState(false);
-  const { theme, setTheme, language, setLanguage } = useTheme();
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -118,14 +115,14 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Notifications */}
+      {/* Notifications Push */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100">
           <CardTitle className="flex items-center gap-3 text-lg">
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Bell className="w-5 h-5 text-white" />
             </div>
-            Notifications
+            Notifications Push
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -150,46 +147,6 @@ export default function Settings() {
                 <p className="text-sm text-gray-500">Alertes automatiques de maintenance</p>
               </div>
               <Switch defaultChecked />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Apparence */}
-      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="flex items-center gap-3 text-lg">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Palette className="w-5 h-5 text-white" />
-            </div>
-            Apparence
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label>Thème</Label>
-              <Select value={theme} onValueChange={(value: 'light' | 'dark') => setTheme(value)}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Mode clair</SelectItem>
-                  <SelectItem value="dark">Mode sombre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Langue</Label>
-              <Select value={language} onValueChange={(value: 'fr' | 'en') => setLanguage(value)}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </CardContent>

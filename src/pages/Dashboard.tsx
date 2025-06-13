@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ModernKPICard } from '@/components/dashboard/ModernKPICard';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
-import { ModernProgressCard } from '@/components/dashboard/ModernProgressCard';
 import { ModernStatsGrid } from '@/components/dashboard/ModernStatsGrid';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,9 +15,7 @@ import UrgentAlerts from '@/components/dashboard/UrgentAlerts';
 import TrendsChart from '@/components/dashboard/TrendsChart';
 import AISummary from '@/components/dashboard/AISummary';
 import QuickActions from '@/components/dashboard/QuickActions';
-import { NotificationSystem } from '@/components/NotificationSystem';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
-import { DataExport } from '@/components/DataExport';
 import { 
   Wrench, 
   AlertTriangle, 
@@ -145,13 +142,6 @@ export default function Dashboard() {
     }
   ];
 
-  const progressData = [
-    { label: "Maintenance préventive", value: 78, color: "bg-blue-500" },
-    { label: "Réparations urgentes", value: 45, color: "bg-red-500" },
-    { label: "Inspections", value: 92, color: "bg-green-500" },
-    { label: "Formation techniciens", value: 67, color: "bg-purple-500" }
-  ];
-
   const performanceStats = [
     { label: "Temps moyen", value: "2.3h", change: "-12%", isPositive: true },
     { label: "Satisfaction", value: "94%", change: "+5%", isPositive: true },
@@ -201,10 +191,6 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">Actualiser</span>
                 <span className="sm:hidden">Sync</span>
               </Button>
-              
-              <div className="hidden md:block">
-                <NotificationSystem />
-              </div>
               
               <PermissionCheck requiredRole="admin">
                 <Button 
@@ -260,19 +246,12 @@ export default function Dashboard() {
         </div>
 
         {/* Grille principale épurée */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-2">
-            <ModernProgressCard 
-              title="Performance par type"
-              items={progressData}
-            />
-          </div>
-          
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <ModernWeatherWidget />
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <ModernStatsGrid 
               title="Indicateurs clés"
               stats={performanceStats}
