@@ -1,5 +1,9 @@
+
 import React, { useState } from 'react';
-import { DashboardCard } from '@/components/DashboardCard';
+import { ModernKPICard } from '@/components/dashboard/ModernKPICard';
+import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
+import { ModernProgressCard } from '@/components/dashboard/ModernProgressCard';
+import { ModernStatsGrid } from '@/components/dashboard/ModernStatsGrid';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +27,9 @@ import {
   Clock,
   Bell,
   Users,
-  RefreshCw
+  RefreshCw,
+  Activity,
+  Settings
 } from 'lucide-react';
 import { PermissionCheck } from '@/components/auth/PermissionCheck';
 
@@ -140,192 +146,247 @@ export default function Dashboard() {
     }
   ];
 
+  const progressData = [
+    { label: "Maintenance préventive", value: 78, color: "bg-blue-500" },
+    { label: "Réparations urgentes", value: 45, color: "bg-red-500" },
+    { label: "Inspections", value: 92, color: "bg-green-500" },
+    { label: "Formation techniciens", value: 67, color: "bg-purple-500" }
+  ];
+
+  const performanceStats = [
+    { label: "Temps moyen", value: "2.3h", change: "-12%", isPositive: true },
+    { label: "Satisfaction", value: "94%", change: "+5%", isPositive: true },
+    { label: "Première fois", value: "87%", change: "+8%", isPositive: true },
+    { label: "Coût moyen", value: "450€", change: "-3%", isPositive: true }
+  ];
+
   return (
-    <div className="p-3 md:p-6 space-y-4 md:space-y-6 bg-gray-50 min-h-screen pt-16 md:pt-0">
-      {/* Header avec statut de connexion */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Tableau de bord</h1>
-            <ConnectionStatus />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header moderne */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+                  <p className="text-sm text-gray-500">Vue d'ensemble de votre activité</p>
+                </div>
+                <ConnectionStatus />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-full sm:w-32 border-gray-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Aujourd'hui</SelectItem>
+                  <SelectItem value="week">Cette semaine</SelectItem>
+                  <SelectItem value="month">Ce mois</SelectItem>
+                  <SelectItem value="quarter">Ce trimestre</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <DataExport />
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefreshData}
+                disabled={refreshing}
+                className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
+              >
+                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Actualiser</span>
+                <span className="sm:hidden">Sync</span>
+              </Button>
+              
+              <div className="hidden md:block">
+                <NotificationSystem />
+              </div>
+              
+              <PermissionCheck requiredRole="admin">
+                <Button 
+                  size="sm" 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 flex-1 sm:flex-none" 
+                  onClick={handleNewAlert}
+                >
+                  <Bell className="w-4 h-4 mr-1 md:mr-2" />
+                  <span className="hidden sm:inline">Nouvelle alerte</span>
+                  <span className="sm:hidden">Alerte</span>
+                </Button>
+              </PermissionCheck>
+            </div>
           </div>
-          <p className="text-sm md:text-base text-gray-600">Vue d'ensemble de votre activité de maintenance</p>
         </div>
-        <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-full sm:w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="today">Aujourd'hui</SelectItem>
-              <SelectItem value="week">Cette semaine</SelectItem>
-              <SelectItem value="month">Ce mois</SelectItem>
-              <SelectItem value="quarter">Ce trimestre</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <DataExport />
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefreshData}
-            disabled={refreshing}
-            className="flex-1 sm:flex-none hover:bg-green-50 transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">Actualiser</span>
-            <span className="sm:hidden">Sync</span>
-          </Button>
-          
-          <div className="hidden md:block">
-            <NotificationSystem />
+      </div>
+
+      <div className="p-4 md:p-6 space-y-6">
+        {/* KPIs modernes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ModernKPICard
+            title="Interventions totales"
+            value="247"
+            subtitle="Ce mois"
+            icon={Wrench}
+            trend={{ value: 12, isPositive: true }}
+            bgColor="bg-gradient-to-r from-blue-500 to-blue-600"
+            iconColor="bg-blue-400/20"
+            onClick={handleInterventionsClick}
+          />
+          <ModernKPICard
+            title="En cours"
+            value="8"
+            subtitle="Interventions actives"
+            icon={Clock}
+            trend={{ value: -25, isPositive: true }}
+            bgColor="bg-gradient-to-r from-orange-500 to-orange-600"
+            iconColor="bg-orange-400/20"
+            onClick={handleActiveInterventionsClick}
+          />
+          <ModernKPICard
+            title="AF Terminées"
+            value="23"
+            subtitle="Avec Accord de Fin"
+            icon={TrendingUp}
+            trend={{ value: 3, isPositive: true }}
+            bgColor="bg-gradient-to-r from-green-500 to-green-600"
+            iconColor="bg-green-400/20"
+            onClick={handleCompletedClick}
+          />
+          <ModernKPICard
+            title="NF Terminées"
+            value="5"
+            subtitle="Non-Fermées"
+            icon={AlertTriangle}
+            trend={{ value: -8, isPositive: true }}
+            bgColor="bg-gradient-to-r from-red-500 to-red-600"
+            iconColor="bg-red-400/20"
+            onClick={handleNonClosedClick}
+          />
+        </div>
+
+        {/* Grille principale avec widget météo */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Widgets de performance */}
+          <div className="lg:col-span-2">
+            <ModernProgressCard 
+              title="Performance par type"
+              items={progressData}
+            />
           </div>
           
-          <PermissionCheck requiredRole="admin">
-            <Button 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none transition-colors" 
-              onClick={handleNewAlert}
-            >
-              <Bell className="w-4 h-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">Nouvelle alerte</span>
-              <span className="sm:hidden">Alerte</span>
-            </Button>
-          </PermissionCheck>
+          {/* Widget météo */}
+          <div className="lg:col-span-1">
+            <ModernWeatherWidget />
+          </div>
+
+          {/* Statistiques de performance */}
+          <div className="lg:col-span-1">
+            <ModernStatsGrid 
+              title="Indicateurs clés"
+              stats={performanceStats}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* KPIs - En-tête rapide */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <DashboardCard
-          title="Interventions totales"
-          value="247"
-          subtitle="Ce mois"
-          icon={Wrench}
-          trend={{ value: 12, isPositive: true }}
-          className="border-l-4 border-l-blue-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={() => toast({ title: "Navigation", description: "Redirection vers la page Maintenance..." })}
-        />
-        <DashboardCard
-          title="En cours"
-          value="8"
-          subtitle="Interventions actives"
-          icon={Clock}
-          trend={{ value: -25, isPositive: true }}
-          className="border-l-4 border-l-orange-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={() => toast({ title: "✅ Interventions actives", description: "Affichage des 8 interventions en cours..." })}
-        />
-        <DashboardCard
-          title="AF Terminées"
-          value="23"
-          subtitle="Pannes avec Accord de Fin"
-          icon={TrendingUp}
-          trend={{ value: 3, isPositive: true }}
-          className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={() => toast({ title: "✅ AF Terminées", description: "Affichage des 23 interventions avec Accord de Fin..." })}
-        />
-        <DashboardCard
-          title="NF Terminées"
-          value="5"
-          subtitle="Pannes Non-Fermées à surveiller"
-          icon={AlertTriangle}
-          trend={{ value: -8, isPositive: true }}
-          className="border-l-4 border-l-red-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={() => toast({ title: "✅ NF Terminées", description: "Affichage des 5 pannes Non-Fermées à surveiller..." })}
-        />
-      </div>
+        {/* Row 1: Performance & Alerts */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <TechnicianPerformance />
+          <UrgentAlerts />
+        </div>
 
-      {/* Row 1: Performance & Alerts */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
-        <TechnicianPerformance />
-        <UrgentAlerts />
-      </div>
+        {/* Row 2: Geographic & Equipment Analysis */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <RegionMap />
+          <EquipmentTypeBreakdown />
+        </div>
 
-      {/* Row 2: Geographic & Equipment Analysis */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
-        <RegionMap />
-        <EquipmentTypeBreakdown />
-      </div>
+        {/* Row 3: Agency Summary & Trends */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <AgencySummary />
+          <TrendsChart />
+        </div>
 
-      {/* Row 3: Agency Summary & Trends */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
-        <AgencySummary />
-        <TrendsChart />
-      </div>
+        {/* Row 4: AI Summary & Quick Actions */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <AISummary />
+          <QuickActions />
+        </div>
 
-      {/* Row 4: AI Summary & Quick Actions */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
-        <AISummary />
-        <QuickActions />
-      </div>
-
-      {/* Interventions récentes */}
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-            <Users className="w-5 h-5 text-green-500" />
-            Interventions récentes
-            <Badge variant="secondary" className="ml-auto text-xs">
-              {recentInterventions.length} interventions
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b text-left text-xs md:text-sm text-gray-500">
-                  <th className="pb-3 font-medium">ID Intervention</th>
-                  <th className="pb-3 font-medium hidden sm:table-cell">Équipement</th>
-                  <th className="pb-3 font-medium">Technicien</th>
-                  <th className="pb-3 font-medium hidden md:table-cell">Type</th>
-                  <th className="pb-3 font-medium">Statut</th>
-                  <th className="pb-3 font-medium hidden lg:table-cell">Durée</th>
-                  <th className="pb-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentInterventions.map((intervention) => (
-                  <tr key={intervention.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="py-3">
-                      <span className="font-mono text-xs md:text-sm text-blue-600 cursor-pointer hover:underline">
-                        {intervention.id}
-                      </span>
-                    </td>
-                    <td className="py-3 hidden sm:table-cell">
-                      <span className="font-medium text-sm">{intervention.equipment}</span>
-                    </td>
-                    <td className="py-3 text-sm">{intervention.technician}</td>
-                    <td className="py-3 text-xs md:text-sm text-gray-600 hidden md:table-cell">{intervention.type}</td>
-                    <td className="py-3">
-                      <Badge variant="secondary" className={`text-xs ${
-                        intervention.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        intervention.status === 'in-progress' ? 'bg-orange-100 text-orange-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {intervention.status === 'completed' ? 'Terminé' :
-                         intervention.status === 'in-progress' ? 'En cours' : 'Planifié'}
-                      </Badge>
-                    </td>
-                    <td className="py-3 text-xs md:text-sm text-gray-600 hidden lg:table-cell">{intervention.duration}</td>
-                    <td className="py-3">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="text-xs px-2 py-1 hover:bg-blue-50 transition-colors"
-                        onClick={() => toast({ title: "✅ Détails intervention", description: `Ouverture des détails de l'intervention ${intervention.id}` })}
-                      >
-                        Voir
-                      </Button>
-                    </td>
+        {/* Interventions récentes - design moderne */}
+        <Card className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+            <CardTitle className="flex items-center gap-3 text-lg md:text-xl">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              Interventions récentes
+              <Badge variant="secondary" className="ml-auto text-xs bg-blue-100 text-blue-800">
+                {recentInterventions.length} interventions
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-gray-50/50 text-left text-xs md:text-sm text-gray-600">
+                    <th className="py-4 px-6 font-semibold">ID Intervention</th>
+                    <th className="py-4 px-6 font-semibold hidden sm:table-cell">Équipement</th>
+                    <th className="py-4 px-6 font-semibold">Technicien</th>
+                    <th className="py-4 px-6 font-semibold hidden md:table-cell">Type</th>
+                    <th className="py-4 px-6 font-semibold">Statut</th>
+                    <th className="py-4 px-6 font-semibold hidden lg:table-cell">Durée</th>
+                    <th className="py-4 px-6 font-semibold">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+                </thead>
+                <tbody>
+                  {recentInterventions.map((intervention, index) => (
+                    <tr key={intervention.id} className={`border-b last:border-0 hover:bg-blue-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                      <td className="py-4 px-6">
+                        <span className="font-mono text-xs md:text-sm text-blue-600 cursor-pointer hover:underline font-semibold">
+                          {intervention.id}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 hidden sm:table-cell">
+                        <span className="font-medium text-sm text-gray-900">{intervention.equipment}</span>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-700">{intervention.technician}</td>
+                      <td className="py-4 px-6 text-xs md:text-sm text-gray-600 hidden md:table-cell">{intervention.type}</td>
+                      <td className="py-4 px-6">
+                        <Badge variant="secondary" className={`text-xs font-medium ${
+                          intervention.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
+                          intervention.status === 'in-progress' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                          'bg-blue-100 text-blue-800 border-blue-200'
+                        }`}>
+                          {intervention.status === 'completed' ? 'Terminé' :
+                           intervention.status === 'in-progress' ? 'En cours' : 'Planifié'}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-6 text-xs md:text-sm text-gray-600 hidden lg:table-cell font-medium">{intervention.duration}</td>
+                      <td className="py-4 px-6">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-xs px-3 py-2 hover:bg-blue-100 hover:text-blue-700 transition-colors font-medium"
+                          onClick={() => handleViewIntervention(intervention.id)}
+                        >
+                          Voir
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
