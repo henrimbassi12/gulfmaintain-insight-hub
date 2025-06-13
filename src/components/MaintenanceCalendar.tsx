@@ -6,55 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
-
-interface MaintenanceEvent {
-  id: string;
-  title: string;
-  equipment: string;
-  technician: string;
-  date: Date;
-  startTime: string;
-  endTime: string;
-  type: 'preventive' | 'corrective' | 'inspection';
-  priority: 'high' | 'medium' | 'low';
-  status: 'planned' | 'in-progress' | 'completed';
-  location: string;
-}
+import { useMaintenanceCalendar } from '@/hooks/useMaintenanceCalendar';
 
 export function MaintenanceCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
-  const [draggedEvent, setDraggedEvent] = useState<MaintenanceEvent | null>(null);
+  const [draggedEvent, setDraggedEvent] = useState<any>(null);
   const { toast } = useToast();
-
-  const [events, setEvents] = useState<MaintenanceEvent[]>([
-    {
-      id: '1',
-      title: 'Maintenance préventive - Réfrigérateur',
-      equipment: 'FR-2024-089',
-      technician: 'Ahmed Benali',
-      date: new Date(),
-      startTime: '09:00',
-      endTime: '11:30',
-      type: 'preventive',
-      priority: 'medium',
-      status: 'planned',
-      location: 'Agence Casablanca Nord'
-    },
-    {
-      id: '2',
-      title: 'Réparation urgente - Climatiseur',
-      equipment: 'AC-2024-012',
-      technician: 'Fatima Zahra',
-      date: new Date(Date.now() + 86400000), // Tomorrow
-      startTime: '14:00',
-      endTime: '15:15',
-      type: 'corrective',
-      priority: 'high',
-      status: 'planned',
-      location: 'Agence Rabat Centre'
-    }
-  ]);
+  const { events, isLoading, updateEvent } = useMaintenanceCalendar();
 
   const getEventsByDate = (date: Date) => {
     return events.filter(event => 
@@ -80,7 +39,7 @@ export function MaintenanceCalendar() {
     }
   };
 
-  const handleDragStart = (event: MaintenanceEvent) => {
+  const handleDragStart = (event: any) => {
     setDraggedEvent(event);
   };
 
@@ -91,11 +50,7 @@ export function MaintenanceCalendar() {
   const handleDrop = (e: React.DragEvent, newDate: Date) => {
     e.preventDefault();
     if (draggedEvent) {
-      setEvents(prev => prev.map(event => 
-        event.id === draggedEvent.id 
-          ? { ...event, date: newDate }
-          : event
-      ));
+      updateEvent(draggedEvent.id, { date: newDate });
       
       toast({
         title: "Événement déplacé",
@@ -183,12 +138,12 @@ export function MaintenanceCalendar() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="flex justify-center">
+          <div className="w-full">
             <CalendarComponent
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="rounded-md border w-full max-w-sm"
+              className="w-full mx-auto rounded-md border"
             />
           </div>
         </CardContent>
@@ -205,7 +160,7 @@ export function MaintenanceCalendar() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
               <div className="w-6 h-6 border-l-4 border-l-red-500 bg-white border border-gray-200 rounded"></div>
               <span className="font-medium">Priorité haute</span>

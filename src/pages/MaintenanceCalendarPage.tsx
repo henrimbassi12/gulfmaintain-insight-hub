@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { MaintenanceCalendar } from '@/components/MaintenanceCalendar';
+import { WelcomeMessage } from '@/components/WelcomeMessage';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +59,9 @@ export default function MaintenanceCalendarPage() {
           Fiche Passage Dépôt
         </ModernButton>
       </AirbnbHeader>
+
+      {/* Message de bienvenue */}
+      <WelcomeMessage />
 
       {/* Statistiques du planning */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
