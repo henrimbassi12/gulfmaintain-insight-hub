@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -172,22 +171,21 @@ export function MaintenanceCalendar() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Mini Calendar */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Calendrier</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CalendarComponent
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-md border"
-            />
-            
-            {/* Legend */}
-            <div className="mt-4 space-y-2">
+      {/* Main Calendar - Full Width */}
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>
+            {selectedDate ? selectedDate.toLocaleDateString('fr-FR', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : 'Planning'}
+          </CardTitle>
+          
+          {/* Mini Calendar and Legend in Header */}
+          <div className="flex gap-6">
+            <div className="space-y-2">
               <h4 className="text-sm font-medium">Légende</h4>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs">
@@ -204,79 +202,77 @@ export function MaintenanceCalendar() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {view === 'day' && selectedDate ? (
+            <div className="space-y-0">
+              {generateTimeSlots().map(time => (
+                <TimeSlot key={time} time={time} date={selectedDate} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-7 gap-2">
+              {/* Week view or month view */}
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                const dayEvents = getEventsByDate(date);
+                
+                return (
+                  <div 
+                    key={i}
+                    className="min-h-32 border rounded-lg p-2"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, date)}
+                  >
+                    <div className="font-medium text-sm mb-2">
+                      {date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
+                    </div>
+                    <div className="space-y-1">
+                      {dayEvents.map(event => (
+                        <div
+                          key={event.id}
+                          draggable
+                          onDragStart={() => handleDragStart(event)}
+                          className={`text-xs p-1 rounded cursor-move border-l-2 ${getPriorityColor(event.priority)} bg-gray-50 hover:bg-gray-100`}
+                        >
+                          <div className="font-medium truncate">{event.equipment}</div>
+                          <div className="text-gray-600">{event.startTime}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Main Calendar View */}
-        <Card className="lg:col-span-3">
+      {/* Event Details Section - Full Width Below Calendar */}
+      {selectedDate && (
+        <Card className="w-full">
           <CardHeader>
-            <CardTitle>
-              {selectedDate ? selectedDate.toLocaleDateString('fr-FR', { 
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Événements du jour - {selectedDate.toLocaleDateString('fr-FR', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
-              }) : 'Planning'}
+              })}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {view === 'day' && selectedDate ? (
-              <div className="space-y-0">
-                {generateTimeSlots().map(time => (
-                  <TimeSlot key={time} time={time} date={selectedDate} />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-7 gap-2">
-                {/* Week view or month view */}
-                {Array.from({ length: 7 }, (_, i) => {
-                  const date = new Date();
-                  date.setDate(date.getDate() + i);
-                  const dayEvents = getEventsByDate(date);
-                  
-                  return (
-                    <div 
-                      key={i}
-                      className="min-h-32 border rounded-lg p-2"
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, date)}
-                    >
-                      <div className="font-medium text-sm mb-2">
-                        {date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
-                      </div>
-                      <div className="space-y-1">
-                        {dayEvents.map(event => (
-                          <div
-                            key={event.id}
-                            draggable
-                            onDragStart={() => handleDragStart(event)}
-                            className={`text-xs p-1 rounded cursor-move border-l-2 ${getPriorityColor(event.priority)} bg-gray-50 hover:bg-gray-100`}
-                          >
-                            <div className="font-medium truncate">{event.equipment}</div>
-                            <div className="text-gray-600">{event.startTime}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Event Details Sidebar */}
-      {selectedDate && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Événements du jour
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {getEventsByDate(selectedDate).map(event => (
                 <div key={event.id} className="p-4 border rounded-lg">
                   <div className="flex justify-between items-start mb-3">
@@ -287,7 +283,7 @@ export function MaintenanceCalendar() {
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 gap-2 text-sm">
                     <div>
                       <span className="text-gray-500">Équipement:</span>
                       <div className="font-medium">{event.equipment}</div>
@@ -314,9 +310,9 @@ export function MaintenanceCalendar() {
               ))}
               
               {getEventsByDate(selectedDate).length === 0 && (
-                <p className="text-center text-gray-500 py-8">
+                <div className="col-span-full text-center text-gray-500 py-8">
                   Aucune intervention planifiée pour cette date
-                </p>
+                </div>
               )}
             </div>
           </CardContent>
