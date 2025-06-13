@@ -8,13 +8,23 @@ import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { PredictionsList } from '@/components/supervision/PredictionsList';
-import { RecurrenceAnalysis } from '@/components/supervision/RecurrenceAnalysis';
+import RecurrenceAnalysis from '@/components/supervision/RecurrenceAnalysis';
 import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
-import { AIReliabilityScore } from '@/components/supervision/AIReliabilityScore';
+import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { toast } from 'sonner';
 
 export default function Supervision() {
   const [refreshing, setRefreshing] = useState(false);
+  const [filters, setFilters] = useState({
+    region: 'all',
+    riskLevel: 'all',
+    equipmentType: 'all',
+    timeframe: '30'
+  });
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -33,11 +43,84 @@ export default function Supervision() {
     toast.success("Génération du rapport IA en cours...");
   };
 
+  // Mock data for components
+  const mockPredictions = [
+    {
+      id: 1,
+      equipment_name: "Climatiseur Bureau A1",
+      failure_risk: 85,
+      type: "AF",
+      location: "Tunis - Siège",
+      predicted_date: "2024-06-20",
+      recommended_action: "Remplacer le filtre et vérifier le système de refroidissement"
+    },
+    {
+      id: 2,
+      equipment_name: "Générateur Secours B2",
+      failure_risk: 92,
+      type: "NF",
+      location: "Sfax - Agence",
+      predicted_date: "2024-06-18",
+      recommended_action: "Maintenance préventive urgente - vérifier les connexions électriques"
+    }
+  ];
+
+  const mockTechnicians = [
+    {
+      id: 1,
+      technician: "Ahmed Ben Ali",
+      equipment_name: "Climatiseur Bureau A1",
+      location: "Tunis - Siège",
+      match_score: 95,
+      availability: "Disponible aujourd'hui",
+      experience: "5 ans en climatisation",
+      success_rate: 98,
+      expertise: ["Climatisation", "Électrique", "Diagnostic"]
+    },
+    {
+      id: 2,
+      technician: "Fatma Gharbi",
+      equipment_name: "Générateur Secours B2",
+      location: "Sfax - Agence",
+      match_score: 88,
+      availability: "Disponible demain",
+      experience: "8 ans en systèmes électriques",
+      success_rate: 94,
+      expertise: ["Électrique", "Générateurs", "Maintenance préventive"]
+    }
+  ];
+
+  const mockRecurrenceData = [
+    {
+      equipment: "Photocopieur Canon IR3300",
+      recurrenceRate: 45,
+      category: "Critique",
+      totalFailures: 12,
+      avgTimeBetweenFailures: 15
+    },
+    {
+      equipment: "Imprimante HP LaserJet Pro",
+      recurrenceRate: 25,
+      category: "Moyen",
+      totalFailures: 6,
+      avgTimeBetweenFailures: 30
+    }
+  ];
+
+  const mockAIMetrics = {
+    predictionAccuracy: 94,
+    confidenceScore: 87,
+    totalPredictions: 127,
+    correctPredictions: 119,
+    modelVersion: "v2.3.1",
+    lastUpdated: "2024-06-13 14:30"
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header épuré */}
       <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="p-4 md:p-6">
+        <div className="p-4 md:p-6 pt-20 md:pt-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -117,7 +200,7 @@ export default function Supervision() {
         {/* Filtres */}
         <Card className="bg-white border border-gray-100 shadow-sm">
           <CardContent className="p-6">
-            <SupervisionFilters />
+            <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
           </CardContent>
         </Card>
 
@@ -131,7 +214,7 @@ export default function Supervision() {
           
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <AIReliabilityScore />
+              <AIReliabilityScore metrics={mockAIMetrics} />
             </CardContent>
           </Card>
         </div>
@@ -139,19 +222,19 @@ export default function Supervision() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <PredictionsList />
+              <PredictionsList predictions={mockPredictions} filters={filters} />
             </CardContent>
           </Card>
           
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <RecurrenceAnalysis />
+              <RecurrenceAnalysis data={mockRecurrenceData} />
             </CardContent>
           </Card>
           
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <TechnicianRecommendations />
+              <TechnicianRecommendations recommendations={mockTechnicians} filters={filters} />
             </CardContent>
           </Card>
         </div>
