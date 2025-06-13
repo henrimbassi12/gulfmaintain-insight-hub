@@ -31,7 +31,7 @@ import {
   Menu
 } from "lucide-react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { LanguageSelector } from "@/components/LanguageSelector";
 
@@ -51,7 +51,7 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { theme, setTheme, language, setLanguage, t } = useTheme();
 
   return (
@@ -129,7 +129,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <div className="px-2 py-1 space-y-2">
               <UserProfile />
-              <Button onClick={logout} variant="ghost">
+              <Button onClick={signOut} variant="ghost">
                 Se déconnecter
               </Button>
             </div>

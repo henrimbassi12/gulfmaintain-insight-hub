@@ -32,6 +32,7 @@ interface FailurePrediction {
 interface TechnicianRecommendation {
   id: string;
   technician: string;
+  equipment_id: string;
   equipment_name: string;
   location: string;
   match_score: number;
@@ -39,6 +40,8 @@ interface TechnicianRecommendation {
   experience: string;
   success_rate: number;
   expertise: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 export default function Supervision() {
@@ -118,24 +121,30 @@ export default function Supervision() {
     {
       id: '1',
       technician: 'Ahmed Benali',
+      equipment_id: 'FR-2024-089',
       equipment_name: 'Réfrigérateur Commercial A1',
       location: 'Douala Centre',
       match_score: 92,
       availability: 'Disponible demain',
       experience: '8 ans en réfrigération',
       success_rate: 96,
-      expertise: ['Réfrigération', 'Climatisation', 'Électrique']
+      expertise: ['Réfrigération', 'Climatisation', 'Électrique'],
+      created_at: '2024-01-20T10:00:00Z',
+      updated_at: '2024-01-20T10:00:00Z'
     },
     {
       id: '2',
       technician: 'Fatima Kouadio',
+      equipment_id: 'FR-2024-012',
       equipment_name: 'Climatiseur Bureau B2',
       location: 'Douala Nord',
       match_score: 87,
       availability: 'Disponible aujourd\'hui',
       experience: '6 ans en HVAC',
       success_rate: 94,
-      expertise: ['Climatisation', 'Ventilation', 'Maintenance']
+      expertise: ['Climatisation', 'Ventilation', 'Maintenance'],
+      created_at: '2024-01-20T10:00:00Z',
+      updated_at: '2024-01-20T10:00:00Z'
     }
   ];
 
