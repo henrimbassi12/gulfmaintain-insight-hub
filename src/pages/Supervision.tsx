@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
@@ -78,13 +77,13 @@ export default function Supervision() {
   };
 
   // Mock data with proper typing
-  const mockPredictions: FailurePrediction[] = [
+  const mockPredictions = [
     {
       id: '1',
       equipment_id: 'FR-2024-089',
       equipment_name: 'Réfrigérateur Commercial A1',
       failure_risk: 85,
-      type: 'AF',
+      type: 'AF' as const,
       location: 'Agence Casablanca Nord',
       predicted_date: '2024-02-15',
       recommended_action: 'Maintenance préventive immédiate',
@@ -96,7 +95,7 @@ export default function Supervision() {
       equipment_id: 'FR-2024-012',
       equipment_name: 'Climatiseur Bureau B2',
       failure_risk: 72,
-      type: 'NF',
+      type: 'NF' as const,
       location: 'Agence Rabat Centre',
       predicted_date: '2024-02-22',
       recommended_action: 'Inspection programmée',
@@ -108,7 +107,7 @@ export default function Supervision() {
       equipment_id: 'FR-2024-134',
       equipment_name: 'Système HVAC C3',
       failure_risk: 68,
-      type: 'AF',
+      type: 'AF' as const,
       location: 'Agence Marrakech Sud',
       predicted_date: '2024-03-01',
       recommended_action: 'Surveillance renforcée',
@@ -117,7 +116,7 @@ export default function Supervision() {
     }
   ];
 
-  const mockTechnicianRecommendations: TechnicianRecommendation[] = [
+  const mockTechnicianRecommendations = [
     {
       id: '1',
       technician: 'Ahmed Benali',
@@ -199,74 +198,32 @@ export default function Supervision() {
         </ModernButton>
       </AirbnbHeader>
 
-      {/* Statistiques de supervision */}
-      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="flex items-center gap-3 text-lg">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            Analyse prédictive en temps réel
-            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
-              IA Active
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="text-2xl font-bold text-red-600 mb-1">3</p>
-              <p className="text-sm text-gray-600">Risques élevés détectés</p>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="text-2xl font-bold text-orange-600 mb-1">7</p>
-              <p className="text-sm text-gray-600">Alertes moyennes</p>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="text-2xl font-bold text-green-600 mb-1">92%</p>
-              <p className="text-sm text-gray-600">Précision IA</p>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="text-2xl font-bold text-blue-600 mb-1">15</p>
-              <p className="text-sm text-gray-600">Pannes évitées ce mois</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Grille principale */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
-              <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
-              <PredictionsList predictions={mockPredictions} filters={filters} />
-            </CardContent>
-          </Card>
-        </div>
+      {/* Toutes les sections empilées verticalement */}
+      <div className="space-y-6">
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
+          </CardContent>
+        </Card>
         
-        <div className="space-y-6">
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
-              <AIPredictionPanel />
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
-              <AIReliabilityScore metrics={mockAIMetrics} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Section analyse et recommandations */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <PredictionsList predictions={mockPredictions} filters={filters} />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <AIPredictionPanel />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <AIReliabilityScore metrics={mockAIMetrics} />
+          </CardContent>
+        </Card>
+        
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardContent className="p-6">
             <RecurrenceAnalysis data={mockRecurrenceData} />

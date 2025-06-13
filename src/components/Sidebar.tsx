@@ -29,7 +29,6 @@ import {
   Menu
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
-import { useTheme } from "@/contexts/ThemeContext";
 
 const menuItems = [
   { icon: Home, label: "Tableau de bord", href: "/" },
@@ -46,7 +45,6 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { t } = useTheme();
 
   return (
     <Sidebar collapsible="icon">
@@ -59,7 +57,7 @@ export function AppSidebar() {
           
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-blue-600" />
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-lg font-semibold text-gray-900">
               Gulf Maintain
             </h1>
           </div>
@@ -72,10 +70,10 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
           <div>
-            <h1 className="text-base md:text-lg font-bold text-gray-900">
+            <h1 className="text-base md:text-lg font-semibold text-gray-900">
               Gulf Maintain
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 font-normal">
               Gestion de maintenance
             </p>
           </div>
@@ -95,7 +93,7 @@ export function AppSidebar() {
                       isActive ? "text-blue-600" : "text-gray-500"
                     )} />
                     <span className={cn(
-                      "font-medium text-sm md:text-base",
+                      "font-medium text-sm md:text-sm",
                       isActive ? "text-blue-600" : "text-gray-700"
                     )}>
                       {item.label}
@@ -108,7 +106,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       
-      <SidebarFooter>
+      <SidebarFooter className="mt-8 pt-4 border-t border-gray-200">
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="px-2 py-1">
