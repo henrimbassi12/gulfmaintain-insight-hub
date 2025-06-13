@@ -43,31 +43,38 @@ export default function Supervision() {
     toast.success("Génération du rapport IA en cours...");
   };
 
-  // Mock data for components
+  // Mock data for components with correct types
   const mockPredictions = [
     {
       id: 1,
+      equipment_id: "FR-2024-089",
       equipment_name: "Climatiseur Bureau A1",
       failure_risk: 85,
       type: "AF",
       location: "Tunis - Siège",
       predicted_date: "2024-06-20",
-      recommended_action: "Remplacer le filtre et vérifier le système de refroidissement"
+      recommended_action: "Remplacer le filtre et vérifier le système de refroidissement",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
       id: 2,
+      equipment_id: "FR-2024-090",
       equipment_name: "Générateur Secours B2",
       failure_risk: 92,
       type: "NF",
       location: "Sfax - Agence",
       predicted_date: "2024-06-18",
-      recommended_action: "Maintenance préventive urgente - vérifier les connexions électriques"
+      recommended_action: "Maintenance préventive urgente - vérifier les connexions électriques",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ];
 
   const mockTechnicians = [
     {
       id: 1,
+      equipment_id: "FR-2024-089",
       technician: "Ahmed Ben Ali",
       equipment_name: "Climatiseur Bureau A1",
       location: "Tunis - Siège",
@@ -75,10 +82,13 @@ export default function Supervision() {
       availability: "Disponible aujourd'hui",
       experience: "5 ans en climatisation",
       success_rate: 98,
-      expertise: ["Climatisation", "Électrique", "Diagnostic"]
+      expertise: ["Climatisation", "Électrique", "Diagnostic"],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
       id: 2,
+      equipment_id: "FR-2024-090",
       technician: "Fatma Gharbi",
       equipment_name: "Générateur Secours B2",
       location: "Sfax - Agence",
@@ -86,7 +96,9 @@ export default function Supervision() {
       availability: "Disponible demain",
       experience: "8 ans en systèmes électriques",
       success_rate: 94,
-      expertise: ["Électrique", "Générateurs", "Maintenance préventive"]
+      expertise: ["Électrique", "Générateurs", "Maintenance préventive"],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ];
 
@@ -117,126 +129,123 @@ export default function Supervision() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header épuré */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="p-4 md:p-6 pt-20 md:pt-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Eye className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Supervision IA</h1>
-                  <p className="text-sm text-gray-500">Analyse prédictive et recommandations intelligentes</p>
-                </div>
-                <ConnectionStatus />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      {/* Header moderne façon Airbnb */}
+      <div className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
+                <Eye className="w-6 h-6 text-white" />
               </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">Supervision IA</h1>
+                <p className="text-gray-500 text-sm">Analyse prédictive et recommandations intelligentes</p>
+              </div>
+              <ConnectionStatus />
             </div>
-            <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
+            
+            <div className="flex items-center gap-3">
               <Button 
                 variant="outline" 
-                size="sm" 
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
+                className="border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
               >
-                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Actualiser</span>
-                <span className="sm:hidden">Sync</span>
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                Actualiser
               </Button>
               
               <Button 
                 onClick={handleGenerateReport}
-                className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
-                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <Brain className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">Rapport IA</span>
-                <span className="sm:hidden">IA</span>
+                <Brain className="w-4 h-4 mr-2" />
+                Rapport IA
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-4 md:p-6 space-y-6">
-        {/* Statistiques IA */}
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardHeader className="bg-gray-50 border-b border-gray-100">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Métriques IA modernes */}
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="px-8 py-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
                 <Activity className="w-5 h-5 text-white" />
               </div>
-              Analyse prédictive en temps réel
-              <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Analyse prédictive en temps réel</h2>
+                <p className="text-gray-600 text-sm">Insights alimentés par l'intelligence artificielle</p>
+              </div>
+              <Badge className="ml-auto bg-blue-100 text-blue-700 border-blue-200">
                 IA Active
               </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-blue-600 mb-1">127</p>
-                <p className="text-sm text-gray-600">Prédictions générées</p>
+            </div>
+          </div>
+          
+          <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border border-blue-100">
+                <p className="text-3xl font-bold text-blue-600 mb-2">127</p>
+                <p className="text-sm text-gray-600 font-medium">Prédictions générées</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-green-600 mb-1">94%</p>
-                <p className="text-sm text-gray-600">Précision IA</p>
+              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl border border-green-100">
+                <p className="text-3xl font-bold text-green-600 mb-2">94%</p>
+                <p className="text-sm text-gray-600 font-medium">Précision IA</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-orange-600 mb-1">23</p>
-                <p className="text-sm text-gray-600">Alertes préventives</p>
+              <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl border border-orange-100">
+                <p className="text-3xl font-bold text-orange-600 mb-2">23</p>
+                <p className="text-sm text-gray-600 font-medium">Alertes préventives</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-purple-600 mb-1">€15.2k</p>
-                <p className="text-sm text-gray-600">Économies prédites</p>
+              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl border border-purple-100">
+                <p className="text-3xl font-bold text-purple-600 mb-2">€15.2k</p>
+                <p className="text-sm text-gray-600 font-medium">Économies prédites</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Filtres */}
-        <Card className="bg-white border border-gray-100 shadow-sm">
-          <CardContent className="p-6">
-            <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
-          </CardContent>
-        </Card>
-
-        {/* Contenu principal de supervision */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
-              <AIPredictionPanel />
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
-              <AIReliabilityScore metrics={mockAIMetrics} />
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
+        {/* Filtres élégants */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
+        </div>
+
+        {/* Contenu principal avec layout Airbnb */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div className="p-6">
+              <AIPredictionPanel />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div className="p-6">
+              <AIReliabilityScore metrics={mockAIMetrics} />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div className="p-6">
               <PredictionsList predictions={mockPredictions} filters={filters} />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
           
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div className="p-6">
               <RecurrenceAnalysis data={mockRecurrenceData} />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
           
-          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardContent className="p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div className="p-6">
               <TechnicianRecommendations recommendations={mockTechnicians} filters={filters} />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
