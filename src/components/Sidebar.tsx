@@ -1,3 +1,4 @@
+
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ import {
 } from "lucide-react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { LanguageSelector } from "@/components/LanguageSelector";
 
 const menuItems = [

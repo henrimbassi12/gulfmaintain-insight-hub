@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
-import { SupervisionFilters } from '@/components/supervision/SupervisionFilters';
+import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
-import { RecurrenceAnalysis } from '@/components/supervision/RecurrenceAnalysis';
+import RecurrenceAnalysis from '@/components/supervision/RecurrenceAnalysis';
 import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
 import { PredictionsList } from '@/components/supervision/PredictionsList';
-import { AIReliabilityScore } from '@/components/supervision/AIReliabilityScore';
+import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,8 +29,33 @@ interface FailurePrediction {
   updated_at: string;
 }
 
+interface TechnicianRecommendation {
+  id: string;
+  technician: string;
+  equipment_name: string;
+  location: string;
+  match_score: number;
+  availability: string;
+  experience: string;
+  success_rate: number;
+  expertise: string[];
+}
+
 export default function Supervision() {
   const [refreshing, setRefreshing] = useState(false);
+  const [filters, setFilters] = useState({
+    region: 'all',
+    riskLevel: 'all',
+    equipmentType: 'all',
+    timeframe: '30'
+  });
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -54,7 +80,7 @@ export default function Supervision() {
       id: '1',
       equipment_id: 'FR-2024-089',
       equipment_name: 'Réfrigérateur Commercial A1',
-      failure_risk: 0.85,
+      failure_risk: 85,
       type: 'AF',
       location: 'Agence Casablanca Nord',
       predicted_date: '2024-02-15',
@@ -66,7 +92,7 @@ export default function Supervision() {
       id: '2',
       equipment_id: 'FR-2024-012',
       equipment_name: 'Climatiseur Bureau B2',
-      failure_risk: 0.72,
+      failure_risk: 72,
       type: 'NF',
       location: 'Agence Rabat Centre',
       predicted_date: '2024-02-22',
@@ -78,13 +104,64 @@ export default function Supervision() {
       id: '3',
       equipment_id: 'FR-2024-134',
       equipment_name: 'Système HVAC C3',
-      failure_risk: 0.68,
+      failure_risk: 68,
       type: 'AF',
       location: 'Agence Marrakech Sud',
       predicted_date: '2024-03-01',
       recommended_action: 'Surveillance renforcée',
       created_at: '2024-01-20T10:00:00Z',
       updated_at: '2024-01-20T10:00:00Z'
+    }
+  ];
+
+  const mockTechnicianRecommendations: TechnicianRecommendation[] = [
+    {
+      id: '1',
+      technician: 'Ahmed Benali',
+      equipment_name: 'Réfrigérateur Commercial A1',
+      location: 'Douala Centre',
+      match_score: 92,
+      availability: 'Disponible demain',
+      experience: '8 ans en réfrigération',
+      success_rate: 96,
+      expertise: ['Réfrigération', 'Climatisation', 'Électrique']
+    },
+    {
+      id: '2',
+      technician: 'Fatima Kouadio',
+      equipment_name: 'Climatiseur Bureau B2',
+      location: 'Douala Nord',
+      match_score: 87,
+      availability: 'Disponible aujourd\'hui',
+      experience: '6 ans en HVAC',
+      success_rate: 94,
+      expertise: ['Climatisation', 'Ventilation', 'Maintenance']
+    }
+  ];
+
+  const mockAIMetrics = {
+    predictionAccuracy: 92,
+    confidenceScore: 87,
+    totalPredictions: 156,
+    correctPredictions: 143,
+    modelVersion: 'v2.1.3',
+    lastUpdated: '2024-01-20 14:30'
+  };
+
+  const mockRecurrenceData = [
+    {
+      equipment: 'Réfrigérateur Commercial A1',
+      recurrenceRate: 45,
+      category: 'Critique',
+      totalFailures: 8,
+      avgTimeBetweenFailures: 22
+    },
+    {
+      equipment: 'Climatiseur Bureau B2',
+      recurrenceRate: 25,
+      category: 'Modéré',
+      totalFailures: 4,
+      avgTimeBetweenFailures: 45
     }
   ];
 
@@ -153,13 +230,13 @@ export default function Supervision() {
         <div className="xl:col-span-2 space-y-6">
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <SupervisionFilters />
+              <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
             </CardContent>
           </Card>
           
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <PredictionsList predictions={mockPredictions} />
+              <PredictionsList predictions={mockPredictions} filters={filters} />
             </CardContent>
           </Card>
         </div>
@@ -173,7 +250,7 @@ export default function Supervision() {
           
           <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <AIReliabilityScore />
+              <AIReliabilityScore metrics={mockAIMetrics} />
             </CardContent>
           </Card>
         </div>
@@ -183,13 +260,13 @@ export default function Supervision() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardContent className="p-6">
-            <RecurrenceAnalysis />
+            <RecurrenceAnalysis data={mockRecurrenceData} />
           </CardContent>
         </Card>
         
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardContent className="p-6">
-            <TechnicianRecommendations />
+            <TechnicianRecommendations recommendations={mockTechnicianRecommendations} filters={filters} />
           </CardContent>
         </Card>
       </div>
