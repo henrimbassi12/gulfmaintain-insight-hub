@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, RefreshCw, Activity, Send, Search } from 'lucide-react';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { AirbnbContainer } from '@/components/ui/airbnb-container';
+import { AirbnbHeader } from '@/components/ui/airbnb-header';
+import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
 
 export default function Messages() {
@@ -53,144 +56,122 @@ export default function Messages() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header épuré */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <MessageCircle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Messages</h1>
-                  <p className="text-sm text-gray-500">Communication et notifications de l'équipe</p>
-                </div>
-                <ConnectionStatus />
-              </div>
+    <AirbnbContainer>
+      <AirbnbHeader
+        title="Messages"
+        subtitle="Communication et notifications de l'équipe"
+        icon={MessageCircle}
+      >
+        <ModernButton 
+          variant="outline" 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          icon={RefreshCw}
+          className={refreshing ? 'animate-spin' : ''}
+        >
+          Actualiser
+        </ModernButton>
+        
+        <ModernButton 
+          icon={Send}
+        >
+          Nouveau message
+        </ModernButton>
+      </AirbnbHeader>
+
+      {/* Statistiques des messages */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
             </div>
-            <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
-              >
-                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Actualiser</span>
-                <span className="sm:hidden">Sync</span>
-              </Button>
-              
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
-                size="sm"
-              >
-                <Send className="w-4 h-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">Nouveau message</span>
-                <span className="sm:hidden">Nouveau</span>
-              </Button>
+            Aperçu des messages
+            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
+              2 non lus
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-blue-600 mb-1">15</p>
+              <p className="text-sm text-gray-600">Messages aujourd'hui</p>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-red-600 mb-1">2</p>
+              <p className="text-sm text-gray-600">Non lus</p>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-green-600 mb-1">8</p>
+              <p className="text-sm text-gray-600">Rapports reçus</p>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-purple-600 mb-1">5</p>
+              <p className="text-sm text-gray-600">Alertes urgentes</p>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="p-4 md:p-6 space-y-6">
-        {/* Statistiques des messages */}
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardHeader className="bg-gray-50 border-b border-gray-100">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Activity className="w-5 h-5 text-white" />
-              </div>
-              Aperçu des messages
-              <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
-                2 non lus
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-blue-600 mb-1">15</p>
-                <p className="text-sm text-gray-600">Messages aujourd'hui</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-red-600 mb-1">2</p>
-                <p className="text-sm text-gray-600">Non lus</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-green-600 mb-1">8</p>
-                <p className="text-sm text-gray-600">Rapports reçus</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-2xl font-bold text-purple-600 mb-1">5</p>
-                <p className="text-sm text-gray-600">Alertes urgentes</p>
-              </div>
+      {/* Barre de recherche */}
+      <Card className="bg-white border border-gray-100 shadow-sm">
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Rechercher dans les messages..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Liste des messages */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Barre de recherche */}
-        <Card className="bg-white border border-gray-100 shadow-sm">
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Rechercher dans les messages..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Liste des messages */}
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardHeader className="bg-gray-50 border-b border-gray-100">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </div>
-              Messages récents
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y divide-gray-100">
-              {messages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    message.unread ? 'bg-blue-50/50' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className={`font-medium ${message.unread ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
-                          {message.sender}
-                        </h3>
-                        {message.unread && (
-                          <Badge className="bg-blue-100 text-blue-700 text-xs">Nouveau</Badge>
-                        )}
-                      </div>
-                      <p className={`font-medium mb-1 ${message.unread ? 'text-gray-900' : 'text-gray-600'}`}>
-                        {message.subject}
-                      </p>
-                      <p className="text-sm text-gray-500">{message.preview}</p>
+            Messages récents
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y divide-gray-100">
+            {messages.map((message) => (
+              <div 
+                key={message.id} 
+                className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                  message.unread ? 'bg-blue-50/50' : ''
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`font-medium ${message.unread ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
+                        {message.sender}
+                      </h3>
+                      {message.unread && (
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">Nouveau</Badge>
+                      )}
                     </div>
-                    <div className="text-sm text-gray-500 ml-4">
-                      {message.time}
-                    </div>
+                    <p className={`font-medium mb-1 ${message.unread ? 'text-gray-900' : 'text-gray-600'}`}>
+                      {message.subject}
+                    </p>
+                    <p className="text-sm text-gray-500">{message.preview}</p>
+                  </div>
+                  <div className="text-sm text-gray-500 ml-4">
+                    {message.time}
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </AirbnbContainer>
   );
 }

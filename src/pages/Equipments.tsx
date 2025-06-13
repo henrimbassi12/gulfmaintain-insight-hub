@@ -9,6 +9,9 @@ import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
 import { AddEquipmentForm } from '@/components/AddEquipmentForm';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { AirbnbContainer } from '@/components/ui/airbnb-container';
+import { AirbnbHeader } from '@/components/ui/airbnb-header';
+import { ModernButton } from '@/components/ui/modern-button';
 import { useEquipments } from '@/hooks/useEquipments';
 import { toast } from 'sonner';
 
@@ -77,92 +80,68 @@ const Equipments = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <AirbnbContainer>
         <div className="flex items-center justify-center h-64">
           <div className="flex items-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
             <span className="text-lg text-gray-600">Chargement des équipements...</span>
           </div>
         </div>
-      </div>
+      </AirbnbContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header épuré */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Wrench className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Équipements</h1>
-                  <p className="text-sm text-gray-500">
-                    Gestion et suivi de {equipments.length} équipement{equipments.length > 1 ? 's' : ''}
-                    {filteredEquipments.length !== equipments.length && 
-                      ` (${filteredEquipments.length} affiché${filteredEquipments.length > 1 ? 's' : ''})`
-                    }
-                  </p>
-                </div>
-                <ConnectionStatus />
-              </div>
+    <AirbnbContainer>
+      <AirbnbHeader
+        title="Équipements"
+        subtitle={`Gestion et suivi de ${equipments.length} équipement${equipments.length > 1 ? 's' : ''}${filteredEquipments.length !== equipments.length ? ` (${filteredEquipments.length} affiché${filteredEquipments.length > 1 ? 's' : ''})` : ''}`}
+        icon={Wrench}
+      >
+        <ModernButton 
+          variant="outline" 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          icon={RefreshCw}
+          className={refreshing ? 'animate-spin' : ''}
+        >
+          Actualiser
+        </ModernButton>
+        
+        <AddEquipmentForm onSuccess={refetch} />
+      </AirbnbHeader>
+
+      {/* Statistics épurées */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
             </div>
-            <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
-              >
-                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Actualiser</span>
-                <span className="sm:hidden">Sync</span>
-              </Button>
-              
-              <AddEquipmentForm onSuccess={refetch} />
-            </div>
-          </div>
-        </div>
-      </div>
+            Statistiques des équipements
+            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
+              {filteredEquipments.length} équipements
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <EquipmentStats equipments={filteredEquipments} />
+        </CardContent>
+      </Card>
 
-      <div className="p-4 md:p-6 space-y-6">
-        {/* Statistics épurées */}
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardHeader className="bg-gray-50 border-b border-gray-100">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Activity className="w-5 h-5 text-white" />
-              </div>
-              Statistiques des équipements
-              <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
-                {filteredEquipments.length} équipements
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <EquipmentStats equipments={filteredEquipments} />
-          </CardContent>
-        </Card>
+      {/* Enhanced Filters */}
+      <EquipmentFilters 
+        onFilterChange={handleFilterChange}
+        equipments={equipments}
+      />
 
-        {/* Enhanced Filters */}
-        <EquipmentFilters 
-          onFilterChange={handleFilterChange}
-          equipments={equipments}
-        />
-
-        {/* Equipment List */}
-        <EquipmentList 
-          equipments={equipments}
-          filteredEquipments={filteredEquipments}
-          isLoading={isLoading}
-        />
-      </div>
-    </div>
+      {/* Equipment List */}
+      <EquipmentList 
+        equipments={equipments}
+        filteredEquipments={filteredEquipments}
+        isLoading={isLoading}
+      />
+    </AirbnbContainer>
   );
 };
 
