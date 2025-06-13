@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DashboardCard } from '@/components/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +15,7 @@ import AISummary from '@/components/dashboard/AISummary';
 import QuickActions from '@/components/dashboard/QuickActions';
 import { NotificationSystem } from '@/components/NotificationSystem';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { DataExport } from '@/components/DataExport';
 import { 
   Wrench, 
   AlertTriangle, 
@@ -23,7 +23,6 @@ import {
   Clock,
   Bell,
   Users,
-  Download,
   RefreshCw
 } from 'lucide-react';
 import { PermissionCheck } from '@/components/auth/PermissionCheck';
@@ -165,16 +164,7 @@ export default function Dashboard() {
             </SelectContent>
           </Select>
           
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleExportData}
-            className="flex-1 sm:flex-none hover:bg-blue-50 transition-colors"
-          >
-            <Download className="w-4 h-4 mr-1 md:mr-2" />
-            <span className="hidden sm:inline">Exporter</span>
-            <span className="sm:hidden">Export</span>
-          </Button>
+          <DataExport />
           
           <Button 
             variant="outline" 
@@ -215,7 +205,7 @@ export default function Dashboard() {
           icon={Wrench}
           trend={{ value: 12, isPositive: true }}
           className="border-l-4 border-l-blue-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={handleInterventionsClick}
+          onClick={() => toast({ title: "Navigation", description: "Redirection vers la page Maintenance..." })}
         />
         <DashboardCard
           title="En cours"
@@ -224,7 +214,7 @@ export default function Dashboard() {
           icon={Clock}
           trend={{ value: -25, isPositive: true }}
           className="border-l-4 border-l-orange-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={handleActiveInterventionsClick}
+          onClick={() => toast({ title: "✅ Interventions actives", description: "Affichage des 8 interventions en cours..." })}
         />
         <DashboardCard
           title="AF Terminées"
@@ -233,7 +223,7 @@ export default function Dashboard() {
           icon={TrendingUp}
           trend={{ value: 3, isPositive: true }}
           className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={handleCompletedClick}
+          onClick={() => toast({ title: "✅ AF Terminées", description: "Affichage des 23 interventions avec Accord de Fin..." })}
         />
         <DashboardCard
           title="NF Terminées"
@@ -242,7 +232,7 @@ export default function Dashboard() {
           icon={AlertTriangle}
           trend={{ value: -8, isPositive: true }}
           className="border-l-4 border-l-red-500 cursor-pointer hover:shadow-lg transition-all duration-200"
-          onClick={handleNonClosedClick}
+          onClick={() => toast({ title: "✅ NF Terminées", description: "Affichage des 5 pannes Non-Fermées à surveiller..." })}
         />
       </div>
 
@@ -324,7 +314,7 @@ export default function Dashboard() {
                         variant="ghost" 
                         size="sm"
                         className="text-xs px-2 py-1 hover:bg-blue-50 transition-colors"
-                        onClick={() => handleViewIntervention(intervention.id)}
+                        onClick={() => toast({ title: "✅ Détails intervention", description: `Ouverture des détails de l'intervention ${intervention.id}` })}
                       >
                         Voir
                       </Button>
