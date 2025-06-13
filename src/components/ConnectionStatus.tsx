@@ -44,15 +44,17 @@ export function ConnectionStatus() {
 
   if (!isOnline) {
     return (
-      <div className="flex gap-2">
-        <Badge variant="destructive" className="gap-1">
+      <div className="flex gap-1 md:gap-2 flex-wrap">
+        <Badge variant="destructive" className="gap-1 text-xs">
           <WifiOff className="w-3 h-3" />
-          Hors ligne
+          <span className="hidden sm:inline">Hors ligne</span>
+          <span className="sm:hidden">Offline</span>
         </Badge>
         {hasOfflineData && (
-          <Badge variant="secondary" className="gap-1">
+          <Badge variant="secondary" className="gap-1 text-xs">
             <Upload className="w-3 h-3" />
-            Données en attente
+            <span className="hidden sm:inline">Données en attente</span>
+            <span className="sm:hidden">Pending</span>
           </Badge>
         )}
       </div>
@@ -61,24 +63,27 @@ export function ConnectionStatus() {
 
   if (dbConnected === false) {
     return (
-      <Badge variant="destructive" className="gap-1">
+      <Badge variant="destructive" className="gap-1 text-xs">
         <AlertCircle className="w-3 h-3" />
-        DB déconnectée
+        <span className="hidden sm:inline">DB déconnectée</span>
+        <span className="sm:hidden">DB Error</span>
       </Badge>
     );
   }
 
   if (dbConnected === true) {
     return (
-      <div className="flex gap-2">
-        <Badge variant="default" className="gap-1 bg-green-600">
+      <div className="flex gap-1 md:gap-2 flex-wrap">
+        <Badge variant="default" className="gap-1 bg-green-600 text-xs">
           <Database className="w-3 h-3" />
-          Connecté
+          <span className="hidden sm:inline">Connecté</span>
+          <span className="sm:hidden">Online</span>
         </Badge>
         {hasOfflineData && (
-          <Badge variant="secondary" className="gap-1">
+          <Badge variant="secondary" className="gap-1 text-xs">
             <Upload className="w-3 h-3" />
-            Sync en attente
+            <span className="hidden sm:inline">Sync en attente</span>
+            <span className="sm:hidden">Sync</span>
           </Badge>
         )}
       </div>
@@ -86,9 +91,10 @@ export function ConnectionStatus() {
   }
 
   return (
-    <Badge variant="secondary" className="gap-1">
+    <Badge variant="secondary" className="gap-1 text-xs">
       <Wifi className="w-3 h-3" />
-      Vérification...
+      <span className="hidden sm:inline">Vérification...</span>
+      <span className="sm:hidden">Check...</span>
     </Badge>
   );
 }

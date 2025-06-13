@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { DashboardCard } from '@/components/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,19 +100,19 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-6 bg-gray-50 min-h-screen pt-16 md:pt-0">
       {/* Header avec statut de connexion */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Tableau de bord</h1>
             <OfflineIndicator />
           </div>
-          <p className="text-gray-600">Vue d'ensemble de votre activité de maintenance</p>
+          <p className="text-sm md:text-base text-gray-600">Vue d'ensemble de votre activité de maintenance</p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -126,9 +127,11 @@ export default function Dashboard() {
             variant="outline" 
             size="sm" 
             onClick={handleExportData}
+            className="flex-1 sm:flex-none"
           >
-            <Download className="w-4 h-4 mr-2" />
-            Exporter
+            <Download className="w-4 h-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Exporter</span>
+            <span className="sm:hidden">Export</span>
           </Button>
           
           <Button 
@@ -136,24 +139,29 @@ export default function Dashboard() {
             size="sm" 
             onClick={handleRefreshData}
             disabled={refreshing}
+            className="flex-1 sm:flex-none"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualiser
+            <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Actualiser</span>
+            <span className="sm:hidden">Sync</span>
           </Button>
           
-          <NotificationSystem />
+          <div className="hidden md:block">
+            <NotificationSystem />
+          </div>
           
           <PermissionCheck requiredRole="admin">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleNewAlert}>
-              <Bell className="w-4 h-4 mr-2" />
-              Nouvelle alerte
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none" onClick={handleNewAlert}>
+              <Bell className="w-4 h-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Nouvelle alerte</span>
+              <span className="sm:hidden">Alerte</span>
             </Button>
           </PermissionCheck>
         </div>
       </div>
 
       {/* KPIs - En-tête rapide (Header summary) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <DashboardCard
           title="Interventions totales"
           value="247"
@@ -193,25 +201,25 @@ export default function Dashboard() {
       </div>
 
       {/* Row 1: Performance & Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         <TechnicianPerformance />
         <UrgentAlerts />
       </div>
 
       {/* Row 2: Geographic & Equipment Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         <RegionMap />
         <EquipmentTypeBreakdown />
       </div>
 
       {/* Row 3: Agency Summary & Trends */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         <AgencySummary />
         <TrendsChart />
       </div>
 
       {/* Row 4: AI Summary & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         <AISummary />
         <QuickActions />
       </div>
@@ -219,10 +227,10 @@ export default function Dashboard() {
       {/* Interventions récentes */}
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
             <Users className="w-5 h-5 text-green-500" />
             Interventions récentes
-            <Badge variant="secondary" className="ml-auto">
+            <Badge variant="secondary" className="ml-auto text-xs">
               {recentInterventions.length} interventions
             </Badge>
           </CardTitle>
@@ -231,13 +239,13 @@ export default function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b text-left text-sm text-gray-500">
+                <tr className="border-b text-left text-xs md:text-sm text-gray-500">
                   <th className="pb-3 font-medium">ID Intervention</th>
-                  <th className="pb-3 font-medium">Équipement</th>
+                  <th className="pb-3 font-medium hidden sm:table-cell">Équipement</th>
                   <th className="pb-3 font-medium">Technicien</th>
-                  <th className="pb-3 font-medium">Type</th>
+                  <th className="pb-3 font-medium hidden md:table-cell">Type</th>
                   <th className="pb-3 font-medium">Statut</th>
-                  <th className="pb-3 font-medium">Durée</th>
+                  <th className="pb-3 font-medium hidden lg:table-cell">Durée</th>
                   <th className="pb-3 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -245,36 +253,37 @@ export default function Dashboard() {
                 {recentInterventions.map((intervention) => (
                   <tr key={intervention.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                     <td className="py-3">
-                      <span className="font-mono text-sm text-blue-600 cursor-pointer hover:underline">
+                      <span className="font-mono text-xs md:text-sm text-blue-600 cursor-pointer hover:underline">
                         {intervention.id}
                       </span>
                     </td>
-                    <td className="py-3">
-                      <span className="font-medium">{intervention.equipment}</span>
+                    <td className="py-3 hidden sm:table-cell">
+                      <span className="font-medium text-sm">{intervention.equipment}</span>
                     </td>
-                    <td className="py-3">{intervention.technician}</td>
-                    <td className="py-3 text-sm text-gray-600">{intervention.type}</td>
+                    <td className="py-3 text-sm">{intervention.technician}</td>
+                    <td className="py-3 text-xs md:text-sm text-gray-600 hidden md:table-cell">{intervention.type}</td>
                     <td className="py-3">
-                      <Badge variant="secondary" className={
+                      <Badge variant="secondary" className={`text-xs ${
                         intervention.status === 'completed' ? 'bg-green-100 text-green-800' :
                         intervention.status === 'in-progress' ? 'bg-orange-100 text-orange-800' :
                         'bg-blue-100 text-blue-800'
-                      }>
+                      }`}>
                         {intervention.status === 'completed' ? 'Terminé' :
                          intervention.status === 'in-progress' ? 'En cours' : 'Planifié'}
                       </Badge>
                     </td>
-                    <td className="py-3 text-sm text-gray-600">{intervention.duration}</td>
+                    <td className="py-3 text-xs md:text-sm text-gray-600 hidden lg:table-cell">{intervention.duration}</td>
                     <td className="py-3">
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        className="text-xs px-2 py-1"
                         onClick={() => toast({ 
                           title: "Détails", 
                           description: `Affichage des détails de l'intervention ${intervention.id}` 
                         })}
                       >
-                        Voir détails
+                        Voir
                       </Button>
                     </td>
                   </tr>

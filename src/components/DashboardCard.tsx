@@ -30,14 +30,14 @@ export function DashboardCard({
       className={`transition-all duration-200 hover:shadow-lg ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-slate-400" />
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 md:px-6 pt-3 md:pt-6">
+        <CardTitle className="text-xs md:text-sm font-medium text-slate-600 leading-tight">{title}</CardTitle>
+        <Icon className="h-4 w-4 md:h-5 md:w-5 text-slate-400 flex-shrink-0" />
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-slate-900">{value}</div>
+      <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+        <div className="text-xl md:text-2xl font-bold text-slate-900">{value}</div>
         {subtitle && (
-          <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
+          <p className="text-xs text-slate-500 mt-1 leading-tight">{subtitle}</p>
         )}
         {trend && (
           <div className="flex items-center mt-2">
