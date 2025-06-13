@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ModernKPICard } from '@/components/dashboard/ModernKPICard';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
@@ -161,14 +160,14 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header moderne */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header épuré */}
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="p-4 md:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Activity className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -212,7 +211,7 @@ export default function Dashboard() {
               <PermissionCheck requiredRole="admin">
                 <Button 
                   size="sm" 
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 flex-1 sm:flex-none" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none" 
                   onClick={handleNewAlert}
                 >
                   <Bell className="w-4 h-4 mr-1 md:mr-2" />
@@ -226,7 +225,7 @@ export default function Dashboard() {
       </div>
 
       <div className="p-4 md:p-6 space-y-6">
-        {/* KPIs modernes */}
+        {/* KPIs épurés */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <ModernKPICard
             title="Interventions totales"
@@ -234,8 +233,6 @@ export default function Dashboard() {
             subtitle="Ce mois"
             icon={Wrench}
             trend={{ value: 12, isPositive: true }}
-            bgColor="bg-gradient-to-r from-blue-500 to-blue-600"
-            iconColor="bg-blue-400/20"
             onClick={handleInterventionsClick}
           />
           <ModernKPICard
@@ -244,8 +241,6 @@ export default function Dashboard() {
             subtitle="Interventions actives"
             icon={Clock}
             trend={{ value: -25, isPositive: true }}
-            bgColor="bg-gradient-to-r from-orange-500 to-orange-600"
-            iconColor="bg-orange-400/20"
             onClick={handleActiveInterventionsClick}
           />
           <ModernKPICard
@@ -254,8 +249,6 @@ export default function Dashboard() {
             subtitle="Avec Accord de Fin"
             icon={TrendingUp}
             trend={{ value: 3, isPositive: true }}
-            bgColor="bg-gradient-to-r from-green-500 to-green-600"
-            iconColor="bg-green-400/20"
             onClick={handleCompletedClick}
           />
           <ModernKPICard
@@ -264,15 +257,12 @@ export default function Dashboard() {
             subtitle="Non-Fermées"
             icon={AlertTriangle}
             trend={{ value: -8, isPositive: true }}
-            bgColor="bg-gradient-to-r from-red-500 to-red-600"
-            iconColor="bg-red-400/20"
             onClick={handleNonClosedClick}
           />
         </div>
 
-        {/* Grille principale avec widget météo */}
+        {/* Grille principale épurée */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Widgets de performance */}
           <div className="lg:col-span-2">
             <ModernProgressCard 
               title="Performance par type"
@@ -280,12 +270,10 @@ export default function Dashboard() {
             />
           </div>
           
-          {/* Widget météo */}
           <div className="lg:col-span-1">
             <ModernWeatherWidget />
           </div>
 
-          {/* Statistiques de performance */}
           <div className="lg:col-span-1">
             <ModernStatsGrid 
               title="Indicateurs clés"
@@ -318,15 +306,15 @@ export default function Dashboard() {
           <QuickActions />
         </div>
 
-        {/* Interventions récentes - design moderne */}
-        <Card className="shadow-lg border-0 hover:shadow-xl transition-shadow duration-300">
-          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+        {/* Interventions récentes - design épuré */}
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
             <CardTitle className="flex items-center gap-3 text-lg md:text-xl">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Users className="w-5 h-5 text-white" />
               </div>
               Interventions récentes
-              <Badge variant="secondary" className="ml-auto text-xs bg-blue-100 text-blue-800">
+              <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
                 {recentInterventions.length} interventions
               </Badge>
             </CardTitle>
@@ -335,7 +323,7 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b bg-gray-50/50 text-left text-xs md:text-sm text-gray-600">
+                  <tr className="border-b bg-gray-50 text-left text-xs md:text-sm text-gray-600">
                     <th className="py-4 px-6 font-semibold">ID Intervention</th>
                     <th className="py-4 px-6 font-semibold hidden sm:table-cell">Équipement</th>
                     <th className="py-4 px-6 font-semibold">Technicien</th>
@@ -347,7 +335,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {recentInterventions.map((intervention, index) => (
-                    <tr key={intervention.id} className={`border-b last:border-0 hover:bg-blue-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                    <tr key={intervention.id} className={`border-b last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                       <td className="py-4 px-6">
                         <span className="font-mono text-xs md:text-sm text-blue-600 cursor-pointer hover:underline font-semibold">
                           {intervention.id}
@@ -360,9 +348,9 @@ export default function Dashboard() {
                       <td className="py-4 px-6 text-xs md:text-sm text-gray-600 hidden md:table-cell">{intervention.type}</td>
                       <td className="py-4 px-6">
                         <Badge variant="secondary" className={`text-xs font-medium ${
-                          intervention.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
-                          intervention.status === 'in-progress' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                          'bg-blue-100 text-blue-800 border-blue-200'
+                          intervention.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
+                          intervention.status === 'in-progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-gray-50 text-gray-700 border-gray-200'
                         }`}>
                           {intervention.status === 'completed' ? 'Terminé' :
                            intervention.status === 'in-progress' ? 'En cours' : 'Planifié'}
@@ -373,7 +361,7 @@ export default function Dashboard() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          className="text-xs px-3 py-2 hover:bg-blue-100 hover:text-blue-700 transition-colors font-medium"
+                          className="text-xs px-3 py-2 hover:bg-blue-50 hover:text-blue-700 transition-colors font-medium"
                           onClick={() => handleViewIntervention(intervention.id)}
                         >
                           Voir
