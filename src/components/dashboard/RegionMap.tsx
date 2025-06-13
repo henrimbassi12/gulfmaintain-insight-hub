@@ -2,70 +2,94 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Activity } from "lucide-react";
-
-interface RegionData {
-  name: string;
-  interventions: number;
-  critical: number;
-  inProgress: number;
-  completed: number;
-  color: string;
-}
+import { MapPin, TrendingUp, AlertTriangle } from "lucide-react";
 
 const RegionMap: React.FC = () => {
-  const regions: RegionData[] = [
-    { name: "Casablanca", interventions: 89, critical: 5, inProgress: 12, completed: 72, color: "bg-blue-500" },
-    { name: "Rabat", interventions: 64, critical: 3, inProgress: 8, completed: 53, color: "bg-green-500" },
-    { name: "Marrakech", interventions: 45, critical: 2, inProgress: 6, completed: 37, color: "bg-orange-500" },
-    { name: "Tanger", interventions: 32, critical: 1, inProgress: 4, completed: 27, color: "bg-purple-500" }
+  const regions = [
+    {
+      name: "Casablanca",
+      equipments: 145,
+      operational: 132,
+      maintenance: 8,
+      critical: 5,
+      interventions: 23
+    },
+    {
+      name: "Rabat", 
+      equipments: 89,
+      operational: 84,
+      maintenance: 3,
+      critical: 2,
+      interventions: 12
+    },
+    {
+      name: "Marrakech",
+      equipments: 67,
+      operational: 61,
+      maintenance: 4,
+      critical: 2,
+      interventions: 8
+    },
+    {
+      name: "Fès",
+      equipments: 54,
+      operational: 48,
+      maintenance: 5,
+      critical: 1,
+      interventions: 6
+    }
   ];
-
-  const totalInterventions = regions.reduce((acc, region) => acc + region.interventions, 0);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-green-500" />
-          Carte des interventions par région
+          Répartition géographique
         </CardTitle>
-        <CardDescription>Répartition géographique et statuts</CardDescription>
+        <CardDescription>État des équipements par région</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {regions.map((region, index) => {
-            const percentage = Math.round((region.interventions / totalInterventions) * 100);
-            return (
-              <div key={index} className="p-4 border rounded-lg">
-                <div className="flex justify-between items-center mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full ${region.color}`}></div>
-                    <h3 className="font-semibold">{region.name}</h3>
-                    <Badge variant="outline">{percentage}%</Badge>
-                  </div>
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <Activity className="w-4 h-4" />
-                    <span className="font-medium">{region.interventions}</span>
-                  </div>
+          {regions.map((region) => (
+            <div key={region.name} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium">{region.name}</h3>
+                <Badge variant="outline" className="text-xs">
+                  {region.equipments} équipements
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-600">{region.operational}</div>
+                  <div className="text-xs text-gray-500">Opérationnels</div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div className="text-center p-2 bg-red-50 rounded">
-                    <div className="font-bold text-red-600">{region.critical}</div>
-                    <div className="text-red-500">Critiques</div>
-                  </div>
-                  <div className="text-center p-2 bg-orange-50 rounded">
-                    <div className="font-bold text-orange-600">{region.inProgress}</div>
-                    <div className="text-orange-500">En cours</div>
-                  </div>
-                  <div className="text-center p-2 bg-green-50 rounded">
-                    <div className="font-bold text-green-600">{region.completed}</div>
-                    <div className="text-green-500">Terminées</div>
-                  </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-orange-600">{region.maintenance}</div>
+                  <div className="text-xs text-gray-500">Maintenance</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-600">{region.critical}</div>
+                  <div className="text-xs text-gray-500">Critiques</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-600">{region.interventions}</div>
+                  <div className="text-xs text-gray-500">Interventions</div>
                 </div>
               </div>
-            );
-          })}
+              
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full" 
+                  style={{ width: `${(region.operational / region.equipments) * 100}%` }}
+                ></div>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {Math.round((region.operational / region.equipments) * 100)}% opérationnels
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

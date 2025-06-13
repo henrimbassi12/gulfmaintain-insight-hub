@@ -1,75 +1,53 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target } from "lucide-react";
 
 const AISummary: React.FC = () => {
-  const insights = [
+  const { toast } = useToast();
+
+  const aiInsights = [
     {
-      type: 'prediction',
+      type: "prediction",
+      icon: Target,
+      title: "Prédiction de panne",
+      content: "3 équipements à risque élevé dans les 48h",
+      confidence: 89,
+      priority: "high"
+    },
+    {
+      type: "optimization",
       icon: TrendingUp,
-      title: 'Prédiction de panne',
-      description: 'Équipement FR-2024-089 risque de panne dans 5 jours',
-      confidence: 87,
-      priority: 'high',
-      action: 'Planifier maintenance préventive'
+      title: "Optimisation des tournées",
+      content: "Économie possible de 23% sur les déplacements",
+      confidence: 76,
+      priority: "medium"
     },
     {
-      type: 'optimization',
-      icon: Clock,
-      title: 'Optimisation des tournées',
-      description: 'Réorganisation des routes peut économiser 2h30/jour',
+      type: "recommendation",
+      icon: Lightbulb,
+      title: "Recommandation maintenance",
+      content: "Programmer maintenance préventive pour 8 équipements",
       confidence: 94,
-      priority: 'medium',
-      action: 'Appliquer nouveau planning'
-    },
-    {
-      type: 'alert',
-      icon: AlertCircle,
-      title: 'Récurrence détectée',
-      description: 'Même panne sur 3 équipements Samsung cette semaine',
-      confidence: 96,
-      priority: 'high',
-      action: 'Investigation approfondie requise'
-    },
-    {
-      type: 'success',
-      icon: CheckCircle,
-      title: 'Performance améliorée',
-      description: 'Taux de résolution en première intervention: +15%',
-      confidence: 100,
-      priority: 'low',
-      action: 'Maintenir les bonnes pratiques'
+      priority: "high"
     }
   ];
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800';
-      case 'medium':
-        return 'bg-orange-100 text-orange-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleApplyRecommendation = (type: string) => {
+    toast({
+      title: "Recommandation appliquée",
+      description: `Application de la recommandation ${type}`,
+    });
   };
 
-  const getIconColor = (type: string) => {
-    switch (type) {
-      case 'prediction':
-        return 'text-blue-500';
-      case 'optimization':
-        return 'text-purple-500';
-      case 'alert':
-        return 'text-red-500';
-      case 'success':
-        return 'text-green-500';
-      default:
-        return 'text-gray-500';
-    }
+  const handleViewDetails = (type: string) => {
+    toast({
+      title: "Détails IA",
+      description: `Ouverture des détails de l'analyse ${type}`,
+    });
   };
 
   return (
@@ -78,37 +56,61 @@ const AISummary: React.FC = () => {
         <CardTitle className="flex items-center gap-2">
           <Brain className="w-5 h-5 text-purple-500" />
           Résumé IA
-          <Badge variant="outline" className="ml-auto bg-purple-50 text-purple-700 border-purple-200">
-            Mise à jour en temps réel
-          </Badge>
         </CardTitle>
-        <CardDescription>Insights et recommandations basés sur l'intelligence artificielle</CardDescription>
+        <CardDescription>Insights et recommandations intelligentes</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {insights.map((insight, index) => {
+          {aiInsights.map((insight, index) => {
             const IconComponent = insight.icon;
             return (
-              <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-start gap-3">
-                  <IconComponent className={`w-5 h-5 mt-0.5 ${getIconColor(insight.type)}`} />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold">{insight.title}</h3>
-                      <Badge className={getPriorityColor(insight.priority)} variant="outline">
-                        {insight.priority === 'high' ? 'Priorité élevée' : 
-                         insight.priority === 'medium' ? 'Priorité moyenne' : 'Info'}
-                      </Badge>
+              <div key={index} className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <IconComponent className="w-5 h-5 text-purple-500 mt-0.5" />
+                    <div className="space-y-1">
+                      <h3 className="font-medium text-sm">{insight.title}</h3>
+                      <p className="text-sm text-gray-600">{insight.content}</p>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{insight.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        Confiance: {insight.confidence}%
-                      </span>
-                      <span className="text-xs font-medium text-blue-600">
-                        {insight.action}
-                      </span>
+                  </div>
+                  <Badge 
+                    variant={insight.priority === 'high' ? 'default' : 'secondary'}
+                    className="text-xs"
+                  >
+                    {insight.priority === 'high' ? 'Priorité haute' : 'Priorité moyenne'}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">Confiance:</span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                        <div 
+                          className="bg-purple-500 h-1.5 rounded-full" 
+                          style={{ width: `${insight.confidence}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs font-medium">{insight.confidence}%</span>
                     </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewDetails(insight.type)}
+                      className="text-xs"
+                    >
+                      Détails
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => handleApplyRecommendation(insight.type)}
+                      className="text-xs"
+                    >
+                      Appliquer
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -116,23 +118,15 @@ const AISummary: React.FC = () => {
           })}
         </div>
         
-        {/* Résumé global */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">Résumé de la journée</h3>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="text-center">
-              <div className="text-lg font-bold text-blue-600">12</div>
-              <div className="text-blue-700">Recommandations</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-green-600">8</div>
-              <div className="text-blue-700">Actions appliquées</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-orange-600">4</div>
-              <div className="text-blue-700">En attente</div>
-            </div>
-          </div>
+        <div className="mt-6 pt-4 border-t text-center">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => toast({ title: "Navigation", description: "Ouverture du tableau IA complet..." })}
+          >
+            <Brain className="w-4 h-4 mr-2" />
+            Voir toutes les analyses IA
+          </Button>
         </div>
       </CardContent>
     </Card>
