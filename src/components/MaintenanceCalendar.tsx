@@ -172,55 +172,70 @@ export function MaintenanceCalendar() {
         </div>
       </div>
 
-      {/* Mini Calendar and Legend - Above Main Calendar */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Navigation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border w-full"
-              />
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Légende</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 border-l-4 border-l-red-500 bg-white border border-gray-200"></div>
-                  <span>Priorité haute</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 border-l-4 border-l-yellow-500 bg-white border border-gray-200"></div>
-                  <span>Priorité moyenne</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 border-l-4 border-l-green-500 bg-white border border-gray-200"></div>
-                  <span>Priorité faible</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Main Calendar - Full Width */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Planning</CardTitle>
+      {/* Navigation Calendar - Full Width Card */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
+            Navigation
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
+          <div className="flex justify-center">
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border w-full max-w-sm"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Légende - Full Width Card */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-green-600 rounded-xl flex items-center justify-center">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            Légende des priorités
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <div className="w-6 h-6 border-l-4 border-l-red-500 bg-white border border-gray-200 rounded"></div>
+              <span className="font-medium">Priorité haute</span>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <div className="w-6 h-6 border-l-4 border-l-yellow-500 bg-white border border-gray-200 rounded"></div>
+              <span className="font-medium">Priorité moyenne</span>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <div className="w-6 h-6 border-l-4 border-l-green-500 bg-white border border-gray-200 rounded"></div>
+              <span className="font-medium">Priorité faible</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Calendar - Full Width Card */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-purple-600 rounded-xl flex items-center justify-center">
+              <Clock className="w-5 h-5 text-white" />
+            </div>
+            Planning principal
+            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
+              {view === 'month' ? 'Vue mensuelle' : view === 'week' ? 'Vue hebdomadaire' : 'Vue journalière'}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
           {view === 'day' && selectedDate ? (
             <div className="space-y-0">
               {generateTimeSlots().map(time => (
@@ -266,12 +281,14 @@ export function MaintenanceCalendar() {
         </CardContent>
       </Card>
 
-      {/* Event Details Section - Full Width Below Calendar */}
+      {/* Event Details Section - Full Width Card */}
       {selectedDate && (
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <div className="w-8 h-8 bg-orange-600 rounded-xl flex items-center justify-center">
+                <ArrowRight className="w-5 h-5 text-white" />
+              </div>
               Événements du jour - {selectedDate.toLocaleDateString('fr-FR', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -280,7 +297,7 @@ export function MaintenanceCalendar() {
               })}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {getEventsByDate(selectedDate).map(event => (
                 <div key={event.id} className="p-4 border rounded-lg">
