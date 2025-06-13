@@ -1,41 +1,43 @@
-
 import React, { useState } from 'react';
+import { SupervisionFilters } from '@/components/supervision/SupervisionFilters';
+import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
+import { RecurrenceAnalysis } from '@/components/supervision/RecurrenceAnalysis';
+import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
+import { PredictionsList } from '@/components/supervision/PredictionsList';
+import { AIReliabilityScore } from '@/components/supervision/AIReliabilityScore';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, RefreshCw, Activity, TrendingUp, Brain } from 'lucide-react';
+import { Brain, RefreshCw, Activity, AlertTriangle } from 'lucide-react';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
-import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
-import SupervisionFilters from '@/components/supervision/SupervisionFilters';
-import { PredictionsList } from '@/components/supervision/PredictionsList';
-import RecurrenceAnalysis from '@/components/supervision/RecurrenceAnalysis';
-import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
-import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
 
+interface FailurePrediction {
+  id: string;
+  equipment_id: string;
+  equipment_name: string;
+  failure_risk: number;
+  type: "AF" | "NF";
+  location: string;
+  predicted_date: string;
+  recommended_action: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function Supervision() {
   const [refreshing, setRefreshing] = useState(false);
-  const [filters, setFilters] = useState({
-    region: 'all',
-    riskLevel: 'all',
-    equipmentType: 'all',
-    timeframe: '30'
-  });
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
 
   const handleRefresh = () => {
     setRefreshing(true);
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 1500)),
       {
-        loading: 'Actualisation des données IA...',
-        success: 'Données IA actualisées avec succès',
+        loading: 'Actualisation des prédictions...',
+        success: 'Prédictions actualisées avec succès',
         error: 'Erreur lors de l\'actualisation'
       }
     );
@@ -43,100 +45,55 @@ export default function Supervision() {
   };
 
   const handleGenerateReport = () => {
-    toast.success("Génération du rapport IA en cours...");
+    toast.success("Génération du rapport de supervision démarrée...");
   };
 
-  // Mock data with correct types
-  const mockPredictions = [
+  // Mock data with proper typing
+  const mockPredictions: FailurePrediction[] = [
     {
-      id: "1",
-      equipment_id: "FR-2024-089",
-      equipment_name: "Climatiseur Bureau A1",
-      failure_risk: 85,
-      type: "AF",
-      location: "Tunis - Siège",
-      predicted_date: "2024-06-20",
-      recommended_action: "Remplacer le filtre et vérifier le système de refroidissement",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      id: '1',
+      equipment_id: 'FR-2024-089',
+      equipment_name: 'Réfrigérateur Commercial A1',
+      failure_risk: 0.85,
+      type: 'AF',
+      location: 'Agence Casablanca Nord',
+      predicted_date: '2024-02-15',
+      recommended_action: 'Maintenance préventive immédiate',
+      created_at: '2024-01-20T10:00:00Z',
+      updated_at: '2024-01-20T10:00:00Z'
     },
     {
-      id: "2",
-      equipment_id: "FR-2024-090",
-      equipment_name: "Générateur Secours B2",
-      failure_risk: 92,
-      type: "NF",
-      location: "Sfax - Agence",
-      predicted_date: "2024-06-18",
-      recommended_action: "Maintenance préventive urgente - vérifier les connexions électriques",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ];
-
-  const mockTechnicians = [
-    {
-      id: "1",
-      equipment_id: "FR-2024-089",
-      technician: "Ahmed Ben Ali",
-      equipment_name: "Climatiseur Bureau A1",
-      location: "Tunis - Siège",
-      match_score: 95,
-      availability: "Disponible aujourd'hui",
-      experience: "5 ans en climatisation",
-      success_rate: 98,
-      expertise: ["Climatisation", "Électrique", "Diagnostic"],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      id: '2',
+      equipment_id: 'FR-2024-012',
+      equipment_name: 'Climatiseur Bureau B2',
+      failure_risk: 0.72,
+      type: 'NF',
+      location: 'Agence Rabat Centre',
+      predicted_date: '2024-02-22',
+      recommended_action: 'Inspection programmée',
+      created_at: '2024-01-20T10:00:00Z',
+      updated_at: '2024-01-20T10:00:00Z'
     },
     {
-      id: "2",
-      equipment_id: "FR-2024-090",
-      technician: "Fatma Gharbi",
-      equipment_name: "Générateur Secours B2",
-      location: "Sfax - Agence",
-      match_score: 88,
-      availability: "Disponible demain",
-      experience: "8 ans en systèmes électriques",
-      success_rate: 94,
-      expertise: ["Électrique", "Générateurs", "Maintenance préventive"],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      id: '3',
+      equipment_id: 'FR-2024-134',
+      equipment_name: 'Système HVAC C3',
+      failure_risk: 0.68,
+      type: 'AF',
+      location: 'Agence Marrakech Sud',
+      predicted_date: '2024-03-01',
+      recommended_action: 'Surveillance renforcée',
+      created_at: '2024-01-20T10:00:00Z',
+      updated_at: '2024-01-20T10:00:00Z'
     }
   ];
-
-  const mockRecurrenceData = [
-    {
-      equipment: "Photocopieur Canon IR3300",
-      recurrenceRate: 45,
-      category: "Critique",
-      totalFailures: 12,
-      avgTimeBetweenFailures: 15
-    },
-    {
-      equipment: "Imprimante HP LaserJet Pro",
-      recurrenceRate: 25,
-      category: "Moyen",
-      totalFailures: 6,
-      avgTimeBetweenFailures: 30
-    }
-  ];
-
-  const mockAIMetrics = {
-    predictionAccuracy: 94,
-    confidenceScore: 87,
-    totalPredictions: 127,
-    correctPredictions: 119,
-    modelVersion: "v2.3.1",
-    lastUpdated: "2024-06-13 14:30"
-  };
 
   return (
     <AirbnbContainer>
       <AirbnbHeader
-        title="Supervision IA"
-        subtitle="Analyse prédictive et recommandations intelligentes"
-        icon={Eye}
+        title="Supervision & IA"
+        subtitle="Analyse prédictive et supervision intelligente"
+        icon={Brain}
       >
         <ModernButton 
           variant="outline" 
@@ -150,89 +107,91 @@ export default function Supervision() {
         
         <ModernButton 
           onClick={handleGenerateReport}
-          icon={Brain}
+          icon={AlertTriangle}
         >
           Rapport IA
         </ModernButton>
       </AirbnbHeader>
 
-      {/* Métriques IA modernes */}
-      <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="px-8 py-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+      {/* Statistiques de supervision */}
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Activity className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Analyse prédictive en temps réel</h2>
-              <p className="text-gray-600 text-sm">Insights alimentés par l'intelligence artificielle</p>
-            </div>
-            <Badge className="ml-auto bg-blue-100 text-blue-700 border-blue-200">
+            Analyse prédictive en temps réel
+            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
               IA Active
             </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-red-600 mb-1">3</p>
+              <p className="text-sm text-gray-600">Risques élevés détectés</p>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-orange-600 mb-1">7</p>
+              <p className="text-sm text-gray-600">Alertes moyennes</p>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-green-600 mb-1">92%</p>
+              <p className="text-sm text-gray-600">Précision IA</p>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-blue-600 mb-1">15</p>
+              <p className="text-sm text-gray-600">Pannes évitées ce mois</p>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Grille principale */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
+              <SupervisionFilters />
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
+              <PredictionsList predictions={mockPredictions} />
+            </CardContent>
+          </Card>
         </div>
         
-        <div className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border border-blue-100">
-              <p className="text-3xl font-bold text-blue-600 mb-2">127</p>
-              <p className="text-sm text-gray-600 font-medium">Prédictions générées</p>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl border border-green-100">
-              <p className="text-3xl font-bold text-green-600 mb-2">94%</p>
-              <p className="text-sm text-gray-600 font-medium">Précision IA</p>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl border border-orange-100">
-              <p className="text-3xl font-bold text-orange-600 mb-2">23</p>
-              <p className="text-sm text-gray-600 font-medium">Alertes préventives</p>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl border border-purple-100">
-              <p className="text-3xl font-bold text-purple-600 mb-2">€15.2k</p>
-              <p className="text-sm text-gray-600 font-medium">Économies prédites</p>
-            </div>
-          </div>
+        <div className="space-y-6">
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
+              <AIPredictionPanel />
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
+              <AIReliabilityScore />
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Filtres élégants */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <SupervisionFilters filters={filters} onFilterChange={handleFilterChange} />
-      </div>
-
-      {/* Contenu principal avec layout Airbnb */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6">
-            <AIPredictionPanel />
-          </div>
-        </div>
+      {/* Section analyse et recommandations */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <RecurrenceAnalysis />
+          </CardContent>
+        </Card>
         
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6">
-            <AIReliabilityScore metrics={mockAIMetrics} />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6">
-            <PredictionsList predictions={mockPredictions} filters={filters} />
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6">
-            <RecurrenceAnalysis data={mockRecurrenceData} />
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6">
-            <TechnicianRecommendations recommendations={mockTechnicians} filters={filters} />
-          </div>
-        </div>
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <TechnicianRecommendations />
+          </CardContent>
+        </Card>
       </div>
     </AirbnbContainer>
   );

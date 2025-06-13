@@ -1,4 +1,3 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,10 @@ import {
   Clock,
   Menu
 } from "lucide-react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const menuItems = [
   { icon: Home, label: "Tableau de bord", href: "/" },
@@ -47,78 +49,92 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { theme, setTheme, language, setLanguage, t } = useTheme();
 
   return (
-    <>
-      {/* Mobile Header avec trigger de sidebar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b p-3 flex items-center justify-between">
-        <SidebarTrigger className="p-2">
-          <Menu className="w-5 h-5" />
-        </SidebarTrigger>
-        
-        <div className="flex items-center gap-2">
-          <Shield className="w-6 h-6 text-blue-600" />
-          <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-            Gulf Maintain
-          </h1>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <NotificationSystem />
-          <ThemeToggle />
-        </div>
-      </div>
-
-      <Sidebar className="border-r">
-        <SidebarHeader className="border-b p-4 md:p-6">
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        {/* Mobile Header avec trigger de sidebar */}
+        <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b p-3 flex items-center justify-between">
+          <SidebarTrigger className="p-2">
+            <Menu className="w-5 h-5" />
+          </SidebarTrigger>
+          
           <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-            <div>
-              <h1 className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
-                Gulf Maintain
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Gestion de maintenance
-              </p>
-            </div>
+            <Shield className="w-6 h-6 text-blue-600" />
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              Gulf Maintain
+            </h1>
           </div>
           
-          {/* Recherche globale - masquée sur mobile */}
-          <div className="mt-4 mobile-hidden">
-            <GlobalSearch />
+          <div className="flex items-center gap-1">
+            <NotificationSystem />
+            <ThemeToggle />
           </div>
-        </SidebarHeader>
-        
-        <SidebarContent className="p-2 md:p-4">
-          <SidebarMenu>
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive} size="lg">
-                    <Link to={item.href} className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent">
-                      <item.icon className={cn(
-                        "w-5 h-5 md:w-4 md:h-4",
-                        isActive ? "text-blue-600" : "text-gray-500"
-                      )} />
-                      <span className={cn(
-                        "font-medium text-sm md:text-base",
-                        isActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
-                      )}>
-                        {item.label}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarContent>
+        </div>
 
-        <SidebarFooter className="p-2 md:p-4">
-          <UserProfile />
-        </SidebarFooter>
-      </Sidebar>
-    </>
+        <div className="flex items-center gap-2">
+          <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+          <div>
+            <h1 className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
+              Gulf Maintain
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Gestion de maintenance
+            </p>
+          </div>
+        </div>
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarMenu>
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton asChild isActive={isActive} size="lg">
+                  <Link to={item.href} className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent">
+                    <item.icon className={cn(
+                      "w-5 h-5 md:w-4 md:h-4",
+                      isActive ? "text-blue-600" : "text-gray-500"
+                    )} />
+                    <span className={cn(
+                      "font-medium text-sm md:text-base",
+                      isActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
+                    )}>
+                      {item.label}
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+      
+      <SidebarFooter>
+        <SidebarMenu>
+          {/* Theme and Language Controls */}
+          <SidebarMenuItem>
+            <div className="px-2 py-1 space-y-2">
+              <ThemeToggle />
+              <LanguageSelector />
+            </div>
+          </SidebarMenuItem>
+          
+          {/* User Menu */}
+          <SidebarMenuItem>
+            <div className="px-2 py-1 space-y-2">
+              <UserProfile />
+              <Button onClick={logout} variant="ghost">
+                Se déconnecter
+              </Button>
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

@@ -14,7 +14,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Dictionnaire de traductions
+// Dictionnaire de traductions étendu
 const translations = {
   fr: {
     dashboard: 'Tableau de bord',
@@ -24,6 +24,9 @@ const translations = {
     supervision: 'Supervision',
     reports: 'Rapports',
     settings: 'Paramètres',
+    geolocation: 'Géolocalisation',
+    calendar: 'Planning',
+    history: 'Historique',
     darkMode: 'Mode sombre',
     lightMode: 'Mode clair',
     language: 'Langue',
@@ -39,7 +42,24 @@ const translations = {
     security: 'Sécurité',
     settingsDescription: 'Configuration de votre compte et préférences',
     themeDescription: 'Choisir le thème de l\'interface',
-    languageDescription: 'Sélectionner la langue de l\'application'
+    languageDescription: 'Sélectionner la langue de l\'application',
+    refresh: 'Actualiser',
+    search: 'Rechercher',
+    filter: 'Filtrer',
+    export: 'Exporter',
+    import: 'Importer',
+    delete: 'Supprimer',
+    edit: 'Modifier',
+    view: 'Voir',
+    add: 'Ajouter',
+    create: 'Créer',
+    close: 'Fermer',
+    open: 'Ouvrir',
+    loading: 'Chargement...',
+    error: 'Erreur',
+    success: 'Succès',
+    warning: 'Attention',
+    info: 'Information'
   },
   en: {
     dashboard: 'Dashboard',
@@ -49,6 +69,9 @@ const translations = {
     supervision: 'Supervision',
     reports: 'Reports',
     settings: 'Settings',
+    geolocation: 'Geolocation',
+    calendar: 'Calendar',
+    history: 'History',
     darkMode: 'Dark mode',
     lightMode: 'Light mode',
     language: 'Language',
@@ -64,7 +87,24 @@ const translations = {
     security: 'Security',
     settingsDescription: 'Configure your account and preferences',
     themeDescription: 'Choose interface theme',
-    languageDescription: 'Select application language'
+    languageDescription: 'Select application language',
+    refresh: 'Refresh',
+    search: 'Search',
+    filter: 'Filter',
+    export: 'Export',
+    import: 'Import',
+    delete: 'Delete',
+    edit: 'Edit',
+    view: 'View',
+    add: 'Add',
+    create: 'Create',
+    close: 'Close',
+    open: 'Open',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+    warning: 'Warning',
+    info: 'Information'
   }
 };
 
@@ -80,25 +120,36 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    return translations[language][key as keyof typeof translations[typeof language]] || key;
   };
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
+    const root = document.documentElement;
+    
     if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
+      root.style.colorScheme = 'dark';
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
+      root.style.colorScheme = 'light';
     }
   }, [theme]);
 
   useEffect(() => {
     localStorage.setItem('language', language);
+    document.documentElement.lang = language;
   }, [language]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, language, setLanguage, t }}>
-      {children}
+      <div className={`min-h-screen transition-colors duration-300 ${
+        theme === 'dark' 
+          ? 'dark bg-gray-900 text-gray-100' 
+          : 'bg-gray-50 text-gray-900'
+      }`}>
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 }

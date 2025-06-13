@@ -190,8 +190,6 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
               
-              <DataExport />
-              
               <Button 
                 variant="outline" 
                 size="sm" 
