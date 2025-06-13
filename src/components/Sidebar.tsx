@@ -15,7 +15,6 @@ import {
 import { UserProfile } from "@/components/UserProfile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSearch } from "@/components/GlobalSearch";
-import { DataExport } from "@/components/DataExport";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import {
   Home,
@@ -114,22 +113,6 @@ export function AppSidebar() {
               );
             })}
           </SidebarMenu>
-
-          {/* Actions rapides */}
-          <div className="mt-6 pt-4 border-t">
-            <h3 className="text-sm font-medium text-gray-500 mb-3 px-2">Actions rapides</h3>
-            <div className="space-y-2">
-              <div className="flex gap-2 px-2">
-                <div className="md:hidden flex-1">
-                  <NotificationSystem />
-                </div>
-                <DataExport />
-              </div>
-              <div className="mobile-hidden px-2">
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
         </SidebarContent>
 
         <SidebarFooter className="p-2 md:p-4">

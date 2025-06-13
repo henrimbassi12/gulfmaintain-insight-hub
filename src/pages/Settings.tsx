@@ -34,9 +34,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-16 md:pt-0">
       {/* Header épuré */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-16 md:top-0 z-40">
         <div className="p-4 md:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
