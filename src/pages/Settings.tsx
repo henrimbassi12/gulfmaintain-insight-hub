@@ -1,478 +1,249 @@
+
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, User, Bell, Shield, Database, Save, Eye, EyeOff, Palette } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { useTheme } from "@/contexts/ThemeContext";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageSelector } from "@/components/LanguageSelector";
+import { Settings as SettingsIcon, RefreshCw, Activity, User, Bell, Shield, Palette } from 'lucide-react';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { toast } from 'sonner';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const Settings = () => {
-  const { toast } = useToast();
-  const { t } = useTheme();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  const [userSettings, setUserSettings] = useState({
-    name: "Tech Manager",
-    email: "manager@gulfmaintain.com",
-    phone: "+33 1 23 45 67 89",
-    role: "Gestionnaire",
-    timezone: "Europe/Paris",
-    language: "fr"
-  });
+export default function Settings() {
+  const [refreshing, setRefreshing] = useState(false);
+  const { theme, setTheme, language, setLanguage } = useTheme();
 
-  const [notifications, setNotifications] = useState({
-    emailAlerts: true,
-    smsAlerts: false,
-    pushNotifications: true,
-    weeklyReports: true,
-    urgentOnly: false
-  });
-
-  const [systemSettings, setSystemSettings] = useState({
-    autoAssignTechnicians: true,
-    enableAIPredictions: true,
-    defaultPriority: "normale",
-    sessionTimeout: "8",
-    maintenanceReminders: true
-  });
-
-  const [passwords, setPasswords] = useState({
-    current: "",
-    new: "",
-    confirm: ""
-  });
+  const handleRefresh = () => {
+    setRefreshing(true);
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Actualisation des paramètres...',
+        success: 'Paramètres actualisés avec succès',
+        error: 'Erreur lors de l\'actualisation'
+      }
+    );
+    setTimeout(() => setRefreshing(false), 1500);
+  };
 
   const handleSaveSettings = () => {
-    toast({
-      title: "Paramètres sauvegardés",
-      description: "Vos modifications ont été enregistrées avec succès.",
-    });
-  };
-
-  const handleChangePassword = () => {
-    if (!passwords.current || !passwords.new || !passwords.confirm) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs du mot de passe.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (passwords.new !== passwords.confirm) {
-      toast({
-        title: "Erreur",
-        description: "Les nouveaux mots de passe ne correspondent pas.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (passwords.new.length < 8) {
-      toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 8 caractères.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Mot de passe modifié",
-      description: "Votre mot de passe a été mis à jour avec succès.",
-    });
-
-    setPasswords({ current: "", new: "", confirm: "" });
-  };
-
-  const handleDisconnectSession = (sessionName: string) => {
-    toast({
-      title: "Session déconnectée",
-      description: `La session "${sessionName}" a été fermée.`,
-    });
-  };
-
-  const handleNotificationChange = (key: string, value: boolean) => {
-    setNotifications(prev => ({ ...prev, [key]: value }));
-    toast({
-      title: "Notification mise à jour",
-      description: `Préférence "${key}" ${value ? 'activée' : 'désactivée'}.`,
-    });
-  };
-
-  const handleSystemChange = (key: string, value: boolean | string) => {
-    setSystemSettings(prev => ({ ...prev, [key]: value }));
-    toast({
-      title: "Paramètre système mis à jour",
-      description: `Configuration "${key}" modifiée.`,
-    });
-  };
-
-  const handleTestNotification = () => {
-    toast({
-      title: "Notification de test",
-      description: "Ceci est une notification de test pour vérifier vos paramètres.",
-    });
+    toast.success("Paramètres sauvegardés avec succès");
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 mb-6">
-        <SettingsIcon className="w-8 h-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('settings')}</h1>
-          <p className="text-gray-600 dark:text-gray-300">{t('settingsDescription')}</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header épuré */}
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <SettingsIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Paramètres</h1>
+                  <p className="text-sm text-gray-500">Configuration de votre compte et préférences</p>
+                </div>
+                <ConnectionStatus />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
+              >
+                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Actualiser</span>
+                <span className="sm:hidden">Sync</span>
+              </Button>
+              
+              <Button 
+                onClick={handleSaveSettings}
+                className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
+                size="sm"
+              >
+                <SettingsIcon className="w-4 h-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Sauvegarder</span>
+                <span className="sm:hidden">Save</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Apparence et langue */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="w-5 h-5 text-purple-500" />
-              {t('appearance')}
+      <div className="p-4 md:p-6 space-y-6">
+        {/* Aperçu du profil */}
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              Profil utilisateur
+              <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
+                Actif
+              </Badge>
             </CardTitle>
-            <CardDescription>{t('themeDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t('theme')}</Label>
-              <ThemeToggle />
-            </div>
-            <Separator />
-            <div className="space-y-2">
-              <Label>{t('language')}</Label>
-              <LanguageSelector />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Profil utilisateur */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-500" />
-              {t('profile')}
-            </CardTitle>
-            <CardDescription>Informations personnelles et contact</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nom complet</Label>
-              <Input
-                id="name"
-                value={userSettings.name}
-                onChange={(e) => setUserSettings(prev => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={userSettings.email}
-                onChange={(e) => setUserSettings(prev => ({ ...prev, email: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Téléphone</Label>
-              <Input
-                id="phone"
-                value={userSettings.phone}
-                onChange={(e) => setUserSettings(prev => ({ ...prev, phone: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Fuseau horaire</Label>
-              <Select value={userSettings.timezone} onValueChange={(value) => setUserSettings(prev => ({ ...prev, timezone: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le fuseau horaire" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Europe/Paris">Europe/Paris (GMT+1)</SelectItem>
-                  <SelectItem value="Africa/Tunis">Africa/Tunis (GMT+1)</SelectItem>
-                  <SelectItem value="Africa/Casablanca">Africa/Casablanca (GMT+0)</SelectItem>
-                </SelectContent>
-              </Select>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nom complet</Label>
+                  <Input id="name" defaultValue="Ahmed Benali" className="mt-1" />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" defaultValue="ahmed.benali@gfi.com" className="mt-1" />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="role">Rôle</Label>
+                  <Select defaultValue="technician">
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="technician">Technicien</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Administrateur</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="agency">Agence</Label>
+                  <Select defaultValue="casablanca">
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="casablanca">Casablanca</SelectItem>
+                      <SelectItem value="rabat">Rabat</SelectItem>
+                      <SelectItem value="fes">Fès</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5 text-orange-500" />
-              {t('notifications')}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="ml-auto"
-                onClick={handleTestNotification}
-              >
-                Tester
-              </Button>
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Bell className="w-5 h-5 text-white" />
+              </div>
+              Notifications
             </CardTitle>
-            <CardDescription>Gérer vos préférences de notification</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Alertes email</Label>
-                <p className="text-sm text-gray-500">Recevoir des notifications par email</p>
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900">Notifications push</h4>
+                  <p className="text-sm text-gray-500">Recevoir des notifications sur le bureau</p>
+                </div>
+                <Switch defaultChecked />
               </div>
-              <Switch
-                checked={notifications.emailAlerts}
-                onCheckedChange={(checked) => handleNotificationChange('emailAlerts', checked)}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Alertes SMS</Label>
-                <p className="text-sm text-gray-500">Notifications urgentes par SMS</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900">Alertes par email</h4>
+                  <p className="text-sm text-gray-500">Notifications importantes par email</p>
+                </div>
+                <Switch defaultChecked />
               </div>
-              <Switch
-                checked={notifications.smsAlerts}
-                onCheckedChange={(checked) => handleNotificationChange('smsAlerts', checked)}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Notifications push</Label>
-                <p className="text-sm text-gray-500">Notifications dans le navigateur</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900">Rappels de maintenance</h4>
+                  <p className="text-sm text-gray-500">Alertes automatiques de maintenance</p>
+                </div>
+                <Switch defaultChecked />
               </div>
-              <Switch
-                checked={notifications.pushNotifications}
-                onCheckedChange={(checked) => handleNotificationChange('pushNotifications', checked)}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Rapports hebdomadaires</Label>
-                <p className="text-sm text-gray-500">Résumé d'activité chaque semaine</p>
-              </div>
-              <Switch
-                checked={notifications.weeklyReports}
-                onCheckedChange={(checked) => handleNotificationChange('weeklyReports', checked)}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Urgences uniquement</Label>
-                <p className="text-sm text-gray-500">Seules les interventions critiques</p>
-              </div>
-              <Switch
-                checked={notifications.urgentOnly}
-                onCheckedChange={(checked) => handleNotificationChange('urgentOnly', checked)}
-              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Préférences système */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-green-500" />
-              {t('systemPreferences')}
+        {/* Apparence */}
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Palette className="w-5 h-5 text-white" />
+              </div>
+              Apparence
             </CardTitle>
-            <CardDescription>Configuration générale de l'application</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label>Attribution automatique</Label>
-                <p className="text-sm text-gray-500">Assigner automatiquement les techniciens</p>
+                <Label>Thème</Label>
+                <Select value={theme} onValueChange={(value: 'light' | 'dark') => setTheme(value)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Mode clair</SelectItem>
+                    <SelectItem value="dark">Mode sombre</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Switch
-                checked={systemSettings.autoAssignTechnicians}
-                onCheckedChange={(checked) => handleSystemChange('autoAssignTechnicians', checked)}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
               <div>
-                <Label>Prédictions IA</Label>
-                <p className="text-sm text-gray-500">Activer les alertes prédictives</p>
+                <Label>Langue</Label>
+                <Select value={language} onValueChange={(value: 'fr' | 'en') => setLanguage(value)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Switch
-                checked={systemSettings.enableAIPredictions}
-                onCheckedChange={(checked) => handleSystemChange('enableAIPredictions', checked)}
-              />
-            </div>
-            <Separator />
-            <div className="space-y-2">
-              <Label>Priorité par défaut</Label>
-              <Select value={systemSettings.defaultPriority} onValueChange={(value) => handleSystemChange('defaultPriority', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner la priorité" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="faible">Faible</SelectItem>
-                  <SelectItem value="normale">Normale</SelectItem>
-                  <SelectItem value="élevée">Élevée</SelectItem>
-                  <SelectItem value="critique">Critique</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Délai de session (heures)</Label>
-              <Select value={systemSettings.sessionTimeout} onValueChange={(value) => handleSystemChange('sessionTimeout', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le délai" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 heures</SelectItem>
-                  <SelectItem value="4">4 heures</SelectItem>
-                  <SelectItem value="8">8 heures</SelectItem>
-                  <SelectItem value="24">24 heures</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Rappels de maintenance</Label>
-                <p className="text-sm text-gray-500">Notifications préventives automatiques</p>
-              </div>
-              <Switch
-                checked={systemSettings.maintenanceReminders}
-                onCheckedChange={(checked) => handleSystemChange('maintenanceReminders', checked)}
-              />
             </div>
           </CardContent>
         </Card>
 
         {/* Sécurité */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-red-500" />
-              {t('security')}
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              Sécurité
             </CardTitle>
-            <CardDescription>Paramètres de sécurité et confidentialité</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Mot de passe actuel</Label>
-                <div className="relative">
-                  <Input 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="Entrez votre mot de passe actuel"
-                    value={passwords.current}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, current: e.target.value }))}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="current-password">Mot de passe actuel</Label>
+                <Input id="current-password" type="password" className="mt-1" />
               </div>
-              <div className="space-y-2">
-                <Label>Nouveau mot de passe</Label>
-                <div className="relative">
-                  <Input 
-                    type={showNewPassword ? "text" : "password"} 
-                    placeholder="Nouveau mot de passe"
-                    value={passwords.new}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, new: e.target.value }))}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                  >
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
+              <div>
+                <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                <Input id="new-password" type="password" className="mt-1" />
               </div>
-              <div className="space-y-2">
-                <Label>Confirmer le mot de passe</Label>
-                <div className="relative">
-                  <Input 
-                    type={showConfirmPassword ? "text" : "password"} 
-                    placeholder="Confirmer le nouveau mot de passe"
-                    value={passwords.confirm}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
+              <div>
+                <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                <Input id="confirm-password" type="password" className="mt-1" />
               </div>
-            </div>
-            <Button onClick={handleChangePassword} className="w-full md:w-auto">
-              Changer le mot de passe
-            </Button>
-            <Separator />
-            <div className="space-y-3">
-              <h4 className="font-medium">Sessions actives</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                  <div>
-                    <p className="font-medium">Navigateur actuel</p>
-                    <p className="text-gray-500">Chrome sur Windows - IP: 192.168.1.10</p>
-                  </div>
-                  <span className="text-green-600 text-xs">Actuelle</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                  <div>
-                    <p className="font-medium">Application mobile</p>
-                    <p className="text-gray-500">iPhone - Dernière activité: il y a 2h</p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDisconnectSession("Application mobile")}
-                  >
-                    Déconnecter
-                  </Button>
-                </div>
-              </div>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                Changer le mot de passe
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Boutons d'action */}
-      <div className="flex justify-end gap-3 pt-6 border-t dark:border-gray-700">
-        <Button variant="outline">
-          {t('cancel')}
-        </Button>
-        <Button onClick={handleSaveSettings} className="bg-blue-600 hover:bg-blue-700">
-          <Save className="w-4 h-4 mr-2" />
-          {t('save')} les modifications
-        </Button>
-      </div>
     </div>
   );
-};
-
-export default Settings;
+}
