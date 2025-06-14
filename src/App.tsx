@@ -4,7 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
+import Welcome from "@/pages/Welcome";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
 import Equipments from "@/pages/Equipments";
 import Maintenance from "@/pages/Maintenance";
@@ -30,23 +32,15 @@ function App() {
           <div className="min-h-screen bg-background">
             <Toaster />
             <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Index />
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              } />
+              <Route path="/" element={<Welcome />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
                     <AppSidebar />
                     <main className="flex-1 overflow-auto">
-                      <Dashboard />
+                      <Index />
                     </main>
                   </div>
                 </ProtectedRoute>
