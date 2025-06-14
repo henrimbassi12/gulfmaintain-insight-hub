@@ -252,7 +252,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"] | null
           agency: string | null
+          approved_at: string | null
+          approved_by: string | null
           avatar_url: string | null
           created_at: string
           email: string
@@ -263,7 +266,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
           agency?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           created_at?: string
           email: string
@@ -274,7 +280,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
           agency?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string
@@ -284,7 +293,22 @@ export type Database = {
           role?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "pending_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       technician_recommendations: {
         Row: {
@@ -333,13 +357,49 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pending_users: {
+        Row: {
+          account_status: Database["public"]["Enums"]["account_status"] | null
+          agency: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          role: string | null
+        }
+        Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
+          agency?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: string | null
+        }
+        Update: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
+          agency?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      approve_user: {
+        Args: { user_id: string; approver_id: string }
+        Returns: undefined
+      }
+      reject_user: {
+        Args: { user_id: string; approver_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -454,6 +514,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const

@@ -18,6 +18,7 @@ import Messages from "@/pages/Messages";
 import Supervision from "@/pages/Supervision";
 import GeolocationPage from "@/pages/GeolocationPage";
 import EquipmentHistoryPage from "@/pages/EquipmentHistoryPage";
+import UserManagement from "@/pages/UserManagement";
 import NotFound from "@/pages/NotFound";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppSidebar } from "@/components/Sidebar";
@@ -115,6 +116,13 @@ function App() {
                 <ProtectedRoute>
                   <LayoutWithSidebar>
                     <EquipmentHistoryPage />
+                  </LayoutWithSidebar>
+                </ProtectedRoute>
+              } />
+              <Route path="/user-management" element={
+                <ProtectedRoute>
+                  <LayoutWithSidebar>
+                    <UserManagement />
                   </LayoutWithSidebar>
                 </ProtectedRoute>
               } />

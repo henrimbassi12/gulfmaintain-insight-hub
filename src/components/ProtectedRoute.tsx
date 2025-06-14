@@ -2,13 +2,14 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import PendingApproval from '@/pages/PendingApproval';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -19,7 +20,17 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
+  }
+
+  // Si l'utilisateur est connecté mais son compte n'est pas approuvé
+  if (userProfile && userProfile.account_status === 'pending') {
+    return <PendingApproval />;
+  }
+
+  // Si le compte est rejeté, rediriger vers l'accueil
+  if (userProfile && userProfile.account_status === 'rejected') {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
