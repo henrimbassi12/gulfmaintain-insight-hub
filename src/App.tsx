@@ -19,8 +19,8 @@ import Supervision from "@/pages/Supervision";
 import GeolocationPage from "@/pages/GeolocationPage";
 import EquipmentHistoryPage from "@/pages/EquipmentHistoryPage";
 import NotFound from "@/pages/NotFound";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Sidebar from "@/components/Sidebar";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppSidebar } from "@/components/Sidebar";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -40,7 +40,7 @@ function App() {
               <Route path="/" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Index />
                     </main>
@@ -50,7 +50,7 @@ function App() {
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Dashboard />
                     </main>
@@ -60,7 +60,7 @@ function App() {
               <Route path="/equipments" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Equipments />
                     </main>
@@ -70,7 +70,7 @@ function App() {
               <Route path="/maintenance" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Maintenance />
                     </main>
@@ -80,7 +80,7 @@ function App() {
               <Route path="/planning" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <MaintenanceCalendarPage />
                     </main>
@@ -90,7 +90,7 @@ function App() {
               <Route path="/reports" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Reports />
                     </main>
@@ -100,7 +100,7 @@ function App() {
               <Route path="/settings" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Settings />
                     </main>
@@ -110,7 +110,7 @@ function App() {
               <Route path="/messages" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Messages />
                     </main>
@@ -120,7 +120,7 @@ function App() {
               <Route path="/supervision" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <Supervision />
                     </main>
@@ -130,7 +130,7 @@ function App() {
               <Route path="/geolocation" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <GeolocationPage />
                     </main>
@@ -140,7 +140,7 @@ function App() {
               <Route path="/equipment-history" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
-                    <Sidebar />
+                    <AppSidebar />
                     <main className="flex-1 overflow-auto">
                       <EquipmentHistoryPage />
                     </main>
