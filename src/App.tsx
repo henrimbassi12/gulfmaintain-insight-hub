@@ -5,9 +5,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
-import AuthWelcome from "@/pages/AuthWelcome";
-import AuthLogin from "@/pages/AuthLogin";
-import AuthSignup from "@/pages/AuthSignup";
 import Dashboard from "@/pages/Dashboard";
 import Equipments from "@/pages/Equipments";
 import Maintenance from "@/pages/Maintenance";
@@ -34,9 +31,6 @@ function App() {
             <Toaster />
             <Routes>
               <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/welcome" element={<AuthWelcome />} />
-              <Route path="/auth/login" element={<AuthLogin />} />
-              <Route path="/auth/signup" element={<AuthSignup />} />
               <Route path="/" element={
                 <ProtectedRoute>
                   <div className="flex h-screen">
