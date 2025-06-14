@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "@/pages/Index";
 import Welcome from "@/pages/Welcome";
 import Login from "@/pages/Login";
@@ -24,6 +25,18 @@ import "./App.css";
 
 const queryClient = new QueryClient();
 
+// Composant wrapper pour les routes avec sidebar
+const LayoutWithSidebar = ({ children }: { children: React.ReactNode }) => (
+  <SidebarProvider>
+    <div className="flex h-screen w-full">
+      <AppSidebar />
+      <main className="flex-1 overflow-auto">
+        {children}
+      </main>
+    </div>
+  </SidebarProvider>
+);
+
 function App() {
   return (
     <AuthProvider>
@@ -37,102 +50,72 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Index />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Index />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/equipments" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Equipments />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Equipments />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/maintenance" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Maintenance />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Maintenance />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/planning" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <MaintenanceCalendarPage />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <MaintenanceCalendarPage />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/reports" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Reports />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Reports />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/settings" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Settings />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Settings />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/messages" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Messages />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Messages />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/supervision" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Supervision />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <Supervision />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/geolocation" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <GeolocationPage />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <GeolocationPage />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="/equipment-history" element={
                 <ProtectedRoute>
-                  <div className="flex h-screen">
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <EquipmentHistoryPage />
-                    </main>
-                  </div>
+                  <LayoutWithSidebar>
+                    <EquipmentHistoryPage />
+                  </LayoutWithSidebar>
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
