@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -10,6 +11,7 @@ import { TechnicianProfileSheet } from '@/components/supervision/TechnicianProfi
 import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
 import { useSupervision } from '@/hooks/useSupervision';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
 
 export default function Supervision() {
   const [selectedPrediction, setSelectedPrediction] = useState<FailurePrediction | null>(null);
@@ -38,6 +40,7 @@ export default function Supervision() {
           </>
         ) : (
           <>
+            <AIPredictionPanel />
             <IntelligentFailurePredictionPanel 
               predictions={highRiskPredictions} 
               onSelectPrediction={setSelectedPrediction} 
