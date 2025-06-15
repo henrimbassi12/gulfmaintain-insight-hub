@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -101,7 +100,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
   return [
     {
       id: '1',
-      technician: 'CÉDRIC',
+      technician: 'Emmanuel Fotso',
       equipment_id: 'FR-2024-089',
       equipment_name: 'Réfrigérateur Commercial A1',
       location: 'JAPOMA',
@@ -115,7 +114,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
     },
     {
       id: '2',
-      technician: 'MBAPBOU GRÉGOIRE',
+      technician: 'Serge Talla',
       equipment_id: 'FR-2024-012',
       equipment_name: 'Climatiseur Bureau B2',
       location: 'AKWA',
@@ -129,7 +128,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
     },
     {
       id: '3',
-      technician: 'VOUKENG',
+      technician: 'Patrick Wamba',
       equipment_id: 'FR-2024-134',
       equipment_name: 'Système HVAC C3',
       location: 'BONABERI',
@@ -143,7 +142,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
     },
     {
       id: '4',
-      technician: 'TCHINDA CONSTANT',
+      technician: 'Olivier Kenne',
       equipment_id: 'FR-2024-156',
       equipment_name: 'Réfrigérateur Vitrine D4',
       location: 'ANGE RAPHAEL',
@@ -157,7 +156,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
     },
     {
       id: '5',
-      technician: 'NDJOKO IV',
+      technician: 'Thierry Njoya',
       equipment_id: 'FR-2024-167',
       equipment_name: 'Climatiseur Central E5',
       location: 'DEÏDO',
