@@ -15,9 +15,23 @@ interface KpiData {
 interface DashboardKPIsProps {
   kpiData: KpiData;
   isLoading: boolean;
+  config: {
+    titles: {
+      total: string;
+      inProgress: string;
+      completed: string;
+      planned: string;
+    };
+    subtitles: {
+      total: string;
+      inProgress: string;
+      completed: string;
+      planned: string;
+    };
+  };
 }
 
-export function DashboardKPIs({ kpiData, isLoading }: DashboardKPIsProps) {
+export function DashboardKPIs({ kpiData, isLoading, config }: DashboardKPIsProps) {
   const { toast } = useToast();
 
   const handleInterventionsClick = () => toast({ title: "✅ Navigation", description: "Redirection vers la page Maintenance..." });
@@ -28,30 +42,30 @@ export function DashboardKPIs({ kpiData, isLoading }: DashboardKPIsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <ModernKPICard
-        title="Interventions totales"
+        title={config.titles.total}
         value={isLoading ? <Skeleton className="h-8 w-20" /> : kpiData.total}
-        subtitle="Toutes périodes"
+        subtitle={config.subtitles.total}
         icon={Wrench}
         onClick={handleInterventionsClick}
       />
       <ModernKPICard
-        title="En cours"
+        title={config.titles.inProgress}
         value={isLoading ? <Skeleton className="h-8 w-12" /> : kpiData.inProgress}
-        subtitle="Interventions actives"
+        subtitle={config.subtitles.inProgress}
         icon={Clock}
         onClick={handleActiveInterventionsClick}
       />
       <ModernKPICard
-        title="Terminées"
+        title={config.titles.completed}
         value={isLoading ? <Skeleton className="h-8 w-12" /> : kpiData.completed}
-        subtitle="Avec Accord de Fin"
+        subtitle={config.subtitles.completed}
         icon={TrendingUp}
         onClick={handleCompletedClick}
       />
       <ModernKPICard
-        title="Planifiées"
+        title={config.titles.planned}
         value={isLoading ? <Skeleton className="h-8 w-12" /> : kpiData.planned}
-        subtitle="À venir"
+        subtitle={config.subtitles.planned}
         icon={AlertTriangle}
         onClick={handleNonClosedClick}
       />

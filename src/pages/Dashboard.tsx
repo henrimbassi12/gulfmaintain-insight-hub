@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
 import { ModernStatsGrid } from '@/components/dashboard/ModernStatsGrid';
@@ -16,6 +15,8 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardKPIs } from '@/components/dashboard/DashboardKPIs';
 import { RecentInterventionsTable } from '@/components/dashboard/RecentInterventionsTable';
 import { MaintenanceReport } from '@/types/maintenance';
+import { useAuth } from '@/contexts/AuthContext';
+import { Wrench, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 
 type ReportStatus = MaintenanceReport['status'];
 type InterventionStatus = 'completed' | 'in-progress' | 'planned';
@@ -36,21 +37,49 @@ export default function Dashboard() {
   const [timeRange, setTimeRange] = useState("today");
   const [refreshing, setRefreshing] = useState(false);
   const { reports, isLoading: isLoadingReports, refetch: refetchReports } = useReports();
+  const { userProfile, loading: isLoadingAuth } = useAuth();
 
   const kpiData = useMemo(() => {
     if (!reports) return { total: 0, inProgress: 0, completed: 0, planned: 0 };
     
-    const total = reports.length;
-    const inProgress = reports.filter(r => r.status === 'En cours').length;
-    const completed = reports.filter(r => r.status === 'Terminé').length;
-    const planned = reports.filter(r => r.status === 'Planifié').length;
+    const reportsToProcess = userProfile?.role === 'technician' && userProfile?.full_name
+      ? reports.filter(r => r.technician.toLowerCase() === userProfile.full_name.toLowerCase())
+      : reports;
+
+    const total = reportsToProcess.length;
+    const inProgress = reportsToProcess.filter(r => r.status === 'En cours').length;
+    const completed = reportsToProcess.filter(r => r.status === 'Terminé').length;
+    const planned = reportsToProcess.filter(r => r.status === 'Planifié').length;
 
     return { total, inProgress, completed, planned };
-  }, [reports]);
+  }, [reports, userProfile]);
+
+  const kpiConfig = useMemo(() => {
+    const isTechnician = userProfile?.role === 'technician';
+    return {
+      titles: {
+        total: isTechnician ? "Mes interventions" : "Interventions totales",
+        inProgress: "En cours",
+        completed: "Terminées",
+        planned: "Planifiées",
+      },
+      subtitles: {
+        total: "Toutes périodes",
+        inProgress: isTechnician ? "Vos tâches actives" : "Interventions actives",
+        completed: "Avec Accord de Fin",
+        planned: "À venir",
+      }
+    }
+  }, [userProfile]);
 
   const recentInterventions = useMemo(() => {
     if (!reports) return [];
-    return reports.slice(0, 3).map(report => ({
+    
+    const reportsToDisplay = userProfile?.role === 'technician' && userProfile?.full_name
+      ? reports.filter(r => r.technician.toLowerCase() === userProfile.full_name.toLowerCase())
+      : reports;
+      
+    return reportsToDisplay.slice(0, 3).map(report => ({
       id: report.report_id,
       equipment: report.equipment,
       technician: report.technician,
@@ -59,7 +88,7 @@ export default function Dashboard() {
       duration: report.duration,
       sector: report.location
     }));
-  }, [reports]);
+  }, [reports, userProfile]);
 
   const handleRefreshData = () => {
     setRefreshing(true);
@@ -91,13 +120,14 @@ export default function Dashboard() {
         setTimeRange={setTimeRange}
         handleRefreshData={handleRefreshData}
         refreshing={refreshing}
-        isLoading={isLoadingReports}
+        isLoading={isLoadingReports || isLoadingAuth}
       />
 
       <div className="p-4 md:p-6 space-y-6">
         <DashboardKPIs
           kpiData={kpiData}
-          isLoading={isLoadingReports}
+          isLoading={isLoadingReports || isLoadingAuth}
+          config={kpiConfig}
         />
 
         {/* Grille principale épurée */}
@@ -140,7 +170,7 @@ export default function Dashboard() {
 
         <RecentInterventionsTable 
           interventions={recentInterventions}
-          isLoading={isLoadingReports}
+          isLoading={isLoadingReports || isLoadingAuth}
         />
       </div>
     </div>
