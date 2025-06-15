@@ -5,7 +5,7 @@ import { PredictionsList } from '@/components/supervision/PredictionsList';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, RefreshCw, Activity, AlertTriangle, TrendingUp, Users } from 'lucide-react';
+import { Brain, RefreshCw, AlertTriangle, Users } from 'lucide-react';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -16,6 +16,7 @@ import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision
 import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
 import { PredictionDetails } from '@/components/supervision/PredictionDetails';
 import { TechnicianProfileSheet } from '@/components/supervision/TechnicianProfileSheet';
+import { SupervisionStats } from '@/components/supervision/SupervisionStats';
 
 export default function Supervision() {
   const { predictions, recommendations, isLoading, error, refetch } = useSupervision();
@@ -77,12 +78,6 @@ export default function Supervision() {
     setIsTechnicianProfileOpen(true);
   };
 
-  // Statistiques calculées à partir des données réelles
-  const totalPredictions = predictions.length;
-  const highRiskPredictions = predictions.filter(p => p.failure_risk > 70).length;
-  const mediumRiskPredictions = predictions.filter(p => p.failure_risk >= 30 && p.failure_risk <= 70).length;
-  const lowRiskPredictions = predictions.filter(p => p.failure_risk < 30).length;
-
   if (error) {
     return (
       <AirbnbContainer>
@@ -133,55 +128,7 @@ export default function Supervision() {
 
       {/* Indicateurs de statut */}
       <div className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-600">Total Prédictions</p>
-                  <p className="text-2xl font-bold text-blue-700">{totalPredictions}</p>
-                </div>
-                <Activity className="w-8 h-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-red-600">Risque Élevé</p>
-                  <p className="text-2xl font-bold text-red-700">{highRiskPredictions}</p>
-                </div>
-                <AlertTriangle className="w-8 h-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-600">Risque Moyen</p>
-                  <p className="text-2xl font-bold text-orange-700">{mediumRiskPredictions}</p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-600">Techniciens Recommandés</p>
-                  <p className="text-2xl font-bold text-green-700">{recommendations.length}</p>
-                </div>
-                <Users className="w-8 h-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <SupervisionStats predictions={predictions} recommendations={recommendations} />
       </div>
 
       {/* Toutes les sections empilées verticalement */}
