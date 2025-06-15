@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AlertTriangle, MapPin, Calendar, Wrench, BarChart, Server } from "lucide-react";
-import { FailurePrediction } from '@/hooks/useSupervision';
+import { FailurePrediction } from '@/types/supervision';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 

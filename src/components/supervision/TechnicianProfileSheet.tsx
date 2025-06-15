@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { User, MapPin, Star, Clock, Wrench, Award, Phone, Mail } from "lucide-react";
-import { TechnicianRecommendation } from '@/hooks/useSupervision';
+import { TechnicianRecommendation } from '@/types/supervision';
 
 interface TechnicianProfileSheetProps {
   isOpen: boolean;

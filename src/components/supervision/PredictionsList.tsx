@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, MapPin, Calendar, Wrench, TrendingUp, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { FailurePrediction } from '@/hooks/useSupervision';
+import { FailurePrediction } from '@/types/supervision';
 import { toast } from 'sonner';
 
 interface PredictionsListProps {
