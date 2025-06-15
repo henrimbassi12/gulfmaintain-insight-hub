@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -152,23 +152,29 @@ export function ChatWindow({
               <Video className="w-5 h-5" />
             </Button>
             
-            <ContextMenu>
-              <ContextMenuTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700 hover:bg-gray-100">
                   <MoreVertical className="w-5 h-5" />
                 </Button>
-              </ContextMenuTrigger>
-              <ContextMenuContent className="w-48">
-                <ContextMenuItem onClick={() => setShowArchiveDialog(true)}>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48" align="end">
+                <DropdownMenuItem 
+                  onClick={() => setShowArchiveDialog(true)}
+                  className="cursor-pointer"
+                >
                   <Archive className="w-4 h-4 mr-2" />
                   Archiver la conversation
-                </ContextMenuItem>
-                <ContextMenuItem onClick={() => setShowDeleteDialog(true)} className="text-red-600">
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setShowDeleteDialog(true)} 
+                  className="text-red-600 cursor-pointer"
+                >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Supprimer la conversation
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
