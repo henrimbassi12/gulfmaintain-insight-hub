@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Shield, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,12 +6,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 const Welcome = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, signInWithOAuth, user, loading } = useAuth();
+  const { signIn, signUp, signInWithOAuth, user, userProfile, loading } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [error, setError] = useState('');
+  const [debugInfo, setDebugInfo] = useState('');
 
   // Form states
   const [email, setEmail] = useState('');
@@ -30,15 +30,39 @@ const Welcome = () => {
     }
   }, [searchParams]);
 
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users to dashboard avec timeout de sécurité
   useEffect(() => {
-    console.log('🔍 Welcome - État auth:', { user: user?.email, loading });
+    console.log('🔍 Welcome - État auth détaillé:', { 
+      user: user?.email, 
+      loading, 
+      userProfile: userProfile?.account_status,
+      hasUser: !!user,
+      hasProfile: !!userProfile 
+    });
+
+    setDebugInfo(`Loading: ${loading}, User: ${user?.email || 'none'}, Profile: ${userProfile?.account_status || 'none'}`);
     
+    // Timeout de sécurité : si le loading dure plus de 10 secondes, forcer l'arrêt
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log('⚠️ Timeout de vérification de session - forçage de l\'arrêt du loading');
+        setDebugInfo('Timeout de vérification - redirection...');
+        // Si il y a un utilisateur mais que ça prend trop de temps, on redirige quand même
+        if (user) {
+          navigate('/dashboard', { replace: true });
+        }
+      }
+    }, 10000); // 10 secondes
+
     if (!loading && user) {
       console.log('✅ Utilisateur connecté, redirection vers dashboard');
+      setDebugInfo('Redirection vers le dashboard...');
+      clearTimeout(timeoutId);
       navigate('/dashboard', { replace: true });
     }
-  }, [user, loading, navigate]);
+
+    return () => clearTimeout(timeoutId);
+  }, [user, loading, userProfile, navigate]);
 
   // Show loading while checking auth state
   if (loading) {
@@ -46,7 +70,11 @@ const Welcome = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
         <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Vérification de la session...</p>
+          <p className="text-gray-600 mb-2">Vérification de la session...</p>
+          <p className="text-xs text-gray-400">{debugInfo}</p>
+          <div className="mt-4 text-xs text-gray-500">
+            Si cela prend trop de temps, la page se redirigera automatiquement
+          </div>
         </div>
       </div>
     );
@@ -54,7 +82,14 @@ const Welcome = () => {
 
   // Don't render the form if user is authenticated (prevents flash)
   if (user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirection en cours...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

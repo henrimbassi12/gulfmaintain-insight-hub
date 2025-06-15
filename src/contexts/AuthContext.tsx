@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fonction pour récupérer le profil utilisateur
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('🔍 Récupération du profil pour userId:', userId);
+      console.log('🔍 fetchUserProfile - DÉBUT pour userId:', userId);
       
       const { data, error } = await supabase
         .from('profiles')
@@ -36,11 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (error) {
-        console.error('❌ Erreur lors de la récupération du profil:', error);
+        console.error('❌ fetchUserProfile - Erreur lors de la récupération du profil:', error);
         
         // Si le profil n'existe pas, on va le créer
         if (error.code === 'PGRST116' || error.message?.includes('not found')) {
-          console.log('⚠️ Profil inexistant, tentative de création...');
+          console.log('⚠️ fetchUserProfile - Profil inexistant, tentative de création...');
           
           const newProfileData = {
             id: userId,
@@ -50,6 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             account_status: 'pending' as 'pending'
           };
           
+          console.log('📝 fetchUserProfile - Données du nouveau profil:', newProfileData);
+          
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .insert(newProfileData)
@@ -57,68 +58,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .single();
             
           if (createError) {
-            console.error('❌ Erreur création profil:', createError);
+            console.error('❌ fetchUserProfile - Erreur création profil:', createError);
             return null;
           }
           
-          console.log('✅ Profil créé avec succès:', newProfile);
+          console.log('✅ fetchUserProfile - Profil créé avec succès:', newProfile);
           return newProfile;
         }
         
         return null;
       }
       
-      console.log('✅ Profil récupéré:', data);
+      console.log('✅ fetchUserProfile - Profil récupéré avec succès:', data);
       return data;
     } catch (error) {
-      console.error('❌ Erreur catch dans fetchUserProfile:', error);
+      console.error('❌ fetchUserProfile - Erreur catch:', error);
       return null;
+    } finally {
+      console.log('🔍 fetchUserProfile - FIN pour userId:', userId);
     }
   };
 
   useEffect(() => {
-    console.log('🚀 Initialisation AuthProvider');
+    console.log('🚀 AuthProvider - Initialisation');
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state change:', event, session?.user?.email);
+        console.log('🔄 AuthProvider - Auth state change:', event, session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('👤 Utilisateur connecté, récupération du profil...');
+          console.log('👤 AuthProvider - Utilisateur connecté, récupération du profil...');
           
-          const profile = await fetchUserProfile(session.user.id);
-          setUserProfile(profile);
+          try {
+            const profile = await fetchUserProfile(session.user.id);
+            console.log('📄 AuthProvider - Profil récupéré:', profile);
+            setUserProfile(profile);
+          } catch (error) {
+            console.error('❌ AuthProvider - Erreur dans fetchUserProfile:', error);
+            setUserProfile(null);
+          }
         } else {
-          console.log('❌ Aucun utilisateur, profil effacé');
+          console.log('❌ AuthProvider - Aucun utilisateur, profil effacé');
           setUserProfile(null);
         }
         
+        console.log('✅ AuthProvider - Fin du traitement auth state change, setLoading(false)');
         setLoading(false);
       }
     );
 
     // THEN check for existing session
+    console.log('🔍 AuthProvider - Vérification session existante...');
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('🔍 Session existante trouvée:', session?.user?.email);
+      console.log('🔍 AuthProvider - Session existante trouvée:', session?.user?.email);
       
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        console.log('👤 Session existante, récupération du profil...');
+        console.log('👤 AuthProvider - Session existante avec utilisateur, récupération du profil...');
         
-        const profile = await fetchUserProfile(session.user.id);
-        setUserProfile(profile);
+        try {
+          const profile = await fetchUserProfile(session.user.id);
+          console.log('📄 AuthProvider - Profil session existante récupéré:', profile);
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('❌ AuthProvider - Erreur dans fetchUserProfile pour session existante:', error);
+          setUserProfile(null);
+        }
       }
       
+      console.log('✅ AuthProvider - Fin traitement session existante, setLoading(false)');
+      setLoading(false);
+    }).catch((error) => {
+      console.error('❌ AuthProvider - Erreur lors de getSession:', error);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🧹 AuthProvider - Cleanup subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
