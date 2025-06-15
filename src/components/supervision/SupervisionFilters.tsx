@@ -25,15 +25,19 @@ const SupervisionFilters: React.FC<SupervisionFiltersProps> = ({ filters, onFilt
           </div>
           
           <Select value={filters.region} onValueChange={(value) => onFilterChange('region', value)}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Région" />
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Agence" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes les régions</SelectItem>
-              <SelectItem value="douala">Douala</SelectItem>
-              <SelectItem value="yaounde">Yaoundé</SelectItem>
-              <SelectItem value="bamenda">Bamenda</SelectItem>
-              <SelectItem value="bafoussam">Bafoussam</SelectItem>
+              <SelectItem value="all">Toutes les agences</SelectItem>
+              <SelectItem value="douala-centre">Agence Douala Centre</SelectItem>
+              <SelectItem value="douala-nord">Agence Douala Nord</SelectItem>
+              <SelectItem value="yaounde-centre">Agence Yaoundé Centre</SelectItem>
+              <SelectItem value="yaounde-nord">Agence Yaoundé Nord</SelectItem>
+              <SelectItem value="bamenda">Agence Bamenda</SelectItem>
+              <SelectItem value="bafoussam">Agence Bafoussam</SelectItem>
+              <SelectItem value="garoua">Agence Garoua</SelectItem>
+              <SelectItem value="maroua">Agence Maroua</SelectItem>
             </SelectContent>
           </Select>
 
@@ -55,7 +59,9 @@ const SupervisionFilters: React.FC<SupervisionFiltersProps> = ({ filters, onFilt
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les types</SelectItem>
+              <SelectItem value="refrigeration">Réfrigération</SelectItem>
               <SelectItem value="climatisation">Climatisation</SelectItem>
+              <SelectItem value="hvac">HVAC</SelectItem>
               <SelectItem value="electrique">Électrique</SelectItem>
               <SelectItem value="mecanique">Mécanique</SelectItem>
             </SelectContent>

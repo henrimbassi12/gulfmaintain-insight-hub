@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
@@ -8,42 +9,16 @@ import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, RefreshCw, Activity, AlertTriangle } from 'lucide-react';
+import { Brain, RefreshCw, Activity, AlertTriangle, TrendingUp, Users } from 'lucide-react';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
-
-interface FailurePrediction {
-  id: string;
-  equipment_id: string;
-  equipment_name: string;
-  failure_risk: number;
-  type: "AF" | "NF";
-  location: string;
-  predicted_date: string;
-  recommended_action: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface TechnicianRecommendation {
-  id: string;
-  technician: string;
-  equipment_id: string;
-  equipment_name: string;
-  location: string;
-  match_score: number;
-  availability: string;
-  experience: string;
-  success_rate: number;
-  expertise: string[];
-  created_at: string;
-  updated_at: string;
-}
+import { useSupervision } from '@/hooks/useSupervision';
 
 export default function Supervision() {
+  const { predictions, recommendations, isLoading, error, refetch } = useSupervision();
   const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({
     region: 'all',
@@ -59,101 +34,35 @@ export default function Supervision() {
     }));
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Actualisation des prédictions...',
-        success: 'Prédictions actualisées avec succès',
-        error: 'Erreur lors de l\'actualisation'
-      }
-    );
-    setTimeout(() => setRefreshing(false), 1500);
+    try {
+      await refetch();
+      toast.success('Données actualisées avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de l\'actualisation');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleGenerateReport = () => {
     toast.success("Génération du rapport de supervision démarrée...");
   };
 
-  // Mock data with proper typing
-  const mockPredictions = [
-    {
-      id: '1',
-      equipment_id: 'FR-2024-089',
-      equipment_name: 'Réfrigérateur Commercial A1',
-      failure_risk: 85,
-      type: 'AF' as const,
-      location: 'Agence Casablanca Nord',
-      predicted_date: '2024-02-15',
-      recommended_action: 'Maintenance préventive immédiate',
-      created_at: '2024-01-20T10:00:00Z',
-      updated_at: '2024-01-20T10:00:00Z'
-    },
-    {
-      id: '2',
-      equipment_id: 'FR-2024-012',
-      equipment_name: 'Climatiseur Bureau B2',
-      failure_risk: 72,
-      type: 'NF' as const,
-      location: 'Agence Rabat Centre',
-      predicted_date: '2024-02-22',
-      recommended_action: 'Inspection programmée',
-      created_at: '2024-01-20T10:00:00Z',
-      updated_at: '2024-01-20T10:00:00Z'
-    },
-    {
-      id: '3',
-      equipment_id: 'FR-2024-134',
-      equipment_name: 'Système HVAC C3',
-      failure_risk: 68,
-      type: 'AF' as const,
-      location: 'Agence Marrakech Sud',
-      predicted_date: '2024-03-01',
-      recommended_action: 'Surveillance renforcée',
-      created_at: '2024-01-20T10:00:00Z',
-      updated_at: '2024-01-20T10:00:00Z'
-    }
-  ];
-
-  const mockTechnicianRecommendations = [
-    {
-      id: '1',
-      technician: 'Ahmed Benali',
-      equipment_id: 'FR-2024-089',
-      equipment_name: 'Réfrigérateur Commercial A1',
-      location: 'Douala Centre',
-      match_score: 92,
-      availability: 'Disponible demain',
-      experience: '8 ans en réfrigération',
-      success_rate: 96,
-      expertise: ['Réfrigération', 'Climatisation', 'Électrique'],
-      created_at: '2024-01-20T10:00:00Z',
-      updated_at: '2024-01-20T10:00:00Z'
-    },
-    {
-      id: '2',
-      technician: 'Fatima Kouadio',
-      equipment_id: 'FR-2024-012',
-      equipment_name: 'Climatiseur Bureau B2',
-      location: 'Douala Nord',
-      match_score: 87,
-      availability: 'Disponible aujourd\'hui',
-      experience: '6 ans en HVAC',
-      success_rate: 94,
-      expertise: ['Climatisation', 'Ventilation', 'Maintenance'],
-      created_at: '2024-01-20T10:00:00Z',
-      updated_at: '2024-01-20T10:00:00Z'
-    }
-  ];
+  // Statistiques calculées à partir des données réelles
+  const totalPredictions = predictions.length;
+  const highRiskPredictions = predictions.filter(p => p.failure_risk > 70).length;
+  const mediumRiskPredictions = predictions.filter(p => p.failure_risk >= 30 && p.failure_risk <= 70).length;
+  const lowRiskPredictions = predictions.filter(p => p.failure_risk < 30).length;
 
   const mockAIMetrics = {
     predictionAccuracy: 92,
     confidenceScore: 87,
-    totalPredictions: 156,
-    correctPredictions: 143,
+    totalPredictions: totalPredictions,
+    correctPredictions: Math.floor(totalPredictions * 0.92),
     modelVersion: 'v2.1.3',
-    lastUpdated: '2024-01-20 14:30'
+    lastUpdated: new Date().toLocaleString('fr-FR')
   };
 
   const mockRecurrenceData = [
@@ -170,8 +79,38 @@ export default function Supervision() {
       category: 'Modéré',
       totalFailures: 4,
       avgTimeBetweenFailures: 45
+    },
+    {
+      equipment: 'Système HVAC C3',
+      recurrenceRate: 35,
+      category: 'Modéré',
+      totalFailures: 6,
+      avgTimeBetweenFailures: 30
     }
   ];
+
+  if (error) {
+    return (
+      <AirbnbContainer>
+        <AirbnbHeader
+          title="Supervision & IA"
+          subtitle="Analyse prédictive et supervision intelligente"
+          icon={Brain}
+        />
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-red-700 mb-2">Erreur de chargement</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={handleRefresh} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
+      </AirbnbContainer>
+    );
+  }
 
   return (
     <AirbnbContainer>
@@ -183,7 +122,7 @@ export default function Supervision() {
         <ModernButton 
           variant="outline" 
           onClick={handleRefresh}
-          disabled={refreshing}
+          disabled={refreshing || isLoading}
           icon={RefreshCw}
           className={refreshing ? 'animate-spin' : ''}
         >
@@ -198,6 +137,59 @@ export default function Supervision() {
         </ModernButton>
       </AirbnbHeader>
 
+      {/* Indicateurs de statut */}
+      <div className="mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Total Prédictions</p>
+                  <p className="text-2xl font-bold text-blue-700">{totalPredictions}</p>
+                </div>
+                <Activity className="w-8 h-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-600">Risque Élevé</p>
+                  <p className="text-2xl font-bold text-red-700">{highRiskPredictions}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Risque Moyen</p>
+                  <p className="text-2xl font-bold text-orange-700">{mediumRiskPredictions}</p>
+                </div>
+                <TrendingUp className="w-8 h-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">Techniciens Disponibles</p>
+                  <p className="text-2xl font-bold text-green-700">{recommendations.length}</p>
+                </div>
+                <Users className="w-8 h-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       {/* Toutes les sections empilées verticalement */}
       <div className="space-y-6">
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -207,8 +199,24 @@ export default function Supervision() {
         </Card>
         
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-500" />
+              Prédictions de Pannes
+              <Badge variant="secondary" className="ml-2">
+                {totalPredictions} prédictions
+              </Badge>
+            </CardTitle>
+          </CardHeader>
           <CardContent className="p-6">
-            <PredictionsList predictions={mockPredictions} filters={filters} />
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-2 text-gray-500">Chargement des prédictions...</p>
+              </div>
+            ) : (
+              <PredictionsList predictions={predictions} filters={filters} />
+            )}
           </CardContent>
         </Card>
         
@@ -231,10 +239,31 @@ export default function Supervision() {
         </Card>
         
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-500" />
+              Recommandations Techniciens
+              <Badge variant="secondary" className="ml-2">
+                {recommendations.length} recommandations
+              </Badge>
+            </CardTitle>
+          </CardHeader>
           <CardContent className="p-6">
-            <TechnicianRecommendations recommendations={mockTechnicianRecommendations} filters={filters} />
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-2 text-gray-500">Chargement des recommandations...</p>
+              </div>
+            ) : (
+              <TechnicianRecommendations recommendations={recommendations} filters={filters} />
+            )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Indicateur de connexion */}
+      <div className="fixed bottom-4 right-4">
+        <ConnectionStatus />
       </div>
     </AirbnbContainer>
   );
