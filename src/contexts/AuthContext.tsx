@@ -29,19 +29,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔍 Recherche du profil pour userId:', userId);
       console.log('🔗 Test de connexion à Supabase...');
       
-      // Test de connectivité basique
-      const { data: testData, error: testError } = await supabase
+      // Test de connectivité basique avec timeout
+      console.log('📡 Début du test de connectivité...');
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout après 10 secondes')), 10000);
+      });
+      
+      const testQuery = supabase
         .from('profiles')
         .select('count')
         .limit(1);
       
+      console.log('🚀 Exécution de la requête de test...');
+      
+      const { data: testData, error: testError } = await Promise.race([
+        testQuery,
+        timeoutPromise
+      ]) as any;
+      
       if (testError) {
         console.error('❌ Erreur de test de connexion:', testError);
+        console.error('❌ Détails:', JSON.stringify(testError, null, 2));
         return null;
       }
       
-      console.log('✅ Test de connexion réussi');
+      console.log('✅ Test de connexion réussi, données de test:', testData);
       
+      console.log('🔍 Recherche du profil utilisateur...');
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -50,6 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('❌ Erreur lors de la récupération du profil:', error);
+        console.error('❌ Code d\'erreur:', error.code);
+        console.error('❌ Message:', error.message);
         
         // Si le profil n'existe pas, on va le créer
         if (error.code === 'PGRST116') {
@@ -82,7 +99,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('📊 Statut du compte:', data.account_status);
       return data;
     } catch (error) {
-      console.error('❌ Erreur catch:', error);
+      console.error('❌ Erreur catch dans fetchUserProfile:', error);
+      if (error instanceof Error) {
+        console.error('❌ Message d\'erreur:', error.message);
+        console.error('❌ Stack trace:', error.stack);
+      }
       return null;
     }
   };
@@ -106,9 +127,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('📧 Email:', session.user.email);
           console.log('🏷️ Metadata:', session.user.user_metadata);
           
-          const profile = await fetchUserProfile(session.user.id);
-          setUserProfile(profile);
-          console.log('📋 Profil défini:', profile);
+          try {
+            const profile = await fetchUserProfile(session.user.id);
+            setUserProfile(profile);
+            console.log('📋 Profil défini:', profile);
+          } catch (error) {
+            console.error('❌ Erreur lors de la récupération du profil:', error);
+            setUserProfile(null);
+          }
         } else {
           console.log('❌ Aucun utilisateur, profil effacé');
           setUserProfile(null);
@@ -129,9 +155,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         console.log('👤 Session existante, récupération du profil...');
         console.log('🆔 User ID existant:', session.user.id);
-        const profile = await fetchUserProfile(session.user.id);
-        setUserProfile(profile);
-        console.log('📋 Profil défini pour session existante:', profile);
+        try {
+          const profile = await fetchUserProfile(session.user.id);
+          setUserProfile(profile);
+          console.log('📋 Profil défini pour session existante:', profile);
+        } catch (error) {
+          console.error('❌ Erreur lors de la récupération du profil pour session existante:', error);
+          setUserProfile(null);
+        }
       }
       
       setLoading(false);
