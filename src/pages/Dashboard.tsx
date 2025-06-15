@@ -15,12 +15,12 @@ import UrgentAlerts from '@/components/dashboard/UrgentAlerts';
 import TrendsChart from '@/components/dashboard/TrendsChart';
 import AISummary from '@/components/dashboard/AISummary';
 import QuickActions from '@/components/dashboard/QuickActions';
+import { NotificationSystem } from '@/components/NotificationSystem';
 import { 
   Wrench, 
   AlertTriangle, 
   TrendingUp, 
   Clock,
-  Bell,
   Users,
   RefreshCw,
   Activity,
@@ -193,17 +193,7 @@ export default function Dashboard() {
                 <span className="sm:hidden">Sync</span>
               </Button>
               
-              <PermissionCheck requiredRole="admin">
-                <Button 
-                  size="sm" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none" 
-                  onClick={handleNewAlert}
-                >
-                  <Bell className="w-4 h-4 mr-1 md:mr-2" />
-                  <span className="hidden sm:inline">Nouvelle alerte</span>
-                  <span className="sm:hidden">Alerte</span>
-                </Button>
-              </PermissionCheck>
+              <NotificationSystem />
             </div>
           </div>
         </div>
