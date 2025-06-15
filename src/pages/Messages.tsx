@@ -24,7 +24,9 @@ export default function Messages() {
     setSelectedConversationId,
     isLoading,
     sendMessage,
-    refetch
+    refetch,
+    deleteConversation,
+    archiveConversation
   } = useMessages();
 
   const [newMessage, setNewMessage] = useState('');
@@ -65,30 +67,42 @@ export default function Messages() {
     );
   };
 
-  const handleDeleteConversation = (conversationId: string) => {
-    // Fonction simulée pour la suppression - en mode démo
-    console.log('Suppression de la conversation:', conversationId);
-    
-    // Déselectionner la conversation si elle était sélectionnée
-    if (selectedConversationId === conversationId) {
-      setSelectedConversationId(null);
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      await deleteConversation(conversationId);
+      
+      // Déselectionner la conversation si elle était sélectionnée
+      if (selectedConversationId === conversationId) {
+        setSelectedConversationId(null);
+      }
+      
+      // Actualiser la liste des conversations
+      await refetch();
+      
+      toast.success('Conversation supprimée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error('Erreur lors de la suppression de la conversation');
     }
-    
-    // Actualiser la liste des conversations
-    refetch();
   };
 
-  const handleArchiveConversation = (conversationId: string) => {
-    // Fonction simulée pour l'archivage - en mode démo
-    console.log('Archivage de la conversation:', conversationId);
-    
-    // Déselectionner la conversation si elle était sélectionnée
-    if (selectedConversationId === conversationId) {
-      setSelectedConversationId(null);
+  const handleArchiveConversation = async (conversationId: string) => {
+    try {
+      await archiveConversation(conversationId);
+      
+      // Déselectionner la conversation si elle était sélectionnée
+      if (selectedConversationId === conversationId) {
+        setSelectedConversationId(null);
+      }
+      
+      // Actualiser la liste des conversations
+      await refetch();
+      
+      toast.success('Conversation archivée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de l\'archivage:', error);
+      toast.error('Erreur lors de l\'archivage de la conversation');
     }
-    
-    // Actualiser la liste des conversations
-    refetch();
   };
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
