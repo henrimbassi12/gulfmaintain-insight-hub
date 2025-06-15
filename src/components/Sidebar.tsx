@@ -36,12 +36,23 @@ export function AppSidebar() {
   const location = useLocation();
   const { user, userProfile } = useAuth();
 
-  console.log('🔍 Sidebar Debug:', {
-    user: user?.email,
-    userProfile,
+  console.log('🔍 Sidebar Debug - État complet:', {
+    user: user ? {
+      id: user.id,
+      email: user.email,
+      metadata: user.user_metadata
+    } : null,
+    userProfile: userProfile ? {
+      id: userProfile.id,
+      role: userProfile.role,
+      account_status: userProfile.account_status,
+      full_name: userProfile.full_name
+    } : null,
     userRole: userProfile?.role,
     accountStatus: userProfile?.account_status,
-    isAdmin: userProfile?.role === 'admin'
+    isAdmin: userProfile?.role === 'admin',
+    isApproved: userProfile?.account_status === 'approved',
+    shouldShowUserManagement: userProfile?.role === 'admin' && userProfile?.account_status === 'approved'
   });
 
   // Menu items de base
@@ -60,13 +71,18 @@ export function AppSidebar() {
 
   // Ajouter la gestion des utilisateurs pour les admins
   const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
-  console.log('🛡️ Is Admin Check:', isAdmin);
+  console.log('🛡️ Is Admin Check Final:', {
+    userProfile: !!userProfile,
+    role: userProfile?.role,
+    accountStatus: userProfile?.account_status,
+    isAdmin
+  });
   
   const menuItems = isAdmin 
     ? [...baseMenuItems, { icon: Users, label: "Gestion des utilisateurs", href: "/user-management" }]
     : baseMenuItems;
 
-  console.log('📋 Menu Items:', menuItems.map(item => item.label));
+  console.log('📋 Menu Items Final:', menuItems.map(item => ({ label: item.label, href: item.href })));
 
   return (
     <Sidebar collapsible="icon">

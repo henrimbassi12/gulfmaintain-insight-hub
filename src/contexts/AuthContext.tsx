@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: session?.user?.email || '',
             full_name: session?.user?.user_metadata?.full_name || 'EPANDA MBASSI HENRI SOREL',
             role: 'admin', // Forcer admin
-            account_status: 'approved'
+            account_status: 'approved' as 'approved'
           };
           
           console.log('📝 Données du nouveau profil:', newProfileData);
