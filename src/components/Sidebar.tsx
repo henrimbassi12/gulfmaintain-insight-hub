@@ -34,7 +34,15 @@ import { useLocation, Link } from "react-router-dom";
 
 export function AppSidebar() {
   const location = useLocation();
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
+
+  console.log('🔍 Sidebar Debug:', {
+    user: user?.email,
+    userProfile,
+    userRole: userProfile?.role,
+    accountStatus: userProfile?.account_status,
+    isAdmin: userProfile?.role === 'admin'
+  });
 
   // Menu items de base
   const baseMenuItems = [
@@ -51,9 +59,14 @@ export function AppSidebar() {
   ];
 
   // Ajouter la gestion des utilisateurs pour les admins
-  const menuItems = userProfile?.role === 'admin' 
+  const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
+  console.log('🛡️ Is Admin Check:', isAdmin);
+  
+  const menuItems = isAdmin 
     ? [...baseMenuItems, { icon: Users, label: "Gestion des utilisateurs", href: "/user-management" }]
     : baseMenuItems;
+
+  console.log('📋 Menu Items:', menuItems.map(item => item.label));
 
   return (
     <Sidebar collapsible="icon">

@@ -27,36 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('🔍 Recherche du profil pour userId:', userId);
-      console.log('🔗 Test de connexion à Supabase...');
       
-      // Test de connectivité basique avec timeout
-      console.log('📡 Début du test de connectivité...');
-      
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout après 10 secondes')), 10000);
-      });
-      
-      const testQuery = supabase
-        .from('profiles')
-        .select('count')
-        .limit(1);
-      
-      console.log('🚀 Exécution de la requête de test...');
-      
-      const { data: testData, error: testError } = await Promise.race([
-        testQuery,
-        timeoutPromise
-      ]) as any;
-      
-      if (testError) {
-        console.error('❌ Erreur de test de connexion:', testError);
-        console.error('❌ Détails:', JSON.stringify(testError, null, 2));
-        return null;
-      }
-      
-      console.log('✅ Test de connexion réussi, données de test:', testData);
-      
-      console.log('🔍 Recherche du profil utilisateur...');
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -77,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               id: userId,
               email: session?.user?.email || '',
               full_name: session?.user?.user_metadata?.full_name || '',
-              role: session?.user?.user_metadata?.role || 'technician',
+              role: session?.user?.user_metadata?.role || 'admin',  // Forcer admin pour debug
               account_status: 'approved'
             })
             .select()
@@ -97,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       console.log('✅ Profil récupéré:', data);
       console.log('📊 Statut du compte:', data.account_status);
+      console.log('🏷️ Rôle utilisateur:', data.role);
       return data;
     } catch (error) {
       console.error('❌ Erreur catch dans fetchUserProfile:', error);
@@ -110,13 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     console.log('🚀 Initialisation AuthProvider');
-    console.log('🌍 Window location:', window.location.href);
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state change:', event, session?.user?.email);
-        console.log('📝 Session complète:', session);
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -147,7 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('🔍 Session existante trouvée:', session?.user?.email);
-      console.log('📝 Session existante complète:', session);
       
       setSession(session);
       setUser(session?.user ?? null);
