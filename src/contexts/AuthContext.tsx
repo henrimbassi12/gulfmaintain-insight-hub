@@ -28,38 +28,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('🔍 Recherche du profil pour userId:', userId);
       
+      // Test de connexion à Supabase
+      console.log('🔗 Test de connexion Supabase...');
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
       
+      console.log('📊 Résultat de la requête profiles:', { data, error });
+      
       if (error) {
         console.error('❌ Erreur lors de la récupération du profil:', error);
         console.error('❌ Code d\'erreur:', error.code);
         console.error('❌ Message:', error.message);
+        console.error('❌ Détails complets:', JSON.stringify(error, null, 2));
         
         // Si le profil n'existe pas, on va le créer
-        if (error.code === 'PGRST116') {
+        if (error.code === 'PGRST116' || error.message?.includes('not found')) {
           console.log('⚠️ Profil inexistant, tentative de création...');
+          
+          const newProfileData = {
+            id: userId,
+            email: session?.user?.email || '',
+            full_name: session?.user?.user_metadata?.full_name || 'EPANDA MBASSI HENRI SOREL',
+            role: 'admin', // Forcer admin
+            account_status: 'approved'
+          };
+          
+          console.log('📝 Données du nouveau profil:', newProfileData);
+          
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
-            .insert({
-              id: userId,
-              email: session?.user?.email || '',
-              full_name: session?.user?.user_metadata?.full_name || '',
-              role: session?.user?.user_metadata?.role || 'admin',  // Forcer admin pour debug
-              account_status: 'approved'
-            })
+            .insert(newProfileData)
             .select()
             .single();
             
+          console.log('📊 Résultat création profil:', { newProfile, createError });
+            
           if (createError) {
             console.error('❌ Erreur création profil:', createError);
+            console.error('❌ Détails création:', JSON.stringify(createError, null, 2));
             return null;
           }
           
-          console.log('✅ Profil créé:', newProfile);
+          console.log('✅ Profil créé avec succès:', newProfile);
           return newProfile;
         }
         
@@ -87,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state change:', event, session?.user?.email);
+        console.log('📝 Session reçue:', session ? 'présente' : 'absente');
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -99,8 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           try {
             const profile = await fetchUserProfile(session.user.id);
+            console.log('📋 Profil final reçu:', profile);
             setUserProfile(profile);
-            console.log('📋 Profil défini:', profile);
           } catch (error) {
             console.error('❌ Erreur lors de la récupération du profil:', error);
             setUserProfile(null);
@@ -117,6 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('🔍 Session existante trouvée:', session?.user?.email);
+      console.log('📝 Session existante:', session ? 'présente' : 'absente');
       
       setSession(session);
       setUser(session?.user ?? null);
@@ -126,8 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('🆔 User ID existant:', session.user.id);
         try {
           const profile = await fetchUserProfile(session.user.id);
-          setUserProfile(profile);
           console.log('📋 Profil défini pour session existante:', profile);
+          setUserProfile(profile);
         } catch (error) {
           console.error('❌ Erreur lors de la récupération du profil pour session existante:', error);
           setUserProfile(null);
