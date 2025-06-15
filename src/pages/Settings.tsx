@@ -32,7 +32,7 @@ export default function Settings() {
       setFullName(userProfile.full_name || '');
       setEmail(userProfile.email || '');
       setRole(userProfile.role || 'technician');
-      setAgency(userProfile.agency || '');
+      setAgency(userProfile.agency || 'non-assigne');
     } else if (user) {
       setEmail(user.email || '');
       setFullName(user.user_metadata?.full_name || '');
@@ -72,11 +72,13 @@ export default function Settings() {
     
     setLoading(true);
     try {
+      const agencyValue = agency === 'non-assigne' ? null : agency;
+      
       const { error } = await supabase
         .from('profiles')
         .update({
           full_name: fullName,
-          agency: agency
+          agency: agencyValue
         })
         .eq('id', user.id);
 
@@ -203,7 +205,7 @@ export default function Settings() {
                     <SelectValue placeholder="Sélectionner une agence" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Non assigné</SelectItem>
+                    <SelectItem value="non-assigne">Non assigné</SelectItem>
                     <SelectItem value="Agence Douala Centre">Agence Douala Centre</SelectItem>
                     <SelectItem value="Agence Douala Nord">Agence Douala Nord</SelectItem>
                     <SelectItem value="Agence Yaoundé Centre">Agence Yaoundé Centre</SelectItem>
