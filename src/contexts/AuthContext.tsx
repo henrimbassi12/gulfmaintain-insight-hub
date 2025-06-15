@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('🔍 Recherche du profil pour userId:', userId);
-      console.log('🌐 URL Supabase:', supabase.supabaseUrl);
       console.log('🔗 Test de connexion à Supabase...');
       
       // Test de connectivité basique
@@ -38,8 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (testError) {
         console.error('❌ Erreur de test de connexion:', testError);
-        console.error('❌ Code d\'erreur:', testError.code);
-        console.error('❌ Message:', testError.message);
         return null;
       }
       
@@ -86,15 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return data;
     } catch (error) {
       console.error('❌ Erreur catch:', error);
-      console.error('❌ Type d\'erreur:', typeof error);
-      console.error('❌ Stack:', error instanceof Error ? error.stack : 'Pas de stack');
       return null;
     }
   };
 
   useEffect(() => {
     console.log('🚀 Initialisation AuthProvider');
-    console.log('🌐 Supabase URL:', supabase.supabaseUrl);
     console.log('🌍 Window location:', window.location.href);
     
     // Set up auth state listener FIRST
