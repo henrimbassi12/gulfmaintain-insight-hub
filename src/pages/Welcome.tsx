@@ -7,11 +7,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 const Welcome = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, signInWithOAuth } = useAuth();
+  const { signIn, signUp, signInWithOAuth, user, loading } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Form states
@@ -30,44 +30,69 @@ const Welcome = () => {
     }
   }, [searchParams]);
 
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    console.log('🔍 Welcome - État auth:', { user: user?.email, loading });
+    
+    if (!loading && user) {
+      console.log('✅ Utilisateur connecté, redirection vers dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Vérification de la session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render the form if user is authenticated (prevents flash)
+  if (user) {
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setAuthLoading(true);
 
     if (mode === 'signup') {
       if (password !== confirmPassword) {
         setError('Les mots de passe ne correspondent pas');
-        setLoading(false);
+        setAuthLoading(false);
         return;
       }
 
       if (!acceptTerms) {
         setError('Vous devez accepter les conditions d\'utilisation');
-        setLoading(false);
+        setAuthLoading(false);
         return;
       }
 
       const { error: signUpError } = await signUp(email, password, fullName, role);
       if (signUpError) {
         setError(signUpError.message);
-      } else {
-        navigate('/dashboard');
       }
+      // No manual navigation here - useEffect will handle it
     } else {
       const { error: signInError } = await signIn(email, password);
       if (signInError) {
         setError(signInError.message);
-      } else {
-        navigate('/dashboard');
       }
+      // No manual navigation here - useEffect will handle it
     }
 
-    setLoading(false);
+    setAuthLoading(false);
   };
 
   const handleSocialAuth = async (provider: 'google' | 'facebook' | 'linkedin_oidc') => {
-    setLoading(true);
+    setAuthLoading(true);
     setError('');
     
     const { error } = await signInWithOAuth(provider);
@@ -75,7 +100,7 @@ const Welcome = () => {
       setError(error.message);
     }
     
-    setLoading(false);
+    setAuthLoading(false);
   };
 
   return (
@@ -156,11 +181,10 @@ const Welcome = () => {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              {/* Google */}
               <button
                 type="button"
                 onClick={() => handleSocialAuth('google')}
-                disabled={loading}
+                disabled={authLoading}
                 className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -171,11 +195,10 @@ const Welcome = () => {
                 </svg>
               </button>
 
-              {/* Facebook */}
               <button
                 type="button"
                 onClick={() => handleSocialAuth('facebook')}
-                disabled={loading}
+                disabled={authLoading}
                 className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
@@ -183,11 +206,10 @@ const Welcome = () => {
                 </svg>
               </button>
 
-              {/* LinkedIn */}
               <button
                 type="button"
                 onClick={() => handleSocialAuth('linkedin_oidc')}
-                disabled={loading}
+                disabled={authLoading}
                 className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <svg className="w-5 h-5" fill="#0A66C2" viewBox="0 0 24 24">
@@ -349,10 +371,10 @@ const Welcome = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={authLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
-            {loading 
+            {authLoading 
               ? (mode === 'signup' ? 'Création...' : 'Connexion...') 
               : (mode === 'signup' ? 'Créer un compte' : 'Se connecter')
             }
