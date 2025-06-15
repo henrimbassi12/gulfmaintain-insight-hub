@@ -38,6 +38,20 @@ export function MaintenanceCalendar() {
     }
   };
 
+  // Fonction pour obtenir la couleur d'une date selon les événements qu'elle contient
+  const getDateColor = (date: Date) => {
+    const dayEvents = getEventsByDate(date);
+    if (dayEvents.length === 0) return '';
+    
+    // Priorité haute = rouge, moyenne = orange, faible = vert
+    const hasHighPriority = dayEvents.some(event => event.priority === 'high');
+    const hasMediumPriority = dayEvents.some(event => event.priority === 'medium');
+    
+    if (hasHighPriority) return 'bg-red-100 border-red-300 text-red-800';
+    if (hasMediumPriority) return 'bg-yellow-100 border-yellow-300 text-yellow-800';
+    return 'bg-green-100 border-green-300 text-green-800';
+  };
+
   const handleDragStart = (event: any) => {
     setDraggedEvent(event);
   };
@@ -151,9 +165,51 @@ export function MaintenanceCalendar() {
                 head_cell: "flex-1 text-center p-2",
                 row: "flex w-full flex-1",
                 cell: "flex-1 h-full p-1 border border-gray-100",
-                day: "w-full h-full flex items-center justify-center text-sm hover:bg-blue-50",
+                day: "w-full h-full flex items-center justify-center text-sm hover:bg-blue-50 relative",
                 day_selected: "bg-blue-600 text-white hover:bg-blue-700",
                 day_today: "bg-blue-100 text-blue-900"
+              }}
+              modifiers={{
+                hasEvents: (date) => getEventsByDate(date).length > 0,
+                highPriority: (date) => getEventsByDate(date).some(event => event.priority === 'high'),
+                mediumPriority: (date) => getEventsByDate(date).some(event => event.priority === 'medium'),
+                lowPriority: (date) => getEventsByDate(date).some(event => event.priority === 'low' && !getEventsByDate(date).some(event => event.priority === 'high' || event.priority === 'medium'))
+              }}
+              modifiersClassNames={{
+                hasEvents: "font-semibold",
+                highPriority: "bg-red-100 border-red-300 text-red-800 hover:bg-red-200",
+                mediumPriority: "bg-yellow-100 border-yellow-300 text-yellow-800 hover:bg-yellow-200",
+                lowPriority: "bg-green-100 border-green-300 text-green-800 hover:bg-green-200"
+              }}
+              components={{
+                DayContent: ({ date, displayMonth }) => {
+                  const dayEvents = getEventsByDate(date);
+                  const isCurrentMonth = date.getMonth() === displayMonth.getMonth();
+                  
+                  return (
+                    <div className="relative w-full h-full flex flex-col items-center justify-center">
+                      <span className={`${!isCurrentMonth ? 'text-gray-400' : ''}`}>
+                        {date.getDate()}
+                      </span>
+                      {dayEvents.length > 0 && (
+                        <div className="absolute bottom-1 flex gap-0.5">
+                          {dayEvents.slice(0, 3).map((event, idx) => (
+                            <div
+                              key={idx}
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                event.priority === 'high' ? 'bg-red-500' :
+                                event.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                              }`}
+                            />
+                          ))}
+                          {dayEvents.length > 3 && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
               }}
             />
           </div>
@@ -171,18 +227,42 @@ export function MaintenanceCalendar() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <div className="w-6 h-6 border-l-4 border-l-red-500 bg-white border border-gray-200 rounded"></div>
-              <span className="font-medium">Priorité haute</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700 mb-2">Code couleur des barres (événements)</h4>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-6 h-6 border-l-4 border-l-red-500 bg-white border border-gray-200 rounded"></div>
+                <span className="font-medium">Priorité haute</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-6 h-6 border-l-4 border-l-yellow-500 bg-white border border-gray-200 rounded"></div>
+                <span className="font-medium">Priorité moyenne</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-6 h-6 border-l-4 border-l-green-500 bg-white border border-gray-200 rounded"></div>
+                <span className="font-medium">Priorité faible</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <div className="w-6 h-6 border-l-4 border-l-yellow-500 bg-white border border-gray-200 rounded"></div>
-              <span className="font-medium">Priorité moyenne</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <div className="w-6 h-6 border-l-4 border-l-green-500 bg-white border border-gray-200 rounded"></div>
-              <span className="font-medium">Priorité faible</span>
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700 mb-2">Code couleur du calendrier</h4>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-6 h-6 bg-red-100 border border-red-300 rounded flex items-center justify-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                </div>
+                <span className="font-medium">Interventions critiques</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-6 h-6 bg-yellow-100 border border-yellow-300 rounded flex items-center justify-center">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                </div>
+                <span className="font-medium">Interventions moyennes</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-6 h-6 bg-green-100 border border-green-300 rounded flex items-center justify-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+                <span className="font-medium">Interventions de routine</span>
+              </div>
             </div>
           </div>
         </CardContent>
