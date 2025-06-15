@@ -35,7 +35,7 @@ export interface ConversationWithParticipant extends Conversation {
   unreadCount: number;
 }
 
-// Noms des membres de l'équipe
+// Noms des membres de l'équipe - UNIQUEMENT ceux-ci
 const TEAM_MEMBERS = [
   { name: 'CÉDRIC', role: 'technician' },
   { name: 'MBAPBOU GRÉGOIRE', role: 'manager' },
@@ -65,6 +65,7 @@ export function useMessages() {
   const [isLoading, setIsLoading] = useState(true);
 
   const generateSampleConversations = (): ConversationWithParticipant[] => {
+    // Utiliser UNIQUEMENT les membres de l'équipe définis ci-dessus
     return TEAM_MEMBERS.map((member, index) => {
       const conversationId = `conv-${index + 1}`;
       const lastMessageTime = new Date(Date.now() - Math.random() * 86400000 * 7); // Dans les 7 derniers jours
@@ -137,7 +138,7 @@ export function useMessages() {
 
       if (convError) {
         console.error('Error fetching conversations:', convError);
-        // En cas d'erreur, utiliser les données simulées
+        // En cas d'erreur, utiliser les données simulées (UNIQUEMENT les membres de l'équipe)
         const sampleConversations = generateSampleConversations();
         setConversations(sampleConversations);
         setIsLoading(false);
@@ -147,7 +148,7 @@ export function useMessages() {
       console.log('Conversations fetched:', conversationsData);
 
       if (conversationsData.length === 0) {
-        // Aucune conversation en base, utiliser les données simulées
+        // Aucune conversation en base, utiliser les données simulées (UNIQUEMENT les membres de l'équipe)
         const sampleConversations = generateSampleConversations();
         setConversations(sampleConversations);
         setIsLoading(false);
@@ -196,7 +197,7 @@ export function useMessages() {
       setConversations(conversationsWithData);
     } catch (error) {
       console.error('Erreur lors de la récupération des conversations:', error);
-      // En cas d'erreur, utiliser les données simulées
+      // En cas d'erreur, utiliser UNIQUEMENT les données simulées des membres de l'équipe
       const sampleConversations = generateSampleConversations();
       setConversations(sampleConversations);
       toast.error('Utilisation des données de démonstration');
