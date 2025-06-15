@@ -5,18 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
-// Fix for default markers in Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
+// Remove react-leaflet import temporarily to fix the context error
+// We'll implement a simple placeholder map instead
 interface TechnicianLocation {
   id: string;
   name: string;
@@ -146,23 +137,6 @@ export function GeolocationSystem() {
   useEffect(() => {
     getCurrentLocation();
   }, []);
-
-  // Custom icons for different marker types
-  const createCustomIcon = (color: string) => {
-    return L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-      iconSize: [15, 15],
-      iconAnchor: [7.5, 7.5]
-    });
-  };
-
-  const technicianIcon = createCustomIcon('#3b82f6'); // Blue
-  const priorityIcons = {
-    high: createCustomIcon('#ef4444'),    // Red
-    medium: createCustomIcon('#eab308'),  // Yellow
-    low: createCustomIcon('#22c55e')      // Green
-  };
 
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     const R = 6371; // Earth's radius in km
@@ -350,77 +324,25 @@ export function GeolocationSystem() {
         </Card>
       </div>
 
-      {/* Interactive Map with Leaflet - Fixed structure */}
+      {/* Temporary Map Placeholder */}
       <Card>
         <CardHeader>
           <CardTitle>Carte interactive - Douala par secteur</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-96 rounded-lg overflow-hidden shadow-lg">
-            {userLocation && (
-              <MapContainer
-                center={[userLocation.lat, userLocation.lng]}
-                zoom={12}
-                style={{ height: '100%', width: '100%' }}
-                className="z-0"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                
-                {/* Technician Markers */}
-                {technicians.map((tech) => (
-                  <Marker
-                    key={`tech-${tech.id}`}
-                    position={[tech.lat, tech.lng]}
-                    icon={technicianIcon}
-                  >
-                    <Popup>
-                      <div className="p-2">
-                        <h3 className="font-semibold">{tech.name}</h3>
-                        <p className="text-sm text-gray-600">Status: {tech.status === 'available' ? 'Disponible' : tech.status === 'busy' ? 'Occupé' : 'Hors ligne'}</p>
-                        <p className="text-sm text-gray-600">Secteurs: {tech.sectors}</p>
-                        {tech.currentTask && <p className="text-sm">Tâche: {tech.currentTask}</p>}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-
-                {/* Maintenance Point Markers */}
-                {maintenancePoints.map((point) => (
-                  <Marker
-                    key={`maintenance-${point.id}`}
-                    position={[point.lat, point.lng]}
-                    icon={priorityIcons[point.priority]}
-                  >
-                    <Popup>
-                      <div className="p-2">
-                        <h3 className="font-semibold">{point.equipment}</h3>
-                        <p className="text-sm text-gray-600">{point.address}</p>
-                        <p className="text-sm">Priorité: {point.priority === 'high' ? 'Urgent' : point.priority === 'medium' ? 'Moyen' : 'Faible'}</p>
-                        <p className="text-sm">Durée: {point.estimatedDuration}</p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-
-                {/* User Location Marker */}
-                <Marker 
-                  key="user-location"
-                  position={[userLocation.lat, userLocation.lng]}
-                >
-                  <Popup>
-                    <div className="p-2">
-                      <h3 className="font-semibold">Votre position</h3>
-                      <p className="text-sm text-gray-600">
-                        {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-                      </p>
-                    </div>
-                  </Popup>
-                </Marker>
-              </MapContainer>
-            )}
+          <div className="h-96 rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
+            <div className="text-center">
+              <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 mb-2">Carte temporairement indisponible</p>
+              <p className="text-sm text-gray-500">
+                Position: {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'En cours...'}
+              </p>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-blue-600">🔵 {technicians.filter(t => t.status === 'available').length} Techniciens disponibles</p>
+                <p className="text-sm text-red-600">🔴 {maintenancePoints.filter(p => p.priority === 'high').length} Interventions urgentes</p>
+                <p className="text-sm text-yellow-600">🟡 {maintenancePoints.filter(p => p.priority === 'medium').length} Interventions moyennes</p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
