@@ -5,7 +5,7 @@ import { LucideIcon } from "lucide-react";
 
 interface ModernKPICardProps {
   title: string;
-  value: string | number;
+  value: React.ReactNode;
   subtitle?: string;
   icon: LucideIcon;
   trend?: {
@@ -32,7 +32,7 @@ export function ModernKPICard({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <p className="text-gray-600 text-sm font-medium mb-2">{title}</p>
-            <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+            <div className="text-3xl font-bold text-gray-900 mb-1">{value}</div>
             {subtitle && (
               <p className="text-gray-500 text-xs">{subtitle}</p>
             )}

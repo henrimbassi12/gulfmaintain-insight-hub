@@ -189,7 +189,7 @@ export function useReports() {
   }, [fetchReports]);
 
   const refetch = useCallback(() => {
-    fetchReports();
+    return fetchReports();
   }, [fetchReports]);
 
   return {
