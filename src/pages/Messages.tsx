@@ -65,6 +65,32 @@ export default function Messages() {
     );
   };
 
+  const handleDeleteConversation = (conversationId: string) => {
+    // Fonction simulée pour la suppression - en mode démo
+    console.log('Suppression de la conversation:', conversationId);
+    
+    // Déselectionner la conversation si elle était sélectionnée
+    if (selectedConversationId === conversationId) {
+      setSelectedConversationId(null);
+    }
+    
+    // Actualiser la liste des conversations
+    refetch();
+  };
+
+  const handleArchiveConversation = (conversationId: string) => {
+    // Fonction simulée pour l'archivage - en mode démo
+    console.log('Archivage de la conversation:', conversationId);
+    
+    // Déselectionner la conversation si elle était sélectionnée
+    if (selectedConversationId === conversationId) {
+      setSelectedConversationId(null);
+    }
+    
+    // Actualiser la liste des conversations
+    refetch();
+  };
+
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   return (
@@ -151,6 +177,8 @@ export default function Messages() {
                   newMessage={newMessage}
                   onNewMessageChange={setNewMessage}
                   onSendMessage={handleSendMessage}
+                  onDeleteConversation={handleDeleteConversation}
+                  onArchiveConversation={handleArchiveConversation}
                 />
               ) : (
                 <EmptyChat />
