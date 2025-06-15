@@ -23,7 +23,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
       name: "CÉDRIC",
       specialization: "Électricité",
       status: "available",
-      location: "Douala",
+      location: "JAPOMA, VILLAGE, NGODI BAKOKO",
       phone: "+237 6 12 34 56 78",
       rating: 4.8,
       currentTasks: 0,
@@ -35,7 +35,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
       name: "MBAPBOU GRÉGOIRE",
       specialization: "Climatisation",
       status: "available",
-      location: "Yaoundé",
+      location: "AKWA, MBOPPI",
       phone: "+237 6 87 65 43 21",
       rating: 4.9,
       currentTasks: 1,
@@ -47,7 +47,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
       name: "VOUKENG",
       specialization: "Mécanique",
       status: "busy",
-      location: "Bafoussam",
+      location: "BONABERI",
       phone: "+237 6 11 22 33 44",
       rating: 4.6,
       currentTasks: 3,
@@ -59,7 +59,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
       name: "TCHINDA CONSTANT",
       specialization: "Électronique",
       status: "available",
-      location: "Douala",
+      location: "ANGE RAPHAEL",
       phone: "+237 6 55 66 77 88",
       rating: 4.7,
       currentTasks: 0,
@@ -71,7 +71,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
       name: "NDJOKO IV",
       specialization: "Plomberie",
       status: "unavailable",
-      location: "Garoua",
+      location: "DEÏDO, MAKEPE",
       phone: "+237 6 99 88 77 66",
       rating: 4.5,
       currentTasks: 0,
@@ -83,7 +83,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
       name: "NDOUMBE ETIA",
       specialization: "Réfrigération",
       status: "available",
-      location: "Bamenda",
+      location: "AKWA, BALI",
       phone: "+237 6 44 33 22 11",
       rating: 4.8,
       currentTasks: 1,
@@ -141,7 +141,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
           {/* Barre de recherche */}
           <div>
             <Input
-              placeholder="Rechercher par nom, spécialisation ou localisation..."
+              placeholder="Rechercher par nom, spécialisation ou secteur..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -199,7 +199,7 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
                   
                   {technician.status === 'available' && (
                     <div className="bg-green-50 p-2 rounded text-xs text-green-700">
-                      ✅ Recommandé - Technicien libre et proche
+                      ✅ Recommandé - Technicien libre et secteur adapté
                     </div>
                   )}
                   

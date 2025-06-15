@@ -16,6 +16,7 @@ interface TechnicianLocation {
   lng: number;
   status: 'available' | 'busy' | 'offline';
   currentTask?: string;
+  sectors: string;
 }
 
 interface MaintenanceLocation {
@@ -38,19 +39,19 @@ export function GeolocationSystem() {
   const map = useRef<mapboxgl.Map | null>(null);
   
   const [technicians] = useState<TechnicianLocation[]>([
-    { id: '1', name: 'CÉDRIC', lat: 4.0511, lng: 9.7679, status: 'available' },
-    { id: '2', name: 'MBAPBOU GRÉGOIRE', lat: 4.0383, lng: 9.7792, status: 'busy', currentTask: 'FR-2024-012' },
-    { id: '3', name: 'VOUKENG', lat: 4.0469, lng: 9.7585, status: 'available' },
-    { id: '4', name: 'TCHINDA CONSTANT', lat: 4.0600, lng: 9.7700, status: 'available' },
-    { id: '5', name: 'NDJOKO IV', lat: 4.0300, lng: 9.7500, status: 'offline' },
-    { id: '6', name: 'NDOUMBE ETIA', lat: 4.0450, lng: 9.7620, status: 'available' }
+    { id: '1', name: 'CÉDRIC', lat: 4.0511, lng: 9.7679, status: 'available', sectors: 'JAPOMA, VILLAGE, NGODI BAKOKO' },
+    { id: '2', name: 'MBAPBOU GRÉGOIRE', lat: 4.0383, lng: 9.7792, status: 'busy', currentTask: 'FR-2024-012', sectors: 'AKWA, MBOPPI' },
+    { id: '3', name: 'VOUKENG', lat: 4.0469, lng: 9.7585, status: 'available', sectors: 'BONABERI' },
+    { id: '4', name: 'TCHINDA CONSTANT', lat: 4.0600, lng: 9.7700, status: 'available', sectors: 'ANGE RAPHAEL' },
+    { id: '5', name: 'NDJOKO IV', lat: 4.0300, lng: 9.7500, status: 'offline', sectors: 'DEÏDO, MAKEPE' },
+    { id: '6', name: 'NDOUMBE ETIA', lat: 4.0450, lng: 9.7620, status: 'available', sectors: 'AKWA, BALI' }
   ]);
   
   const [maintenancePoints] = useState<MaintenanceLocation[]>([
     {
       id: '1',
       equipment: 'FR-2024-089',
-      address: 'Agence Douala Centre',
+      address: 'Agence AKWA Centre',
       lat: 4.0511,
       lng: 9.7679,
       priority: 'medium',
@@ -59,7 +60,7 @@ export function GeolocationSystem() {
     {
       id: '2',
       equipment: 'FR-2024-012',
-      address: 'Agence Douala Port',
+      address: 'Agence BONABERI Port',
       lat: 4.0383,
       lng: 9.7792,
       priority: 'high',
@@ -171,6 +172,7 @@ export function GeolocationSystem() {
             <div class="p-2">
               <h3 class="font-semibold">${tech.name}</h3>
               <p class="text-sm text-gray-600">Status: ${tech.status}</p>
+              <p class="text-sm text-gray-600">Secteurs: ${tech.sectors}</p>
               ${tech.currentTask ? `<p class="text-sm">Tâche: ${tech.currentTask}</p>` : ''}
             </div>
           `))
@@ -264,7 +266,7 @@ export function GeolocationSystem() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <MapPin className="w-6 h-6 text-blue-600" />
-          Géolocalisation
+          Géolocalisation par secteur
         </h2>
         <div className="flex gap-2">
           <Button onClick={optimizeRoute} className="flex items-center gap-2">
@@ -336,7 +338,7 @@ export function GeolocationSystem() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Navigation className="w-5 h-5" />
-              Techniciens disponibles
+              Techniciens par secteur
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -348,6 +350,9 @@ export function GeolocationSystem() {
                     <div>
                       <p className="font-medium">{tech.name}</p>
                       <p className="text-sm text-gray-600">
+                        {tech.sectors}
+                      </p>
+                      <p className="text-xs text-gray-500">
                         {userLocation && calculateDistance(
                           userLocation.lat, userLocation.lng,
                           tech.lat, tech.lng
@@ -408,10 +413,10 @@ export function GeolocationSystem() {
                         .filter(t => t.status === 'available')
                         .map(tech => (
                           <option key={tech.id} value={tech.id}>
-                            {tech.name} ({userLocation && calculateDistance(
+                            {tech.name} ({tech.sectors}) - {userLocation && calculateDistance(
                               userLocation.lat, userLocation.lng,
                               tech.lat, tech.lng
-                            )} km)
+                            )} km
                           </option>
                         ))
                       }
@@ -427,7 +432,7 @@ export function GeolocationSystem() {
       {/* Interactive Map */}
       <Card>
         <CardHeader>
-          <CardTitle>Carte interactive - Douala</CardTitle>
+          <CardTitle>Carte interactive - Douala par secteur</CardTitle>
         </CardHeader>
         <CardContent>
           {mapboxToken ? (
@@ -436,7 +441,7 @@ export function GeolocationSystem() {
             <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
               <div className="text-center text-gray-500">
                 <MapPin className="w-12 h-12 mx-auto mb-2" />
-                <p>Carte interactive de Douala</p>
+                <p>Carte interactive de Douala par secteur</p>
                 <p className="text-sm">Configurez votre token Mapbox pour afficher la carte</p>
               </div>
             </div>

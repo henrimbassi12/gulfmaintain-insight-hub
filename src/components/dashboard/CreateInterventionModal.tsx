@@ -110,14 +110,24 @@ export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionM
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="location">Localisation</Label>
-              <Input
-                id="location"
-                placeholder="Douala - Zone Industrielle"
-                value={formData.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                required
-              />
+              <Label htmlFor="location">Secteur / Localisation</Label>
+              <Select value={formData.location} onValueChange={(value) => setFormData(prev => ({ ...prev, location: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez le secteur" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="akwa">AKWA</SelectItem>
+                  <SelectItem value="bali">BALI</SelectItem>
+                  <SelectItem value="deido">DEÏDO</SelectItem>
+                  <SelectItem value="makepe">MAKEPE</SelectItem>
+                  <SelectItem value="ange-raphael">ANGE RAPHAEL</SelectItem>
+                  <SelectItem value="bonaberi">BONABERI</SelectItem>
+                  <SelectItem value="mboppi">MBOPPI</SelectItem>
+                  <SelectItem value="japoma">JAPOMA</SelectItem>
+                  <SelectItem value="village">VILLAGE</SelectItem>
+                  <SelectItem value="ngodi-bakoko">NGODI BAKOKO</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -152,12 +162,12 @@ export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionM
                   <SelectValue placeholder="Sélectionnez un technicien" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cedric">CÉDRIC (Disponible)</SelectItem>
-                  <SelectItem value="mbapbou-gregoire">MBAPBOU GRÉGOIRE (Disponible)</SelectItem>
-                  <SelectItem value="voukeng">VOUKENG (Occupé)</SelectItem>
-                  <SelectItem value="tchinda-constant">TCHINDA CONSTANT (Disponible)</SelectItem>
-                  <SelectItem value="ndjoko-iv">NDJOKO IV (Disponible)</SelectItem>
-                  <SelectItem value="ndoumbe-etia">NDOUMBE ETIA (Disponible)</SelectItem>
+                  <SelectItem value="cedric">CÉDRIC (JAPOMA, VILLAGE, NGODI BAKOKO)</SelectItem>
+                  <SelectItem value="mbapbou-gregoire">MBAPBOU GRÉGOIRE (AKWA, MBOPPI)</SelectItem>
+                  <SelectItem value="voukeng">VOUKENG (BONABERI)</SelectItem>
+                  <SelectItem value="tchinda-constant">TCHINDA CONSTANT (ANGE RAPHAEL)</SelectItem>
+                  <SelectItem value="ndjoko-iv">NDJOKO IV (DEÏDO, MAKEPE)</SelectItem>
+                  <SelectItem value="ndoumbe-etia">NDOUMBE ETIA (AKWA, BALI)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

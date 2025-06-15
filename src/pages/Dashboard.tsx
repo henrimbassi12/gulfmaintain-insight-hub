@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ModernKPICard } from '@/components/dashboard/ModernKPICard';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
@@ -122,7 +123,8 @@ export default function Dashboard() {
       technician: 'CÉDRIC',
       type: 'Maintenance préventive',
       status: 'completed',
-      duration: '2h 30min'
+      duration: '2h 30min',
+      sector: 'JAPOMA'
     },
     {
       id: 'INT-2024-157',
@@ -130,7 +132,8 @@ export default function Dashboard() {
       technician: 'MBAPBOU GRÉGOIRE',
       type: 'Réparation urgente',
       status: 'in-progress',
-      duration: '1h 15min'
+      duration: '1h 15min',
+      sector: 'AKWA'
     },
     {
       id: 'INT-2024-158',
@@ -138,7 +141,8 @@ export default function Dashboard() {
       technician: 'VOUKENG',
       type: 'Inspection',
       status: 'planned',
-      duration: '45min'
+      duration: '45min',
+      sector: 'BONABERI'
     }
   ];
 
@@ -162,7 +166,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
-                  <p className="text-sm text-gray-500">Vue d'ensemble de votre activité</p>
+                  <p className="text-sm text-gray-500">Vue d'ensemble de votre activité par secteur</p>
                 </div>
                 <ConnectionStatus />
               </div>
@@ -290,7 +294,7 @@ export default function Dashboard() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Users className="w-5 h-5 text-white" />
               </div>
-              Interventions récentes
+              Interventions récentes par secteur
               <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
                 {recentInterventions.length} interventions
               </Badge>
@@ -304,6 +308,7 @@ export default function Dashboard() {
                     <th className="py-4 px-6 font-semibold">ID Intervention</th>
                     <th className="py-4 px-6 font-semibold hidden sm:table-cell">Équipement</th>
                     <th className="py-4 px-6 font-semibold">Technicien</th>
+                    <th className="py-4 px-6 font-semibold hidden md:table-cell">Secteur</th>
                     <th className="py-4 px-6 font-semibold hidden md:table-cell">Type</th>
                     <th className="py-4 px-6 font-semibold">Statut</th>
                     <th className="py-4 px-6 font-semibold hidden lg:table-cell">Durée</th>
@@ -322,6 +327,11 @@ export default function Dashboard() {
                         <span className="font-medium text-sm text-gray-900">{intervention.equipment}</span>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-700">{intervention.technician}</td>
+                      <td className="py-4 px-6 text-xs md:text-sm text-gray-600 hidden md:table-cell">
+                        <Badge variant="outline" className="text-xs">
+                          {intervention.sector}
+                        </Badge>
+                      </td>
                       <td className="py-4 px-6 text-xs md:text-sm text-gray-600 hidden md:table-cell">{intervention.type}</td>
                       <td className="py-4 px-6">
                         <Badge variant="secondary" className={`text-xs font-medium ${
