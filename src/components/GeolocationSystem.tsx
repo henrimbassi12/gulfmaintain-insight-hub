@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Route, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,9 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InteractiveMap } from './InteractiveMap';
 
-// Remove react-leaflet import temporarily to fix the context error
-// We'll implement a simple placeholder map instead
 interface TechnicianLocation {
   id: string;
   name: string;
@@ -324,28 +324,12 @@ export function GeolocationSystem() {
         </Card>
       </div>
 
-      {/* Temporary Map Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Carte interactive - Douala par secteur</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96 rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-2">Carte temporairement indisponible</p>
-              <p className="text-sm text-gray-500">
-                Position: {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'En cours...'}
-              </p>
-              <div className="mt-4 space-y-2">
-                <p className="text-sm text-blue-600">🔵 {technicians.filter(t => t.status === 'available').length} Techniciens disponibles</p>
-                <p className="text-sm text-red-600">🔴 {maintenancePoints.filter(p => p.priority === 'high').length} Interventions urgentes</p>
-                <p className="text-sm text-yellow-600">🟡 {maintenancePoints.filter(p => p.priority === 'medium').length} Interventions moyennes</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Carte interactive */}
+      <InteractiveMap 
+        userLocation={userLocation}
+        technicians={technicians}
+        maintenancePoints={maintenancePoints}
+      />
     </div>
   );
 }
