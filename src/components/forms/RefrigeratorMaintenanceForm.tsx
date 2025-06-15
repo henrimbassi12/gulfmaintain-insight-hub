@@ -39,7 +39,7 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
     typeFrigo: '',
     afNf: '',
     branding: '',
-    dn: '',
+    sn: '',
     tagNumber: '',
 
     // Checks
@@ -196,7 +196,7 @@ export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: Refrige
               <FormField label="Branding" name="branding" value={formData.branding} onChange={(value) => handleInputChange('branding', value)} />
             </div>
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="DN" name="dn" value={formData.dn} onChange={(value) => handleInputChange('dn', value)} />
+                <FormField label="SN (Serial Number)" name="sn" value={formData.sn} onChange={(value) => handleInputChange('sn', value)} />
                 <FormField label="Tag Number" name="tagNumber" value={formData.tagNumber} onChange={(value) => handleInputChange('tagNumber', value)} error={errors.tagNumber} required/>
             </div>
           </div>
