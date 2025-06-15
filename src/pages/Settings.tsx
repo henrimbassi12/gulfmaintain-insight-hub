@@ -29,6 +29,12 @@ export default function Settings() {
   // État pour les notifications
   const [emailNotifications, setEmailNotifications] = useState(true);
 
+  // Nouveaux états pour le changement de mot de passe
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loadingPassword, setLoadingPassword] = useState(false);
+
   // Vérifier si l'utilisateur est admin
   const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
 
@@ -116,6 +122,58 @@ export default function Settings() {
       toast.error('Erreur lors de la sauvegarde');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!user || !user.email) return;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Veuillez remplir tous les champs de mot de passe.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Le nouveau mot de passe et la confirmation ne correspondent pas.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Le nouveau mot de passe doit contenir au moins 6 caractères.");
+      return;
+    }
+
+    setLoadingPassword(true);
+    try {
+      // 1. Vérifier le mot de passe actuel en tentant une connexion.
+      // C'est une mesure de sécurité pour s'assurer que l'utilisateur est bien celui qu'il prétend être.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast.error("Le mot de passe actuel est incorrect.");
+        return;
+      }
+      
+      // 2. Si le mot de passe actuel est correct, mettre à jour avec le nouveau.
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        console.error('Erreur lors du changement de mot de passe:', updateError);
+        toast.error("Erreur lors du changement de mot de passe : " + updateError.message);
+      } else {
+        toast.success("Mot de passe modifié avec succès !");
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (error: any) {
+      console.error('Erreur:', error);
+      toast.error("Une erreur inattendue s'est produite : " + error.message);
+    } finally {
+      setLoadingPassword(false);
     }
   };
 
@@ -305,20 +363,40 @@ export default function Settings() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="current-password">Mot de passe actuel</Label>
-              <Input id="current-password" type="password" className="mt-1" />
+              <Input 
+                id="current-password" 
+                type="password" 
+                className="mt-1" 
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                disabled={loadingPassword}
+              />
             </div>
             <div>
               <Label htmlFor="new-password">Nouveau mot de passe</Label>
-              <Input id="new-password" type="password" className="mt-1" />
+              <Input 
+                id="new-password" 
+                type="password" 
+                className="mt-1" 
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={loadingPassword}
+              />
             </div>
             <div>
               <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-              <Input id="confirm-password" type="password" className="mt-1" />
+              <Input 
+                id="confirm-password" 
+                type="password" 
+                className="mt-1" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loadingPassword}
+              />
             </div>
-            <ModernButton disabled>
-              Changer le mot de passe
+            <ModernButton onClick={handleChangePassword} disabled={loadingPassword}>
+              {loadingPassword ? 'Changement en cours...' : 'Changer le mot de passe'}
             </ModernButton>
-            <p className="text-xs text-gray-500">Fonctionnalité à venir</p>
           </div>
         </CardContent>
       </Card>
