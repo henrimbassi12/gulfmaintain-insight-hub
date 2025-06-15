@@ -21,8 +21,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (loading) {
     console.log('⏳ Loading...');
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 mb-2">Chargement...</p>
+          <p className="text-xs text-gray-400">Vérification des permissions</p>
+        </div>
       </div>
     );
   }

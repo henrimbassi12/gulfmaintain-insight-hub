@@ -23,23 +23,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fonction pour récupérer le profil utilisateur
-  const fetchUserProfile = async (userId: string) => {
+  // Fonction pour récupérer le profil utilisateur avec timeout
+  const fetchUserProfile = async (userId: string): Promise<any> => {
     try {
       console.log('🔍 fetchUserProfile - DÉBUT pour userId:', userId);
       
-      const { data, error } = await supabase
+      // Timeout de 5 secondes pour éviter les blocages
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout')), 5000);
+      });
+
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
+
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
       
       if (error) {
-        console.error('❌ fetchUserProfile - Erreur lors de la récupération du profil:', error);
+        console.error('❌ fetchUserProfile - Erreur:', error);
         
         // Si le profil n'existe pas, on va le créer
         if (error.code === 'PGRST116' || error.message?.includes('not found')) {
-          console.log('⚠️ fetchUserProfile - Profil inexistant, tentative de création...');
+          console.log('⚠️ fetchUserProfile - Profil inexistant, création automatique...');
           
           const newProfileData = {
             id: userId,
@@ -51,19 +58,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           console.log('📝 fetchUserProfile - Données du nouveau profil:', newProfileData);
           
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert(newProfileData)
-            .select()
-            .single();
+          try {
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert(newProfileData)
+              .select()
+              .single();
+              
+            if (createError) {
+              console.error('❌ fetchUserProfile - Erreur création profil:', createError);
+              return null;
+            }
             
-          if (createError) {
-            console.error('❌ fetchUserProfile - Erreur création profil:', createError);
+            console.log('✅ fetchUserProfile - Profil créé avec succès:', newProfile);
+            return newProfile;
+          } catch (createErr) {
+            console.error('❌ fetchUserProfile - Erreur catch création:', createErr);
             return null;
           }
-          
-          console.log('✅ fetchUserProfile - Profil créé avec succès:', newProfile);
-          return newProfile;
         }
         
         return null;
@@ -82,9 +94,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('🚀 AuthProvider - Initialisation');
     
+    let isMounted = true;
+    
+    // Timeout général de sécurité pour éviter les blocages
+    const globalTimeout = setTimeout(() => {
+      if (isMounted) {
+        console.log('⏰ AuthProvider - Timeout global, forçage de setLoading(false)');
+        setLoading(false);
+      }
+    }, 8000); // 8 secondes max
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+        
         console.log('🔄 AuthProvider - Auth state change:', event, session?.user?.email);
         
         setSession(session);
@@ -95,25 +119,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           try {
             const profile = await fetchUserProfile(session.user.id);
-            console.log('📄 AuthProvider - Profil récupéré:', profile);
-            setUserProfile(profile);
+            if (isMounted) {
+              console.log('📄 AuthProvider - Profil récupéré:', profile);
+              setUserProfile(profile);
+            }
           } catch (error) {
             console.error('❌ AuthProvider - Erreur dans fetchUserProfile:', error);
-            setUserProfile(null);
+            if (isMounted) {
+              setUserProfile(null);
+            }
           }
         } else {
           console.log('❌ AuthProvider - Aucun utilisateur, profil effacé');
-          setUserProfile(null);
+          if (isMounted) {
+            setUserProfile(null);
+          }
         }
         
-        console.log('✅ AuthProvider - Fin du traitement auth state change, setLoading(false)');
-        setLoading(false);
+        if (isMounted) {
+          console.log('✅ AuthProvider - Fin du traitement auth state change, setLoading(false)');
+          setLoading(false);
+          clearTimeout(globalTimeout);
+        }
       }
     );
 
     // THEN check for existing session
     console.log('🔍 AuthProvider - Vérification session existante...');
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+      
       console.log('🔍 AuthProvider - Session existante trouvée:', session?.user?.email);
       
       setSession(session);
@@ -124,22 +159,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         try {
           const profile = await fetchUserProfile(session.user.id);
-          console.log('📄 AuthProvider - Profil session existante récupéré:', profile);
-          setUserProfile(profile);
+          if (isMounted) {
+            console.log('📄 AuthProvider - Profil session existante récupéré:', profile);
+            setUserProfile(profile);
+          }
         } catch (error) {
           console.error('❌ AuthProvider - Erreur dans fetchUserProfile pour session existante:', error);
-          setUserProfile(null);
+          if (isMounted) {
+            setUserProfile(null);
+          }
         }
       }
       
-      console.log('✅ AuthProvider - Fin traitement session existante, setLoading(false)');
-      setLoading(false);
+      if (isMounted) {
+        console.log('✅ AuthProvider - Fin traitement session existante, setLoading(false)');
+        setLoading(false);
+        clearTimeout(globalTimeout);
+      }
     }).catch((error) => {
       console.error('❌ AuthProvider - Erreur lors de getSession:', error);
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+        clearTimeout(globalTimeout);
+      }
     });
 
     return () => {
+      isMounted = false;
+      clearTimeout(globalTimeout);
       console.log('🧹 AuthProvider - Cleanup subscription');
       subscription.unsubscribe();
     };
