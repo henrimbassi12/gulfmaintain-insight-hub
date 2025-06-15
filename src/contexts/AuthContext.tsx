@@ -53,9 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('❌ Erreur lors de la récupération du profil:', error);
-        console.error('❌ Code d\'erreur:', error.code);
-        console.error('❌ Message:', error.message);
-        console.error('❌ Détails:', error.details);
         
         // Si le profil n'existe pas, on va le créer
         if (error.code === 'PGRST116') {
