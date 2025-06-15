@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,21 +6,21 @@ import { Users, TrendingUp, Clock, Award } from "lucide-react";
 const TechnicianPerformance: React.FC = () => {
   const technicians = [
     {
-      name: "Ahmed Benali",
+      name: "CÉDRIC",
       interventions: 23,
       efficiency: 94,
       avgTime: "2h 15min",
       status: "available"
     },
     {
-      name: "Fatima Zahra",
+      name: "MBAPBOU GRÉGOIRE",
       interventions: 18,
       efficiency: 89,
       avgTime: "2h 45min",
       status: "busy"
     },
     {
-      name: "Mohamed Alami",
+      name: "VOUKENG",
       interventions: 31,
       efficiency: 96,
       avgTime: "1h 55min",

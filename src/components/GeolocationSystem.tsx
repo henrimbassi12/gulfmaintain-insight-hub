@@ -38,9 +38,12 @@ export function GeolocationSystem() {
   const map = useRef<mapboxgl.Map | null>(null);
   
   const [technicians] = useState<TechnicianLocation[]>([
-    { id: '1', name: 'Ahmed Benali', lat: 4.0511, lng: 9.7679, status: 'available' },
-    { id: '2', name: 'Fatima Zahra', lat: 4.0383, lng: 9.7792, status: 'busy', currentTask: 'FR-2024-012' },
-    { id: '3', name: 'Mohamed Alami', lat: 4.0469, lng: 9.7585, status: 'available' }
+    { id: '1', name: 'CÉDRIC', lat: 4.0511, lng: 9.7679, status: 'available' },
+    { id: '2', name: 'MBAPBOU GRÉGOIRE', lat: 4.0383, lng: 9.7792, status: 'busy', currentTask: 'FR-2024-012' },
+    { id: '3', name: 'VOUKENG', lat: 4.0469, lng: 9.7585, status: 'available' },
+    { id: '4', name: 'TCHINDA CONSTANT', lat: 4.0600, lng: 9.7700, status: 'available' },
+    { id: '5', name: 'NDJOKO IV', lat: 4.0300, lng: 9.7500, status: 'offline' },
+    { id: '6', name: 'NDOUMBE ETIA', lat: 4.0450, lng: 9.7620, status: 'available' }
   ]);
   
   const [maintenancePoints] = useState<MaintenanceLocation[]>([

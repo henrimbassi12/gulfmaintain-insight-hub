@@ -31,6 +31,19 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
     return "secondary";
   };
 
+  // Mapper les noms des techniciens
+  const mapTechnicianName = (name: string) => {
+    const nameMapping: Record<string, string> = {
+      'Ahmed Benali': 'CÉDRIC',
+      'Fatima Zahra': 'MBAPBOU GRÉGOIRE',
+      'Mohamed Alami': 'VOUKENG',
+      'Youssef Idrissi': 'TCHINDA CONSTANT',
+      'Sara Tazi': 'NDJOKO IV',
+      'Karim Bennani': 'NDOUMBE ETIA'
+    };
+    return nameMapping[name] || name;
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -50,7 +63,7 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3 mb-2">
-                      <h3 className="font-semibold text-base md:text-lg">{recommendation.technician}</h3>
+                      <h3 className="font-semibold text-base md:text-lg">{mapTechnicianName(recommendation.technician)}</h3>
                       <div className="flex flex-wrap gap-2">
                         <Badge variant={getMatchColor(recommendation.match_score)} className="text-xs">
                           Match: {recommendation.match_score}%

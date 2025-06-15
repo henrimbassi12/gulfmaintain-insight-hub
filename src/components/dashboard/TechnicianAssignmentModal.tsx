@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -21,11 +20,11 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
   const technicians = [
     {
       id: "tech-001",
-      name: "Ahmed Benali",
+      name: "CÉDRIC",
       specialization: "Électricité",
       status: "available",
-      location: "Casablanca",
-      phone: "+212 6 12 34 56 78",
+      location: "Douala",
+      phone: "+237 6 12 34 56 78",
       rating: 4.8,
       currentTasks: 0,
       experience: "5 ans",
@@ -33,11 +32,11 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
     },
     {
       id: "tech-002",
-      name: "Fatima Zahra",
+      name: "MBAPBOU GRÉGOIRE",
       specialization: "Climatisation",
       status: "available",
-      location: "Rabat",
-      phone: "+212 6 87 65 43 21",
+      location: "Yaoundé",
+      phone: "+237 6 87 65 43 21",
       rating: 4.9,
       currentTasks: 1,
       experience: "7 ans",
@@ -45,11 +44,11 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
     },
     {
       id: "tech-003",
-      name: "Mohamed Alami",
+      name: "VOUKENG",
       specialization: "Mécanique",
       status: "busy",
-      location: "Marrakech",
-      phone: "+212 6 11 22 33 44",
+      location: "Bafoussam",
+      phone: "+237 6 11 22 33 44",
       rating: 4.6,
       currentTasks: 3,
       experience: "3 ans",
@@ -57,11 +56,11 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
     },
     {
       id: "tech-004",
-      name: "Youssef Idrissi",
+      name: "TCHINDA CONSTANT",
       specialization: "Électronique",
       status: "available",
-      location: "Casablanca",
-      phone: "+212 6 55 66 77 88",
+      location: "Douala",
+      phone: "+237 6 55 66 77 88",
       rating: 4.7,
       currentTasks: 0,
       experience: "4 ans",
@@ -69,15 +68,27 @@ export function TechnicianAssignmentModal({ isOpen, onClose }: TechnicianAssignm
     },
     {
       id: "tech-005",
-      name: "Aicha Bennis",
+      name: "NDJOKO IV",
       specialization: "Plomberie",
       status: "unavailable",
-      location: "Fès",
-      phone: "+212 6 99 88 77 66",
+      location: "Garoua",
+      phone: "+237 6 99 88 77 66",
       rating: 4.5,
       currentTasks: 0,
       experience: "6 ans",
       lastIntervention: "Hier"
+    },
+    {
+      id: "tech-006",
+      name: "NDOUMBE ETIA",
+      specialization: "Réfrigération",
+      status: "available",
+      location: "Bamenda",
+      phone: "+237 6 44 33 22 11",
+      rating: 4.8,
+      currentTasks: 1,
+      experience: "8 ans",
+      lastIntervention: "Il y a 45min"
     }
   ];
 

@@ -119,7 +119,7 @@ export default function Dashboard() {
     {
       id: 'INT-2024-156',
       equipment: 'FR-2024-089',
-      technician: 'Ahmed Benali',
+      technician: 'CÉDRIC',
       type: 'Maintenance préventive',
       status: 'completed',
       duration: '2h 30min'
@@ -127,7 +127,7 @@ export default function Dashboard() {
     {
       id: 'INT-2024-157',
       equipment: 'FR-2024-012',
-      technician: 'Fatima Zahra',
+      technician: 'MBAPBOU GRÉGOIRE',
       type: 'Réparation urgente',
       status: 'in-progress',
       duration: '1h 15min'
@@ -135,7 +135,7 @@ export default function Dashboard() {
     {
       id: 'INT-2024-158',
       equipment: 'FR-2024-134',
-      technician: 'Mohamed Alami',
+      technician: 'VOUKENG',
       type: 'Inspection',
       status: 'planned',
       duration: '45min'

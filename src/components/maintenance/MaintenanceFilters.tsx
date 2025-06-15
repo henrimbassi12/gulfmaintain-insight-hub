@@ -108,12 +108,12 @@ const MaintenanceFilters: React.FC<MaintenanceFiltersProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value="ahmed">Ahmed Benali</SelectItem>
-                <SelectItem value="fatima">Fatima Zahra</SelectItem>
-                <SelectItem value="mohamed">Mohamed Alami</SelectItem>
-                <SelectItem value="youssef">Youssef Idrissi</SelectItem>
-                <SelectItem value="sara">Sara Tazi</SelectItem>
-                <SelectItem value="karim">Karim Bennani</SelectItem>
+                <SelectItem value="cedric">CÉDRIC</SelectItem>
+                <SelectItem value="mbapbou">MBAPBOU GRÉGOIRE</SelectItem>
+                <SelectItem value="voukeng">VOUKENG</SelectItem>
+                <SelectItem value="tchinda">TCHINDA CONSTANT</SelectItem>
+                <SelectItem value="ndjoko">NDJOKO IV</SelectItem>
+                <SelectItem value="ndoumbe">NDOUMBE ETIA</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -147,12 +147,12 @@ const MaintenanceFilters: React.FC<MaintenanceFiltersProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes</SelectItem>
-                <SelectItem value="casablanca-nord">Casablanca Nord</SelectItem>
-                <SelectItem value="rabat-centre">Rabat Centre</SelectItem>
-                <SelectItem value="marrakech-sud">Marrakech Sud</SelectItem>
-                <SelectItem value="tanger-port">Tanger Port</SelectItem>
-                <SelectItem value="fes-centre">Fès Centre</SelectItem>
-                <SelectItem value="agadir-sud">Agadir Sud</SelectItem>
+                <SelectItem value="douala-centre">Douala Centre</SelectItem>
+                <SelectItem value="yaounde-centre">Yaoundé Centre</SelectItem>
+                <SelectItem value="bafoussam-ouest">Bafoussam Ouest</SelectItem>
+                <SelectItem value="garoua-nord">Garoua Nord</SelectItem>
+                <SelectItem value="bamenda-nord-ouest">Bamenda Nord-Ouest</SelectItem>
+                <SelectItem value="maroua-extreme-nord">Maroua Extrême-Nord</SelectItem>
               </SelectContent>
             </Select>
           </div>

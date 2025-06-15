@@ -113,7 +113,7 @@ export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionM
               <Label htmlFor="location">Localisation</Label>
               <Input
                 id="location"
-                placeholder="Casablanca - Zone Industrielle"
+                placeholder="Douala - Zone Industrielle"
                 value={formData.location}
                 onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
                 required
@@ -152,10 +152,12 @@ export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionM
                   <SelectValue placeholder="Sélectionnez un technicien" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ahmed-benali">Ahmed Benali (Disponible)</SelectItem>
-                  <SelectItem value="fatima-zahra">Fatima Zahra (Disponible)</SelectItem>
-                  <SelectItem value="mohamed-alami">Mohamed Alami (Occupé)</SelectItem>
-                  <SelectItem value="youssef-idrissi">Youssef Idrissi (Disponible)</SelectItem>
+                  <SelectItem value="cedric">CÉDRIC (Disponible)</SelectItem>
+                  <SelectItem value="mbapbou-gregoire">MBAPBOU GRÉGOIRE (Disponible)</SelectItem>
+                  <SelectItem value="voukeng">VOUKENG (Occupé)</SelectItem>
+                  <SelectItem value="tchinda-constant">TCHINDA CONSTANT (Disponible)</SelectItem>
+                  <SelectItem value="ndjoko-iv">NDJOKO IV (Disponible)</SelectItem>
+                  <SelectItem value="ndoumbe-etia">NDOUMBE ETIA (Disponible)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
