@@ -4,25 +4,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sun, Cloud, CloudRain, Wind } from "lucide-react";
 
 export function ModernWeatherWidget() {
-  // Fonction pour obtenir les 4 prochains jours à partir d'aujourd'hui
-  const getNextDays = () => {
+  // Fonction pour obtenir aujourd'hui + les 3 prochains jours
+  const getTodayAndNextDays = () => {
     const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
     const today = new Date();
-    const nextDays = [];
+    const daysToShow = [];
     
-    for (let i = 1; i <= 4; i++) {
+    // Ajouter aujourd'hui
+    daysToShow.push(days[today.getDay()]);
+    
+    // Ajouter les 3 prochains jours
+    for (let i = 1; i <= 3; i++) {
       const nextDay = new Date(today);
       nextDay.setDate(today.getDate() + i);
-      nextDays.push(days[nextDay.getDay()]);
+      daysToShow.push(days[nextDay.getDay()]);
     }
     
-    return nextDays;
+    return daysToShow;
   };
 
-  const nextDays = getNextDays();
-  // Rotation des icônes pour correspondre aux jours réels
-  const icons = [Cloud, Sun, CloudRain, Wind];
-  const temps = ['21°', '24°', '19°', '23°'];
+  const daysToShow = getTodayAndNextDays();
+  // Icônes et températures correspondant à aujourd'hui + 3 prochains jours
+  const icons = [Sun, Cloud, CloudRain, Wind];
+  const temps = ['22°', '21°', '19°', '23°'];
 
   return (
     <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -43,10 +47,10 @@ export function ModernWeatherWidget() {
         </div>
         
         <div className="grid grid-cols-4 gap-3 text-xs">
-          {nextDays.map((day, index) => {
+          {daysToShow.map((day, index) => {
             const IconComponent = icons[index];
             return (
-              <div key={day} className="text-center p-2 bg-gray-50 rounded-lg">
+              <div key={day + index} className="text-center p-2 bg-gray-50 rounded-lg">
                 <IconComponent className={`h-4 w-4 mx-auto mb-1 ${
                   IconComponent === Sun ? 'text-yellow-500' :
                   IconComponent === Cloud ? 'text-gray-400' :
