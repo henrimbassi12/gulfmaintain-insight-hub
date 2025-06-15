@@ -14,8 +14,10 @@ import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
-import { useSupervision, FailurePrediction } from '@/hooks/useSupervision';
+import { useSupervision, FailurePrediction, TechnicianRecommendation } from '@/hooks/useSupervision';
 import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
+import { PredictionDetails } from '@/components/supervision/PredictionDetails';
+import { TechnicianProfileSheet } from '@/components/supervision/TechnicianProfileSheet';
 
 export default function Supervision() {
   const { predictions, recommendations, isLoading, error, refetch } = useSupervision();
@@ -30,6 +32,11 @@ export default function Supervision() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState({});
 
+  const [isPredictionDetailsOpen, setIsPredictionDetailsOpen] = useState(false);
+  const [selectedPrediction, setSelectedPrediction] = useState<FailurePrediction | null>(null);
+  const [isTechnicianProfileOpen, setIsTechnicianProfileOpen] = useState(false);
+  const [selectedTechnician, setSelectedTechnician] = useState<TechnicianRecommendation | null>(null);
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -43,7 +50,7 @@ export default function Supervision() {
       await refetch();
       toast.success('Données actualisées avec succès');
     } catch (error) {
-      toast.error('Erreur lors de l\'actualisation');
+      toast.error("Erreur lors de l'actualisation");
     } finally {
       setRefreshing(false);
     }
@@ -60,6 +67,16 @@ export default function Supervision() {
       description: `Action recommandée basée sur la prédiction IA : ${prediction.recommended_action}`
     });
     setIsModalOpen(true);
+  };
+  
+  const handleShowPredictionDetails = (prediction: FailurePrediction) => {
+    setSelectedPrediction(prediction);
+    setIsPredictionDetailsOpen(true);
+  };
+  
+  const handleShowTechnicianProfile = (technician: TechnicianRecommendation) => {
+    setSelectedTechnician(technician);
+    setIsTechnicianProfileOpen(true);
   };
 
   // Statistiques calculées à partir des données réelles
@@ -216,7 +233,7 @@ export default function Supervision() {
               <AlertTriangle className="w-5 h-5 text-orange-500" />
               Prédictions de Pannes
               <Badge variant="secondary" className="ml-2">
-                {totalPredictions} prédictions
+                {predictions.length} prédictions
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -231,6 +248,7 @@ export default function Supervision() {
                 predictions={predictions} 
                 filters={filters}
                 onProgramIntervention={handleProgramIntervention}
+                onShowDetails={handleShowPredictionDetails}
               />
             )}
           </CardContent>
@@ -271,7 +289,11 @@ export default function Supervision() {
                 <p className="mt-2 text-gray-500">Chargement des recommandations...</p>
               </div>
             ) : (
-              <TechnicianRecommendations recommendations={recommendations} filters={filters} />
+              <TechnicianRecommendations 
+                recommendations={recommendations} 
+                filters={filters}
+                onShowProfile={handleShowTechnicianProfile} 
+              />
             )}
           </CardContent>
         </Card>
@@ -286,6 +308,18 @@ export default function Supervision() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={modalInitialData}
+      />
+
+      <PredictionDetails 
+        isOpen={isPredictionDetailsOpen}
+        onClose={() => setIsPredictionDetailsOpen(false)}
+        prediction={selectedPrediction}
+      />
+      
+      <TechnicianProfileSheet
+        isOpen={isTechnicianProfileOpen}
+        onClose={() => setIsTechnicianProfileOpen(false)}
+        technician={selectedTechnician}
       />
     </AirbnbContainer>
   );

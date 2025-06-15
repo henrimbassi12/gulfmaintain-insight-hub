@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Star, Clock, Wrench, Award } from "lucide-react";
+import { User, MapPin, Star, Clock, Wrench, Award, Eye } from "lucide-react";
 import { TechnicianRecommendation } from '@/hooks/useSupervision';
 import { toast } from 'sonner';
 
@@ -15,11 +14,13 @@ interface TechnicianRecommendationsProps {
     equipmentType: string;
     timeframe: string;
   };
+  onShowProfile: (recommendation: TechnicianRecommendation) => void;
 }
 
 export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps> = ({ 
   recommendations, 
-  filters 
+  filters,
+  onShowProfile
 }) => {
   const filteredRecommendations = recommendations.filter(recommendation => {
     if (filters.region !== 'all' && recommendation.location.toLowerCase().replace(/ /g, '-') !== filters.region) return false;
@@ -135,13 +136,13 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
                     <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex-1 md:flex-none text-xs" onClick={() => toast.info('Fonctionnalité à venir: Assignation du technicien')}>
                       Assigner
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs" onClick={() => toast.info('Fonctionnalité à venir: Affichage du profil')}>
+                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs" onClick={() => onShowProfile(recommendation)}>
+                      <Eye />
                       Voir profil
                     </Button>
                   </div>
                 </div>
 
-                {/* Barre de progression du match */}
                 <div className="mt-3">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                     <span>Score de compatibilité</span>

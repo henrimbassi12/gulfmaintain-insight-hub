@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, MapPin, Calendar, Wrench, TrendingUp } from "lucide-react";
+import { AlertTriangle, MapPin, Calendar, Wrench, TrendingUp, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { FailurePrediction } from '@/hooks/useSupervision';
@@ -18,9 +17,10 @@ interface PredictionsListProps {
     timeframe: string;
   };
   onProgramIntervention: (prediction: FailurePrediction) => void;
+  onShowDetails: (prediction: FailurePrediction) => void;
 }
 
-export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, filters, onProgramIntervention }) => {
+export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, filters, onProgramIntervention, onShowDetails }) => {
   const filteredPredictions = predictions.filter(prediction => {
     if (filters.region !== 'all' && prediction.location.toLowerCase().replace(/ /g, '-') !== filters.region) return false;
 
@@ -118,13 +118,13 @@ export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, f
                     <Button size="sm" variant="outline" className="flex-1 md:flex-none text-xs" onClick={() => onProgramIntervention(prediction)}>
                       Programmer intervention
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs" onClick={() => toast.info('Fonctionnalité à venir: Affichage des détails de la prédiction')}>
+                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs" onClick={() => onShowDetails(prediction)}>
+                      <Eye />
                       Voir détails
                     </Button>
                   </div>
                 </div>
 
-                {/* Barre de progression du risque */}
                 <div className="mt-3">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                     <span>Niveau de risque</span>
