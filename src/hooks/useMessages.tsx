@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,8 +36,8 @@ export interface ConversationWithParticipant extends Conversation {
   unreadCount: number;
 }
 
-// Noms des membres de l'équipe - UNIQUEMENT ceux-ci
-const TEAM_MEMBERS = [
+// Noms des membres de l'équipe - UNIQUEMENT ceux-ci sont autorisés
+const AUTHORIZED_TEAM_MEMBERS = [
   { name: 'CÉDRIC', role: 'technician' },
   { name: 'MBAPBOU GRÉGOIRE', role: 'manager' },
   { name: 'VOUKENG', role: 'technician' },
@@ -44,6 +45,11 @@ const TEAM_MEMBERS = [
   { name: 'NDJOKO IV', role: 'technician' },
   { name: 'NDOUMBE ETIA', role: 'manager' }
 ];
+
+// Fonction pour vérifier si un nom est autorisé
+const isAuthorizedMember = (name: string): boolean => {
+  return AUTHORIZED_TEAM_MEMBERS.some(member => member.name === name);
+};
 
 // Messages d'exemple pour les conversations
 const SAMPLE_MESSAGES = [
@@ -65,8 +71,8 @@ export function useMessages() {
   const [isLoading, setIsLoading] = useState(true);
 
   const generateSampleConversations = (): ConversationWithParticipant[] => {
-    // Utiliser UNIQUEMENT les membres de l'équipe définis ci-dessus
-    return TEAM_MEMBERS.map((member, index) => {
+    // Utiliser UNIQUEMENT les membres de l'équipe autorisés
+    return AUTHORIZED_TEAM_MEMBERS.map((member, index) => {
       const conversationId = `conv-${index + 1}`;
       const lastMessageTime = new Date(Date.now() - Math.random() * 86400000 * 7); // Dans les 7 derniers jours
       
@@ -138,7 +144,7 @@ export function useMessages() {
 
       if (convError) {
         console.error('Error fetching conversations:', convError);
-        // En cas d'erreur, utiliser les données simulées (UNIQUEMENT les membres de l'équipe)
+        // En cas d'erreur, utiliser les données simulées (UNIQUEMENT les membres autorisés)
         const sampleConversations = generateSampleConversations();
         setConversations(sampleConversations);
         setIsLoading(false);
@@ -148,7 +154,7 @@ export function useMessages() {
       console.log('Conversations fetched:', conversationsData);
 
       if (conversationsData.length === 0) {
-        // Aucune conversation en base, utiliser les données simulées (UNIQUEMENT les membres de l'équipe)
+        // Aucune conversation en base, utiliser les données simulées (UNIQUEMENT les membres autorisés)
         const sampleConversations = generateSampleConversations();
         setConversations(sampleConversations);
         setIsLoading(false);
@@ -161,7 +167,11 @@ export function useMessages() {
 
       if (partError) {
         console.error('Error fetching participants:', partError);
-        throw partError;
+        // En cas d'erreur, utiliser les données simulées
+        const sampleConversations = generateSampleConversations();
+        setConversations(sampleConversations);
+        setIsLoading(false);
+        return;
       }
 
       console.log('Participants fetched:', participantsData);
@@ -173,12 +183,22 @@ export function useMessages() {
 
       if (msgError) {
         console.error('Error fetching messages:', msgError);
-        throw msgError;
+        // En cas d'erreur, utiliser les données simulées
+        const sampleConversations = generateSampleConversations();
+        setConversations(sampleConversations);
+        setIsLoading(false);
+        return;
       }
 
       console.log('Messages fetched:', messagesData);
 
-      const conversationsWithData = conversationsData.map(conv => {
+      // Filtrer pour ne garder que les conversations avec des membres autorisés
+      const authorizedConversations = conversationsData.filter(conv => {
+        const participant = participantsData.find(p => p.conversation_id === conv.id);
+        return participant && isAuthorizedMember(participant.user_name);
+      });
+
+      const conversationsWithData = authorizedConversations.map(conv => {
         const participant = participantsData.find(p => p.conversation_id === conv.id);
         const conversationMessages = messagesData.filter(m => m.conversation_id === conv.id);
         const lastMessage = conversationMessages[0];
@@ -193,11 +213,18 @@ export function useMessages() {
         };
       });
 
-      console.log('Conversations with data:', conversationsWithData);
-      setConversations(conversationsWithData);
+      console.log('Authorized conversations with data:', conversationsWithData);
+      
+      // Si aucune conversation autorisée n'est trouvée, utiliser les données simulées
+      if (conversationsWithData.length === 0) {
+        const sampleConversations = generateSampleConversations();
+        setConversations(sampleConversations);
+      } else {
+        setConversations(conversationsWithData);
+      }
     } catch (error) {
       console.error('Erreur lors de la récupération des conversations:', error);
-      // En cas d'erreur, utiliser UNIQUEMENT les données simulées des membres de l'équipe
+      // En cas d'erreur, utiliser UNIQUEMENT les données simulées des membres autorisés
       const sampleConversations = generateSampleConversations();
       setConversations(sampleConversations);
       toast.error('Utilisation des données de démonstration');
