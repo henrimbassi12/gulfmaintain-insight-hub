@@ -27,6 +27,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('🔍 Recherche du profil pour userId:', userId);
+      console.log('🌐 URL Supabase:', supabase.supabaseUrl);
+      console.log('🔗 Test de connexion à Supabase...');
+      
+      // Test de connectivité basique
+      const { data: testData, error: testError } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+      
+      if (testError) {
+        console.error('❌ Erreur de test de connexion:', testError);
+        console.error('❌ Code d\'erreur:', testError.code);
+        console.error('❌ Message:', testError.message);
+        return null;
+      }
+      
+      console.log('✅ Test de connexion réussi');
       
       const { data, error } = await supabase
         .from('profiles')
@@ -36,30 +53,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('❌ Erreur lors de la récupération du profil:', error);
+        console.error('❌ Code d\'erreur:', error.code);
+        console.error('❌ Message:', error.message);
+        console.error('❌ Détails:', error.details);
+        
+        // Si le profil n'existe pas, on va le créer
+        if (error.code === 'PGRST116') {
+          console.log('⚠️ Profil inexistant, tentative de création...');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              email: session?.user?.email || '',
+              full_name: session?.user?.user_metadata?.full_name || '',
+              role: session?.user?.user_metadata?.role || 'technician',
+              account_status: 'approved'
+            })
+            .select()
+            .single();
+            
+          if (createError) {
+            console.error('❌ Erreur création profil:', createError);
+            return null;
+          }
+          
+          console.log('✅ Profil créé:', newProfile);
+          return newProfile;
+        }
+        
         return null;
       }
       
       console.log('✅ Profil récupéré:', data);
+      console.log('📊 Statut du compte:', data.account_status);
       return data;
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      console.error('❌ Erreur catch:', error);
+      console.error('❌ Type d\'erreur:', typeof error);
+      console.error('❌ Stack:', error instanceof Error ? error.stack : 'Pas de stack');
       return null;
     }
   };
 
   useEffect(() => {
     console.log('🚀 Initialisation AuthProvider');
+    console.log('🌐 Supabase URL:', supabase.supabaseUrl);
+    console.log('🌍 Window location:', window.location.href);
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state change:', event, session?.user?.email);
+        console.log('📝 Session complète:', session);
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           console.log('👤 Utilisateur connecté, récupération du profil...');
+          console.log('🆔 User ID:', session.user.id);
+          console.log('📧 Email:', session.user.email);
+          console.log('🏷️ Metadata:', session.user.user_metadata);
+          
           const profile = await fetchUserProfile(session.user.id);
           setUserProfile(profile);
           console.log('📋 Profil défini:', profile);
@@ -75,12 +130,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('🔍 Session existante trouvée:', session?.user?.email);
+      console.log('📝 Session existante complète:', session);
       
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         console.log('👤 Session existante, récupération du profil...');
+        console.log('🆔 User ID existant:', session.user.id);
         const profile = await fetchUserProfile(session.user.id);
         setUserProfile(profile);
         console.log('📋 Profil défini pour session existante:', profile);
