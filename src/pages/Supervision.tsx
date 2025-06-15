@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
@@ -15,7 +14,8 @@ import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
-import { useSupervision } from '@/hooks/useSupervision';
+import { useSupervision, FailurePrediction } from '@/hooks/useSupervision';
+import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
 
 export default function Supervision() {
   const { predictions, recommendations, isLoading, error, refetch } = useSupervision();
@@ -26,6 +26,9 @@ export default function Supervision() {
     equipmentType: 'all',
     timeframe: '30'
   });
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialData, setModalInitialData] = useState({});
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
@@ -48,6 +51,15 @@ export default function Supervision() {
 
   const handleGenerateReport = () => {
     toast.success("Génération du rapport de supervision démarrée...");
+  };
+
+  const handleProgramIntervention = (prediction: FailurePrediction) => {
+    setModalInitialData({
+      equipmentId: prediction.equipment_id,
+      location: prediction.location,
+      description: `Action recommandée basée sur la prédiction IA : ${prediction.recommended_action}`
+    });
+    setIsModalOpen(true);
   };
 
   // Statistiques calculées à partir des données réelles
@@ -180,7 +192,7 @@ export default function Supervision() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Techniciens Disponibles</p>
+                  <p className="text-sm font-medium text-green-600">Techniciens Recommandés</p>
                   <p className="text-2xl font-bold text-green-700">{recommendations.length}</p>
                 </div>
                 <Users className="w-8 h-8 text-green-500" />
@@ -215,7 +227,11 @@ export default function Supervision() {
                 <p className="mt-2 text-gray-500">Chargement des prédictions...</p>
               </div>
             ) : (
-              <PredictionsList predictions={predictions} filters={filters} />
+              <PredictionsList 
+                predictions={predictions} 
+                filters={filters}
+                onProgramIntervention={handleProgramIntervention}
+              />
             )}
           </CardContent>
         </Card>
@@ -265,6 +281,12 @@ export default function Supervision() {
       <div className="fixed bottom-4 right-4">
         <ConnectionStatus />
       </div>
+
+      <CreateInterventionModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialData={modalInitialData}
+      />
     </AirbnbContainer>
   );
 }

@@ -7,6 +7,7 @@ import { AlertTriangle, MapPin, Calendar, Wrench, TrendingUp } from "lucide-reac
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { FailurePrediction } from '@/hooks/useSupervision';
+import { toast } from 'sonner';
 
 interface PredictionsListProps {
   predictions: FailurePrediction[];
@@ -16,29 +17,48 @@ interface PredictionsListProps {
     equipmentType: string;
     timeframe: string;
   };
+  onProgramIntervention: (prediction: FailurePrediction) => void;
 }
 
-export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, filters }) => {
-  // Filter predictions based on filters
+export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, filters, onProgramIntervention }) => {
   const filteredPredictions = predictions.filter(prediction => {
+    if (filters.region !== 'all' && prediction.location.toLowerCase().replace(/ /g, '-') !== filters.region) return false;
+
     if (filters.riskLevel !== 'all') {
-      if (filters.riskLevel === 'high' && prediction.failure_risk < 70) return false;
-      if (filters.riskLevel === 'medium' && (prediction.failure_risk < 40 || prediction.failure_risk >= 70)) return false;
-      if (filters.riskLevel === 'low' && prediction.failure_risk >= 40) return false;
+      const risk = prediction.failure_risk;
+      if (filters.riskLevel === 'high' && risk <= 70) return false;
+      if (filters.riskLevel === 'medium' && (risk < 30 || risk > 70)) return false;
+      if (filters.riskLevel === 'low' && risk >= 30) return false;
     }
+
+    if (filters.equipmentType !== 'all') {
+      const equipmentName = prediction.equipment_name.toLowerCase();
+      switch(filters.equipmentType) {
+        case 'refrigeration':
+          if (!equipmentName.includes('réfrigérateur')) return false;
+          break;
+        case 'climatisation':
+          if (!equipmentName.includes('climatiseur')) return false;
+          break;
+        case 'hvac':
+          if (!equipmentName.includes('hvac')) return false;
+          break;
+        // Pas de données pour 'electrique' ou 'mecanique' dans les prédictions pour l'instant
+      }
+    }
+    
     return true;
   });
 
   const getRiskColor = (risk: number) => {
-    if (risk >= 80) return "destructive";
-    if (risk >= 60) return "secondary"; 
+    if (risk > 70) return "destructive";
+    if (risk >= 30) return "secondary"; 
     return "outline";
   };
 
   const getRiskLabel = (risk: number) => {
-    if (risk >= 80) return "Critique";
-    if (risk >= 60) return "Élevé";
-    if (risk >= 40) return "Moyen";
+    if (risk > 70) return "Élevé";
+    if (risk >= 30) return "Moyen";
     return "Faible";
   };
 
@@ -95,10 +115,10 @@ export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, f
                   </div>
 
                   <div className="flex flex-row md:flex-col gap-2 md:ml-4">
-                    <Button size="sm" variant="outline" className="flex-1 md:flex-none text-xs">
+                    <Button size="sm" variant="outline" className="flex-1 md:flex-none text-xs" onClick={() => onProgramIntervention(prediction)}>
                       Programmer intervention
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs">
+                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs" onClick={() => toast.info('Fonctionnalité à venir: Affichage des détails de la prédiction')}>
                       Voir détails
                     </Button>
                   </div>
@@ -113,8 +133,8 @@ export const PredictionsList: React.FC<PredictionsListProps> = ({ predictions, f
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all ${
-                        prediction.failure_risk >= 80 ? 'bg-red-500' :
-                        prediction.failure_risk >= 60 ? 'bg-orange-500' : 
+                        prediction.failure_risk > 70 ? 'bg-red-500' :
+                        prediction.failure_risk >= 30 ? 'bg-orange-500' : 
                         'bg-yellow-500'
                       }`}
                       style={{ width: `${prediction.failure_risk}%` }}

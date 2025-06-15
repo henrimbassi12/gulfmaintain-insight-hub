@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, MapPin, Star, Clock, Wrench, Award } from "lucide-react";
 import { TechnicianRecommendation } from '@/hooks/useSupervision';
+import { toast } from 'sonner';
 
 interface TechnicianRecommendationsProps {
   recommendations: TechnicianRecommendation[];
@@ -20,6 +21,36 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
   recommendations, 
   filters 
 }) => {
+  const filteredRecommendations = recommendations.filter(recommendation => {
+    if (filters.region !== 'all' && recommendation.location.toLowerCase().replace(/ /g, '-') !== filters.region) return false;
+
+    if (filters.equipmentType !== 'all') {
+      const equipmentName = recommendation.equipment_name.toLowerCase();
+      const expertise = recommendation.expertise.map(e => e.toLowerCase());
+      
+      switch(filters.equipmentType) {
+        case 'refrigeration':
+          if (!equipmentName.includes('réfrigérateur') && !expertise.includes('réfrigération')) return false;
+          break;
+        case 'climatisation':
+          if (!equipmentName.includes('climatiseur') && !expertise.includes('climatisation')) return false;
+          break;
+        case 'hvac':
+          if (!equipmentName.includes('hvac') && !expertise.includes('hvac')) return false;
+          break;
+        case 'electrique':
+          if (!expertise.includes('électrique')) return false;
+          break;
+        case 'mecanique':
+          if (!expertise.includes('mécanique')) return false;
+          break;
+        default:
+          break;
+      }
+    }
+    return true;
+  });
+
   const getMatchColor = (score: number) => {
     if (score >= 90) return "default";
     if (score >= 70) return "secondary";
@@ -29,19 +60,6 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
   const getAvailabilityColor = (availability: string) => {
     if (availability.includes("Disponible")) return "default";
     return "secondary";
-  };
-
-  // Mapper les noms des techniciens
-  const mapTechnicianName = (name: string) => {
-    const nameMapping: Record<string, string> = {
-      'Ahmed Benali': 'CÉDRIC',
-      'Fatima Zahra': 'MBAPBOU GRÉGOIRE',
-      'Mohamed Alami': 'VOUKENG',
-      'Youssef Idrissi': 'TCHINDA CONSTANT',
-      'Sara Tazi': 'NDJOKO IV',
-      'Karim Bennani': 'NDOUMBE ETIA'
-    };
-    return nameMapping[name] || name;
   };
 
   return (
@@ -58,12 +76,12 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:gap-4">
-            {recommendations.map((recommendation) => (
+            {filteredRecommendations.map((recommendation) => (
               <div key={recommendation.id} className="p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3 mb-2">
-                      <h3 className="font-semibold text-base md:text-lg">{mapTechnicianName(recommendation.technician)}</h3>
+                      <h3 className="font-semibold text-base md:text-lg">{recommendation.technician}</h3>
                       <div className="flex flex-wrap gap-2">
                         <Badge variant={getMatchColor(recommendation.match_score)} className="text-xs">
                           Match: {recommendation.match_score}%
@@ -114,10 +132,10 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
                   </div>
 
                   <div className="flex flex-row md:flex-col gap-2 md:ml-4">
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex-1 md:flex-none text-xs">
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex-1 md:flex-none text-xs" onClick={() => toast.info('Fonctionnalité à venir: Assignation du technicien')}>
                       Assigner
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs">
+                    <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-xs" onClick={() => toast.info('Fonctionnalité à venir: Affichage du profil')}>
                       Voir profil
                     </Button>
                   </div>
@@ -144,10 +162,10 @@ export const TechnicianRecommendations: React.FC<TechnicianRecommendationsProps>
             ))}
           </div>
 
-          {recommendations.length === 0 && (
+          {filteredRecommendations.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <User className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm md:text-base">Aucune recommandation disponible pour le moment.</p>
+              <p className="text-sm md:text-base">Aucune recommandation ne correspond aux filtres.</p>
             </div>
           )}
         </CardContent>

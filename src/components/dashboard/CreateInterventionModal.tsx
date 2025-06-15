@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +11,14 @@ import { Calendar, MapPin, Wrench, User } from "lucide-react";
 interface CreateInterventionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: {
+    equipmentId?: string;
+    location?: string;
+    description?: string;
+  };
 }
 
-export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionModalProps) {
+export function CreateInterventionModal({ isOpen, onClose, initialData }: CreateInterventionModalProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     equipmentId: '',
@@ -25,6 +29,17 @@ export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionM
     scheduledDate: '',
     assignedTechnician: ''
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        equipmentId: initialData.equipmentId || '',
+        location: initialData.location?.toLowerCase().replace(/ /g, '-') || '',
+        description: initialData.description || ''
+      }));
+    }
+  }, [initialData, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +52,7 @@ export function CreateInterventionModal({ isOpen, onClose }: CreateInterventionM
       description: `Intervention ${interventionId} créée avec succès`,
     });
     
-    // Reset form
+    // Reset form and close
     setFormData({
       equipmentId: '',
       type: '',
