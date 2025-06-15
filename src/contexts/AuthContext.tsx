@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,123 +27,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fonction pour récupérer le profil utilisateur
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('🔍 [DEBUG] Début fetchUserProfile pour userId:', userId);
+      console.log('🔍 Récupération du profil pour userId:', userId);
       
-      // Test de connexion à Supabase avec timeout
-      console.log('🔗 [DEBUG] Test de connexion Supabase...');
-      
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout de 10 secondes')), 10000);
-      });
-      
-      const supabasePromise = supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
       
-      console.log('🚀 [DEBUG] Lancement de la requête Supabase...');
-      
-      const result = await Promise.race([supabasePromise, timeoutPromise]);
-      
-      console.log('📊 [DEBUG] Résultat de la requête profiles reçu:', result);
-      
-      const { data, error } = result as any;
-      
-      console.log('📊 [DEBUG] Data:', data);
-      console.log('📊 [DEBUG] Error:', error);
-      
       if (error) {
-        console.error('❌ [DEBUG] Erreur lors de la récupération du profil:', error);
-        console.error('❌ [DEBUG] Code d\'erreur:', error.code);
-        console.error('❌ [DEBUG] Message:', error.message);
-        console.error('❌ [DEBUG] Détails complets:', JSON.stringify(error, null, 2));
+        console.error('❌ Erreur lors de la récupération du profil:', error);
         
         // Si le profil n'existe pas, on va le créer
         if (error.code === 'PGRST116' || error.message?.includes('not found')) {
-          console.log('⚠️ [DEBUG] Profil inexistant, tentative de création...');
+          console.log('⚠️ Profil inexistant, tentative de création...');
           
           const newProfileData = {
             id: userId,
             email: session?.user?.email || '',
-            full_name: session?.user?.user_metadata?.full_name || 'EPANDA MBASSI HENRI SOREL',
-            role: 'admin', // Forcer admin pour test
-            account_status: 'approved' as 'approved'
+            full_name: session?.user?.user_metadata?.full_name || '',
+            role: session?.user?.user_metadata?.role || 'technician',
+            account_status: 'pending' as 'pending'
           };
           
-          console.log('📝 [DEBUG] Données du nouveau profil:', newProfileData);
-          
-          const createPromise = supabase
+          const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .insert(newProfileData)
             .select()
             .single();
             
-          const createResult = await Promise.race([createPromise, timeoutPromise]);
-          
-          console.log('📊 [DEBUG] Résultat création profil:', createResult);
-          
-          const { data: newProfile, error: createError } = createResult as any;
-            
           if (createError) {
-            console.error('❌ [DEBUG] Erreur création profil:', createError);
-            console.error('❌ [DEBUG] Détails création:', JSON.stringify(createError, null, 2));
+            console.error('❌ Erreur création profil:', createError);
             return null;
           }
           
-          console.log('✅ [DEBUG] Profil créé avec succès:', newProfile);
+          console.log('✅ Profil créé avec succès:', newProfile);
           return newProfile;
         }
         
         return null;
       }
       
-      console.log('✅ [DEBUG] Profil récupéré:', data);
-      console.log('📊 [DEBUG] Statut du compte:', data?.account_status);
-      console.log('🏷️ [DEBUG] Rôle utilisateur:', data?.role);
+      console.log('✅ Profil récupéré:', data);
       return data;
     } catch (error) {
-      console.error('❌ [DEBUG] Erreur catch dans fetchUserProfile:', error);
-      if (error instanceof Error) {
-        console.error('❌ [DEBUG] Message d\'erreur:', error.message);
-        console.error('❌ [DEBUG] Stack trace:', error.stack);
-      }
+      console.error('❌ Erreur catch dans fetchUserProfile:', error);
       return null;
     }
   };
 
   useEffect(() => {
-    console.log('🚀 [DEBUG] Initialisation AuthProvider');
+    console.log('🚀 Initialisation AuthProvider');
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 [DEBUG] Auth state change:', event, session?.user?.email);
-        console.log('📝 [DEBUG] Session reçue:', session ? 'présente' : 'absente');
+        console.log('🔄 Auth state change:', event, session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('👤 [DEBUG] Utilisateur connecté, récupération du profil...');
-          console.log('🆔 [DEBUG] User ID:', session.user.id);
-          console.log('📧 [DEBUG] Email:', session.user.email);
-          console.log('🏷️ [DEBUG] Metadata:', session.user.user_metadata);
+          console.log('👤 Utilisateur connecté, récupération du profil...');
           
-          // Utiliser setTimeout pour éviter les deadlocks
-          setTimeout(async () => {
-            try {
-              console.log('⏰ [DEBUG] Début timeout pour fetchUserProfile...');
-              const profile = await fetchUserProfile(session.user.id);
-              console.log('📋 [DEBUG] Profil final reçu dans timeout:', profile);
-              setUserProfile(profile);
-            } catch (error) {
-              console.error('❌ [DEBUG] Erreur dans timeout fetchUserProfile:', error);
-              setUserProfile(null);
-            }
-          }, 100);
+          const profile = await fetchUserProfile(session.user.id);
+          setUserProfile(profile);
         } else {
-          console.log('❌ [DEBUG] Aucun utilisateur, profil effacé');
+          console.log('❌ Aucun utilisateur, profil effacé');
           setUserProfile(null);
         }
         
@@ -152,28 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('🔍 [DEBUG] Session existante trouvée:', session?.user?.email);
-      console.log('📝 [DEBUG] Session existante:', session ? 'présente' : 'absente');
+      console.log('🔍 Session existante trouvée:', session?.user?.email);
       
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        console.log('👤 [DEBUG] Session existante, récupération du profil...');
-        console.log('🆔 [DEBUG] User ID existant:', session.user.id);
+        console.log('👤 Session existante, récupération du profil...');
         
-        // Utiliser setTimeout ici aussi
-        setTimeout(async () => {
-          try {
-            console.log('⏰ [DEBUG] Début timeout pour session existante...');
-            const profile = await fetchUserProfile(session.user.id);
-            console.log('📋 [DEBUG] Profil défini pour session existante:', profile);
-            setUserProfile(profile);
-          } catch (error) {
-            console.error('❌ [DEBUG] Erreur session existante:', error);
-            setUserProfile(null);
-          }
-        }, 100);
+        const profile = await fetchUserProfile(session.user.id);
+        setUserProfile(profile);
       }
       
       setLoading(false);

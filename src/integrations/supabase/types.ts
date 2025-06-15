@@ -393,6 +393,14 @@ export type Database = {
         Args: { user_id: string; approver_id: string }
         Returns: undefined
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      is_admin_approved: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       reject_user: {
         Args: { user_id: string; approver_id: string }
         Returns: undefined
