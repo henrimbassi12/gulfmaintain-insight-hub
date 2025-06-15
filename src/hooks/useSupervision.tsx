@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
-import { generateSamplePredictions, generateSampleRecommendations } from '@/data/supervision-samples';
+import { failurePredictionSamples, technicianRecommendationSamples } from '@/data/supervision-samples';
 
 export function useSupervision() {
   const [predictions, setPredictions] = useState<FailurePrediction[]>([]);
@@ -27,40 +26,37 @@ export function useSupervision() {
           .order('match_score', { ascending: false })
       ]);
 
+      let finalPredictions: FailurePrediction[];
       if (predictionsResult.error) {
         console.warn('Erreur prédictions:', predictionsResult.error);
-        // Utiliser les données d'exemple en cas d'erreur
-        setPredictions(generateSamplePredictions());
+        finalPredictions = failurePredictionSamples;
       } else if (predictionsResult.data && predictionsResult.data.length > 0) {
-        const typedPredictions = predictionsResult.data.map(item => ({
+        finalPredictions = predictionsResult.data.map(item => ({
           ...item,
           type: item.type as 'AF' | 'NF'
         })) as FailurePrediction[];
-        setPredictions(typedPredictions);
       } else {
-        // Aucune donnée en base, utiliser les exemples
-        setPredictions(generateSamplePredictions());
+        finalPredictions = failurePredictionSamples;
       }
+      setPredictions(finalPredictions);
 
+      let finalRecommendations: TechnicianRecommendation[];
       if (recommendationsResult.error) {
         console.warn('Erreur recommandations:', recommendationsResult.error);
-        // Utiliser les données d'exemple en cas d'erreur
-        setRecommendations(generateSampleRecommendations());
+        finalRecommendations = technicianRecommendationSamples;
       } else if (recommendationsResult.data && recommendationsResult.data.length > 0) {
-        const typedRecommendations = recommendationsResult.data as TechnicianRecommendation[];
-        setRecommendations(typedRecommendations);
+        finalRecommendations = recommendationsResult.data as TechnicianRecommendation[];
       } else {
-        // Aucune donnée en base, utiliser les exemples
-        setRecommendations(generateSampleRecommendations());
+        finalRecommendations = technicianRecommendationSamples;
       }
+      setRecommendations(finalRecommendations);
       
-      console.log(`✅ Récupération supervision: ${predictions.length} prédictions, ${recommendations.length} recommandations`);
+      console.log(`✅ Récupération supervision: ${finalPredictions.length} prédictions, ${finalRecommendations.length} recommandations`);
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des données de supervision:', error);
       setError('Erreur lors de la récupération des données de supervision');
-      // En cas d'erreur, utiliser les données d'exemple
-      setPredictions(generateSamplePredictions());
-      setRecommendations(generateSampleRecommendations());
+      setPredictions(failurePredictionSamples);
+      setRecommendations(technicianRecommendationSamples);
       toast.info('Utilisation des données de démonstration');
     } finally {
       setIsLoading(false);

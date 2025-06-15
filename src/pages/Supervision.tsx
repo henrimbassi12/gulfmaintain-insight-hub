@@ -9,16 +9,18 @@ import { IntelligentFailurePredictionPanel } from '@/components/supervision/Inte
 import { PredictionDetails } from '@/components/supervision/PredictionDetails';
 import { TechnicianProfileSheet } from '@/components/supervision/TechnicianProfileSheet';
 import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
-// Données d'exemple pour la démo
-import { failurePredictionSamples, technicianRecommendationSamples } from '@/data/supervision-samples';
+import { useSupervision } from '@/hooks/useSupervision';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Supervision() {
   const [selectedPrediction, setSelectedPrediction] = useState<FailurePrediction | null>(null);
   const [selectedTechnician, setSelectedTechnician] = useState<TechnicianRecommendation | null>(null);
 
+  const { predictions: allPredictions, recommendations: allRecommendations, isLoading } = useSupervision();
+
   // Filtrer pour ne montrer que les prédictions à haut risque et limiter le nombre d'exemples
-  const predictions = failurePredictionSamples.filter(p => p.failure_risk > 70).slice(0, 3);
-  const technicians = technicianRecommendationSamples.slice(0, 2);
+  const highRiskPredictions = allPredictions.filter(p => p.failure_risk > 70).slice(0, 3);
+  const recommendedTechnicians = allRecommendations.slice(0, 2);
 
   return (
     <AirbnbContainer>
@@ -29,15 +31,25 @@ export default function Supervision() {
       />
 
       <div className="space-y-8 py-6">
-        <IntelligentFailurePredictionPanel 
-          predictions={predictions} 
-          onSelectPrediction={setSelectedPrediction} 
-        />
-        <MaintenanceEfficiencyPredictionPanel />
-        <TechnicianAssignmentOptimizationPanel 
-          technicians={technicians}
-          onSelectTechnician={setSelectedTechnician}
-        />
+        {isLoading ? (
+          <>
+            <Skeleton className="h-[450px] w-full rounded-lg" />
+            <Skeleton className="h-[350px] w-full rounded-lg" />
+            <Skeleton className="h-[400px] w-full rounded-lg" />
+          </>
+        ) : (
+          <>
+            <IntelligentFailurePredictionPanel 
+              predictions={highRiskPredictions} 
+              onSelectPrediction={setSelectedPrediction} 
+            />
+            <MaintenanceEfficiencyPredictionPanel />
+            <TechnicianAssignmentOptimizationPanel 
+              technicians={recommendedTechnicians}
+              onSelectTechnician={setSelectedTechnician}
+            />
+          </>
+        )}
       </div>
 
       <PredictionDetails
