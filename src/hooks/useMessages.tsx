@@ -69,6 +69,8 @@ export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletedConversationIds, setDeletedConversationIds] = useState<Set<string>>(new Set());
+  const [archivedConversationIds, setArchivedConversationIds] = useState<Set<string>>(new Set());
 
   const generateSampleConversations = (): ConversationWithParticipant[] => {
     // Utiliser UNIQUEMENT les membres de l'équipe autorisés
@@ -145,7 +147,8 @@ export function useMessages() {
       if (convError) {
         console.error('Error fetching conversations:', convError);
         // En cas d'erreur, utiliser les données simulées (UNIQUEMENT les membres autorisés)
-        const sampleConversations = generateSampleConversations();
+        const sampleConversations = generateSampleConversations()
+          .filter(conv => !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id));
         setConversations(sampleConversations);
         setIsLoading(false);
         return;
@@ -155,7 +158,8 @@ export function useMessages() {
 
       if (conversationsData.length === 0) {
         // Aucune conversation en base, utiliser les données simulées (UNIQUEMENT les membres autorisés)
-        const sampleConversations = generateSampleConversations();
+        const sampleConversations = generateSampleConversations()
+          .filter(conv => !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id));
         setConversations(sampleConversations);
         setIsLoading(false);
         return;
@@ -168,7 +172,8 @@ export function useMessages() {
       if (partError) {
         console.error('Error fetching participants:', partError);
         // En cas d'erreur, utiliser les données simulées
-        const sampleConversations = generateSampleConversations();
+        const sampleConversations = generateSampleConversations()
+          .filter(conv => !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id));
         setConversations(sampleConversations);
         setIsLoading(false);
         return;
@@ -184,7 +189,8 @@ export function useMessages() {
       if (msgError) {
         console.error('Error fetching messages:', msgError);
         // En cas d'erreur, utiliser les données simulées
-        const sampleConversations = generateSampleConversations();
+        const sampleConversations = generateSampleConversations()
+          .filter(conv => !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id));
         setConversations(sampleConversations);
         setIsLoading(false);
         return;
@@ -192,11 +198,16 @@ export function useMessages() {
 
       console.log('Messages fetched:', messagesData);
 
-      // Filtrer pour ne garder que les conversations avec des membres autorisés
-      const authorizedConversations = conversationsData.filter(conv => {
-        const participant = participantsData.find(p => p.conversation_id === conv.id);
-        return participant && isAuthorizedMember(participant.user_name);
-      });
+      // Filtrer pour ne garder que les conversations avec des membres autorisés et non supprimées/archivées
+      const authorizedConversations = conversationsData
+        .filter(conv => {
+          const participant = participantsData.find(p => p.conversation_id === conv.id);
+          return participant && 
+                 isAuthorizedMember(participant.user_name) && 
+                 !deletedConversationIds.has(conv.id) && 
+                 !archivedConversationIds.has(conv.id) &&
+                 !conv.is_archived;
+        });
 
       const conversationsWithData = authorizedConversations.map(conv => {
         const participant = participantsData.find(p => p.conversation_id === conv.id);
@@ -215,17 +226,19 @@ export function useMessages() {
 
       console.log('Authorized conversations with data:', conversationsWithData);
       
-      // Si aucune conversation autorisée n'est trouvée, utiliser les données simulées
+      // Si aucune conversation autorisée n'est trouvée, utiliser les données simulées filtrées
       if (conversationsWithData.length === 0) {
-        const sampleConversations = generateSampleConversations();
+        const sampleConversations = generateSampleConversations()
+          .filter(conv => !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id));
         setConversations(sampleConversations);
       } else {
         setConversations(conversationsWithData);
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des conversations:', error);
-      // En cas d'erreur, utiliser UNIQUEMENT les données simulées des membres autorisés
-      const sampleConversations = generateSampleConversations();
+      // En cas d'erreur, utiliser UNIQUEMENT les données simulées des membres autorisés filtrées
+      const sampleConversations = generateSampleConversations()
+        .filter(conv => !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id));
       setConversations(sampleConversations);
       toast.error('Utilisation des données de démonstration');
     } finally {
@@ -327,47 +340,51 @@ export function useMessages() {
     try {
       console.log('Deleting conversation:', conversationId);
       
-      // Supprimer d'abord les messages de la conversation
-      const { error: messagesError } = await supabase
-        .from('messages')
-        .delete()
-        .eq('conversation_id', conversationId);
-
-      if (messagesError) {
-        console.error('Error deleting messages:', messagesError);
-        // En mode démo, on continue même en cas d'erreur
-      }
-
-      // Supprimer les participants de la conversation
-      const { error: participantsError } = await supabase
-        .from('conversation_participants')
-        .delete()
-        .eq('conversation_id', conversationId);
-
-      if (participantsError) {
-        console.error('Error deleting participants:', participantsError);
-        // En mode démo, on continue même en cas d'erreur
-      }
-
-      // Supprimer la conversation
-      const { error: conversationError } = await supabase
-        .from('conversations')
-        .delete()
-        .eq('id', conversationId);
-
-      if (conversationError) {
-        console.error('Error deleting conversation:', conversationError);
-        // En mode démo, on continue même en cas d'erreur
-      }
-
-      // Mettre à jour l'état local
+      // Marquer comme supprimée localement immédiatement
+      setDeletedConversationIds(prev => new Set(prev).add(conversationId));
+      
+      // Supprimer de l'état local immédiatement
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       
-      console.log('Conversation deleted successfully');
+      // Essayer de supprimer en base de données en arrière-plan
+      try {
+        // Supprimer d'abord les messages de la conversation
+        const { error: messagesError } = await supabase
+          .from('messages')
+          .delete()
+          .eq('conversation_id', conversationId);
+
+        if (messagesError) {
+          console.error('Error deleting messages:', messagesError);
+        }
+
+        // Supprimer les participants de la conversation
+        const { error: participantsError } = await supabase
+          .from('conversation_participants')
+          .delete()
+          .eq('conversation_id', conversationId);
+
+        if (participantsError) {
+          console.error('Error deleting participants:', participantsError);
+        }
+
+        // Supprimer la conversation
+        const { error: conversationError } = await supabase
+          .from('conversations')
+          .delete()
+          .eq('id', conversationId);
+
+        if (conversationError) {
+          console.error('Error deleting conversation:', conversationError);
+        }
+
+        console.log('Conversation deleted successfully from database');
+      } catch (dbError) {
+        console.error('Error deleting from database, keeping local deletion:', dbError);
+      }
+      
     } catch (error) {
       console.error('Erreur lors de la suppression de la conversation:', error);
-      // En mode démo, on simule la suppression locale
-      setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       throw error;
     }
   };
@@ -376,25 +393,30 @@ export function useMessages() {
     try {
       console.log('Archiving conversation:', conversationId);
       
-      // Marquer la conversation comme archivée
-      const { error } = await supabase
-        .from('conversations')
-        .update({ is_archived: true, updated_at: new Date().toISOString() })
-        .eq('id', conversationId);
-
-      if (error) {
-        console.error('Error archiving conversation:', error);
-        // En mode démo, on continue même en cas d'erreur
-      }
-
-      // Mettre à jour l'état local (retirer de la liste des conversations actives)
+      // Marquer comme archivée localement immédiatement
+      setArchivedConversationIds(prev => new Set(prev).add(conversationId));
+      
+      // Supprimer de l'état local immédiatement (retirer de la liste des conversations actives)
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       
-      console.log('Conversation archived successfully');
+      // Essayer d'archiver en base de données en arrière-plan
+      try {
+        const { error } = await supabase
+          .from('conversations')
+          .update({ is_archived: true, updated_at: new Date().toISOString() })
+          .eq('id', conversationId);
+
+        if (error) {
+          console.error('Error archiving conversation:', error);
+        } else {
+          console.log('Conversation archived successfully in database');
+        }
+      } catch (dbError) {
+        console.error('Error archiving in database, keeping local archiving:', dbError);
+      }
+      
     } catch (error) {
       console.error('Erreur lors de l\'archivage de la conversation:', error);
-      // En mode démo, on simule l'archivage local
-      setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       throw error;
     }
   };
@@ -408,7 +430,7 @@ export function useMessages() {
     if (user) {
       fetchConversations();
     }
-  }, [user]);
+  }, [user, deletedConversationIds, archivedConversationIds]);
 
   useEffect(() => {
     if (selectedConversationId) {
