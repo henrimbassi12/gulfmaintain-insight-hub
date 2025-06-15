@@ -13,7 +13,7 @@ const AgencySummary: React.FC = () => {
 
   const agencies = [
     {
-      name: "Agence Casablanca Centre",
+      name: "Agence Douala Centre",
       technicians: 12,
       interventions: 89,
       efficiency: 94,
@@ -21,7 +21,7 @@ const AgencySummary: React.FC = () => {
       trend: "+8%"
     },
     {
-      name: "Agence Rabat Nord",
+      name: "Agence Yaoundé Nord",
       technicians: 8,
       interventions: 56,
       efficiency: 91,
@@ -29,7 +29,7 @@ const AgencySummary: React.FC = () => {
       trend: "+12%"
     },
     {
-      name: "Agence Marrakech",
+      name: "Agence Bamenda",
       technicians: 6,
       interventions: 34,
       efficiency: 88,

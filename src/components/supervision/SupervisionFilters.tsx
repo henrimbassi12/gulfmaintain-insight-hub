@@ -30,9 +30,10 @@ const SupervisionFilters: React.FC<SupervisionFiltersProps> = ({ filters, onFilt
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes les régions</SelectItem>
-              <SelectItem value="tunis">Tunis</SelectItem>
-              <SelectItem value="sfax">Sfax</SelectItem>
-              <SelectItem value="sousse">Sousse</SelectItem>
+              <SelectItem value="douala">Douala</SelectItem>
+              <SelectItem value="yaounde">Yaoundé</SelectItem>
+              <SelectItem value="bamenda">Bamenda</SelectItem>
+              <SelectItem value="bafoussam">Bafoussam</SelectItem>
             </SelectContent>
           </Select>
 

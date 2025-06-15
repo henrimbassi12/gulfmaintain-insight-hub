@@ -7,7 +7,7 @@ import { MapPin, TrendingUp, AlertTriangle } from "lucide-react";
 const RegionMap: React.FC = () => {
   const regions = [
     {
-      name: "Casablanca",
+      name: "Douala",
       equipments: 145,
       operational: 132,
       maintenance: 8,
@@ -15,7 +15,7 @@ const RegionMap: React.FC = () => {
       interventions: 23
     },
     {
-      name: "Rabat", 
+      name: "Yaoundé", 
       equipments: 89,
       operational: 84,
       maintenance: 3,
@@ -23,7 +23,7 @@ const RegionMap: React.FC = () => {
       interventions: 12
     },
     {
-      name: "Marrakech",
+      name: "Bamenda",
       equipments: 67,
       operational: 61,
       maintenance: 4,
@@ -31,7 +31,7 @@ const RegionMap: React.FC = () => {
       interventions: 8
     },
     {
-      name: "Fès",
+      name: "Bafoussam",
       equipments: 54,
       operational: 48,
       maintenance: 5,

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ModernKPICard } from '@/components/dashboard/ModernKPICard';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
@@ -166,7 +165,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
-                  <p className="text-sm text-gray-500">Vue d'ensemble de votre activité par secteur</p>
+                  <p className="text-sm text-gray-500">Vue d'ensemble de votre activité par secteur - Douala</p>
                 </div>
                 <ConnectionStatus />
               </div>

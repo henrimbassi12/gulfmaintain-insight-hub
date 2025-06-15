@@ -26,7 +26,7 @@ export function ModernWeatherWidget() {
   const daysToShow = getTodayAndNextDays();
   // Icônes et températures correspondant à aujourd'hui + 3 prochains jours
   const icons = [Sun, Cloud, CloudRain, Wind];
-  const temps = ['22°', '21°', '19°', '23°'];
+  const temps = ['28°', '27°', '25°', '29°'];
 
   return (
     <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -34,7 +34,7 @@ export function ModernWeatherWidget() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Météo</h3>
-            <p className="text-gray-500 text-sm">Casablanca</p>
+            <p className="text-gray-500 text-sm">Douala</p>
           </div>
           <div className="p-2 bg-blue-50 rounded-lg">
             <Sun className="h-6 w-6 text-blue-600" />
@@ -42,7 +42,7 @@ export function ModernWeatherWidget() {
         </div>
         
         <div className="mb-4">
-          <span className="text-3xl font-bold text-gray-900">22°</span>
+          <span className="text-3xl font-bold text-gray-900">28°</span>
           <span className="text-gray-600 ml-2">Ensoleillé</span>
         </div>
         
