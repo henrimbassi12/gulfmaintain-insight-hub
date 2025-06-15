@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 
 export function UserProfile() {
-  const { user, signOut } = useAuth();
+  const { user, userProfile, signOut } = useAuth();
 
   if (!user) return null;
 
@@ -40,6 +40,10 @@ export function UserProfile() {
     }
   };
 
+  // Utiliser le rôle du profil utilisateur ou celui des métadonnées comme fallback
+  const userRole = userProfile?.role || user.user_metadata?.role || 'technician';
+  const displayName = userProfile?.full_name || user.user_metadata?.full_name || 'Utilisateur';
+
   return (
     <div className="border-t p-4 mt-auto">
       <div className="flex items-center gap-3 mb-3">
@@ -51,7 +55,7 @@ export function UserProfile() {
         </Avatar>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-            {user.user_metadata?.full_name || 'Utilisateur'}
+            {displayName}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
             {user.email}
@@ -60,9 +64,9 @@ export function UserProfile() {
       </div>
       
       <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline" className={`gap-1 ${getRoleBadgeColor(user.user_metadata?.role || 'technician')}`}>
-          {getRoleIcon(user.user_metadata?.role || 'technician')}
-          {user.user_metadata?.role || 'technician'}
+        <Badge variant="outline" className={`gap-1 ${getRoleBadgeColor(userRole)}`}>
+          {getRoleIcon(userRole)}
+          {userRole}
         </Badge>
         <OfflineIndicator />
       </div>

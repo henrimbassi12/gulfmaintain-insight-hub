@@ -14,6 +14,7 @@ import {
 import { UserProfile } from "@/components/UserProfile";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationSystem } from "@/components/NotificationSystem";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Home,
   Wrench,
@@ -26,25 +27,33 @@ import {
   Calendar,
   MapPin,
   Clock,
-  Menu
+  Menu,
+  Users
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 
-const menuItems = [
-  { icon: Home, label: "Tableau de bord", href: "/" },
-  { icon: Wrench, label: "Équipements", href: "/equipments" },
-  { icon: Settings, label: "Maintenance", href: "/maintenance" },
-  { icon: Calendar, label: "Planning", href: "/calendar" },
-  { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-  { icon: Clock, label: "Historique", href: "/history" },
-  { icon: MessageSquare, label: "Messages", href: "/messages" },
-  { icon: Eye, label: "Supervision", href: "/supervision" },
-  { icon: FileText, label: "Rapports", href: "/reports" },
-  { icon: BarChart3, label: "Paramètres", href: "/settings" },
-];
-
 export function AppSidebar() {
   const location = useLocation();
+  const { userProfile } = useAuth();
+
+  // Menu items de base
+  const baseMenuItems = [
+    { icon: Home, label: "Tableau de bord", href: "/dashboard" },
+    { icon: Wrench, label: "Équipements", href: "/equipments" },
+    { icon: Settings, label: "Maintenance", href: "/maintenance" },
+    { icon: Calendar, label: "Planning", href: "/planning" },
+    { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
+    { icon: Clock, label: "Historique", href: "/equipment-history" },
+    { icon: MessageSquare, label: "Messages", href: "/messages" },
+    { icon: Eye, label: "Supervision", href: "/supervision" },
+    { icon: FileText, label: "Rapports", href: "/reports" },
+    { icon: BarChart3, label: "Paramètres", href: "/settings" },
+  ];
+
+  // Ajouter la gestion des utilisateurs pour les admins
+  const menuItems = userProfile?.role === 'admin' 
+    ? [...baseMenuItems, { icon: Users, label: "Gestion des utilisateurs", href: "/user-management" }]
+    : baseMenuItems;
 
   return (
     <Sidebar collapsible="icon">
