@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,25 +12,114 @@ import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Settings() {
+  const { user, userProfile } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  // États pour les champs du formulaire
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
+  const [agency, setAgency] = useState('');
 
-  const handleRefresh = () => {
+  // Charger les données utilisateur
+  useEffect(() => {
+    if (userProfile) {
+      setFullName(userProfile.full_name || '');
+      setEmail(userProfile.email || '');
+      setRole(userProfile.role || 'technician');
+      setAgency(userProfile.agency || '');
+    } else if (user) {
+      setEmail(user.email || '');
+      setFullName(user.user_metadata?.full_name || '');
+      setRole(user.user_metadata?.role || 'technician');
+    }
+  }, [user, userProfile]);
+
+  const handleRefresh = async () => {
     setRefreshing(true);
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Actualisation des paramètres...',
-        success: 'Paramètres actualisés avec succès',
-        error: 'Erreur lors de l\'actualisation'
+    try {
+      // Recharger le profil utilisateur
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Erreur lors du rechargement du profil:', error);
+          toast.error('Erreur lors de l\'actualisation');
+        } else {
+          toast.success('Paramètres actualisés avec succès');
+          // Les données seront automatiquement mises à jour via AuthContext
+        }
       }
-    );
-    setTimeout(() => setRefreshing(false), 1500);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Erreur lors de l\'actualisation');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
-  const handleSaveSettings = () => {
-    toast.success("Paramètres sauvegardés avec succès");
+  const handleSaveSettings = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          agency: agency
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Erreur lors de la sauvegarde:', error);
+        toast.error('Erreur lors de la sauvegarde');
+      } else {
+        toast.success('Paramètres sauvegardés avec succès');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRoleLabel = (roleValue: string) => {
+    switch (roleValue) {
+      case 'admin':
+        return 'Administrateur';
+      case 'manager':
+        return 'Gestionnaire';
+      case 'technician':
+        return 'Technicien';
+      default:
+        return roleValue;
+    }
+  };
+
+  const getStatusBadge = () => {
+    if (!userProfile) return { text: 'Chargement...', variant: 'secondary' as const };
+    
+    switch (userProfile.account_status) {
+      case 'approved':
+        return { text: 'Approuvé', variant: 'default' as const };
+      case 'pending':
+        return { text: 'En attente', variant: 'secondary' as const };
+      case 'rejected':
+        return { text: 'Rejeté', variant: 'destructive' as const };
+      default:
+        return { text: 'Inconnu', variant: 'secondary' as const };
+    }
   };
 
   return (
@@ -52,9 +141,10 @@ export default function Settings() {
         
         <ModernButton 
           onClick={handleSaveSettings}
+          disabled={loading}
           icon={SettingsIcon}
         >
-          Sauvegarder
+          {loading ? 'Sauvegarde...' : 'Sauvegarder'}
         </ModernButton>
       </AirbnbHeader>
 
@@ -66,8 +156,8 @@ export default function Settings() {
               <User className="w-5 h-5 text-white" />
             </div>
             Profil utilisateur
-            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
-              Actif
+            <Badge variant={getStatusBadge().variant} className="ml-auto text-xs">
+              {getStatusBadge().text}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -76,37 +166,52 @@ export default function Settings() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name">Nom complet</Label>
-                <Input id="name" defaultValue="Ahmed Benali" className="mt-1" />
+                <Input 
+                  id="name" 
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="mt-1" 
+                />
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="ahmed.benali@gfi.com" className="mt-1" />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={email}
+                  disabled
+                  className="mt-1 bg-gray-50" 
+                />
+                <p className="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié</p>
               </div>
             </div>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="role">Rôle</Label>
-                <Select defaultValue="technician">
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="technician">Technicien</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Administrateur</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input 
+                  id="role" 
+                  value={getRoleLabel(role)}
+                  disabled
+                  className="mt-1 bg-gray-50" 
+                />
+                <p className="text-xs text-gray-500 mt-1">Le rôle est géré par l'administrateur</p>
               </div>
               <div>
                 <Label htmlFor="agency">Agence</Label>
-                <Select defaultValue="casablanca">
+                <Select value={agency} onValueChange={setAgency}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue />
+                    <SelectValue placeholder="Sélectionner une agence" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="casablanca">Casablanca</SelectItem>
-                    <SelectItem value="rabat">Rabat</SelectItem>
-                    <SelectItem value="fes">Fès</SelectItem>
+                    <SelectItem value="">Non assigné</SelectItem>
+                    <SelectItem value="Agence Douala Centre">Agence Douala Centre</SelectItem>
+                    <SelectItem value="Agence Douala Nord">Agence Douala Nord</SelectItem>
+                    <SelectItem value="Agence Yaoundé Centre">Agence Yaoundé Centre</SelectItem>
+                    <SelectItem value="Agence Yaoundé Nord">Agence Yaoundé Nord</SelectItem>
+                    <SelectItem value="Agence Bamenda">Agence Bamenda</SelectItem>
+                    <SelectItem value="Agence Bafoussam">Agence Bafoussam</SelectItem>
+                    <SelectItem value="Agence Garoua">Agence Garoua</SelectItem>
+                    <SelectItem value="Agence Maroua">Agence Maroua</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -176,9 +281,10 @@ export default function Settings() {
               <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
               <Input id="confirm-password" type="password" className="mt-1" />
             </div>
-            <ModernButton>
+            <ModernButton disabled>
               Changer le mot de passe
             </ModernButton>
+            <p className="text-xs text-gray-500">Fonctionnalité à venir</p>
           </div>
         </CardContent>
       </Card>
