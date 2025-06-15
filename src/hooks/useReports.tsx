@@ -1,7 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useOfflineStorage } from './useOfflineStorage';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface MaintenanceReport {
   id: string;
@@ -25,6 +26,7 @@ export function useReports() {
   const [reports, setReports] = useState<MaintenanceReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isOnline, saveOfflineData, syncOfflineData, hasOfflineData, clearAllOfflineData } = useOfflineStorage('reports');
 
   const fetchReports = useCallback(async () => {
     try {
@@ -60,84 +62,170 @@ export function useReports() {
     }
   }, []);
 
-  const createReport = useCallback(async (reportData: Omit<MaintenanceReport, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      const { data, error } = await supabase
-        .from('maintenance_reports')
-        .insert([reportData])
-        .select()
-        .single();
+  // --- Internal server functions ---
+  const _createReportOnServer = useCallback(async (reportData: Omit<MaintenanceReport, 'id' | 'created_at' | 'updated_at'>) => {
+    const { data, error } = await supabase
+      .from('maintenance_reports')
+      .insert([reportData])
+      .select()
+      .single();
 
-      if (error) {
+    if (error) throw error;
+    
+    return {
+      ...data,
+      type: data.type as "Préventive" | "Corrective" | "Urgente",
+      status: data.status as "Terminé" | "En cours" | "Planifié"
+    } as MaintenanceReport;
+  }, []);
+
+  const _updateReportOnServer = useCallback(async (id: string, updates: Partial<MaintenanceReport>) => {
+    const { data, error } = await supabase
+      .from('maintenance_reports')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    return {
+      ...data,
+      type: data.type as "Préventive" | "Corrective" | "Urgente",
+      status: data.status as "Terminé" | "En cours" | "Planifié"
+    } as MaintenanceReport;
+  }, []);
+
+  const _deleteReportOnServer = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('maintenance_reports')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }, []);
+
+
+  // --- Public functions with offline handling ---
+  const createReport = useCallback(async (reportData: Omit<MaintenanceReport, 'id' | 'created_at' | 'updated_at'>) => {
+    if (isOnline) {
+      try {
+        const newReport = await _createReportOnServer(reportData);
+        setReports(prev => [newReport, ...prev]);
+        toast.success('Rapport créé avec succès');
+        return newReport;
+      } catch (error) {
+        console.error('❌ Erreur lors de la création du rapport:', error);
+        toast.error('Erreur lors de la création du rapport');
         throw error;
       }
-
-      const newReport = {
-        ...data,
-        type: data.type as "Préventive" | "Corrective" | "Urgente",
-        status: data.status as "Terminé" | "En cours" | "Planifié"
-      } as MaintenanceReport;
-
+    } else {
+      const tempId = uuidv4();
+      const newReport: MaintenanceReport = {
+        ...reportData,
+        id: tempId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
       setReports(prev => [newReport, ...prev]);
-      toast.success('Rapport créé avec succès');
+      saveOfflineData({ action: 'CREATE', payload: reportData, tempId }, tempId);
+      toast.info('Mode hors ligne: Rapport sauvegardé', {
+        description: 'Il sera synchronisé une fois la connexion rétablie.'
+      });
       return newReport;
-    } catch (error) {
-      console.error('❌ Erreur lors de la création du rapport:', error);
-      toast.error('Erreur lors de la création du rapport');
-      throw error;
     }
-  }, []);
+  }, [isOnline, saveOfflineData, _createReportOnServer]);
 
   const updateReport = useCallback(async (id: string, updates: Partial<MaintenanceReport>) => {
-    try {
-      const { data, error } = await supabase
-        .from('maintenance_reports')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
+    if (isOnline) {
+      try {
+        const updatedReport = await _updateReportOnServer(id, updates);
+        setReports(prev => prev.map(report => 
+          report.id === id ? updatedReport : report
+        ));
+        toast.success('Rapport mis à jour avec succès');
+        return updatedReport;
+      } catch (error) {
+        console.error('❌ Erreur lors de la mise à jour du rapport:', error);
+        toast.error('Erreur lors de la mise à jour du rapport');
         throw error;
       }
-
-      const updatedReport = {
-        ...data,
-        type: data.type as "Préventive" | "Corrective" | "Urgente",
-        status: data.status as "Terminé" | "En cours" | "Planifié"
-      } as MaintenanceReport;
-
-      setReports(prev => prev.map(report => 
-        report.id === id ? updatedReport : report
-      ));
-      toast.success('Rapport mis à jour avec succès');
+    } else {
+      const updatedReport = reports.find(r => r.id === id);
+      if(updatedReport) {
+        const newReportState = {...updatedReport, ...updates, updated_at: new Date().toISOString()};
+         setReports(prev => prev.map(report => 
+          report.id === id ? newReportState as MaintenanceReport : report
+        ));
+      }
+      saveOfflineData({ action: 'UPDATE', payload: updates, id }, id);
+      toast.info('Mode hors ligne: Mise à jour sauvegardée', {
+        description: 'Elle sera synchronisée une fois la connexion rétablie.'
+      });
       return updatedReport;
-    } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour du rapport:', error);
-      toast.error('Erreur lors de la mise à jour du rapport');
-      throw error;
     }
-  }, []);
+  }, [isOnline, saveOfflineData, _updateReportOnServer, reports]);
 
   const deleteReport = useCallback(async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('maintenance_reports')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
+    if (isOnline) {
+      try {
+        await _deleteReportOnServer(id);
+        setReports(prev => prev.filter(report => report.id !== id));
+        toast.success('Rapport supprimé avec succès');
+      } catch (error) {
+        console.error('❌ Erreur lors de la suppression du rapport:', error);
+        toast.error('Erreur lors de la suppression du rapport');
         throw error;
       }
-
+    } else {
       setReports(prev => prev.filter(report => report.id !== id));
-      toast.success('Rapport supprimé avec succès');
-    } catch (error) {
-      console.error('❌ Erreur lors de la suppression du rapport:', error);
-      toast.error('Erreur lors de la suppression du rapport');
-      throw error;
+      saveOfflineData({ action: 'DELETE', id }, id);
+      toast.info('Mode hors ligne: Suppression enregistrée', {
+        description: 'Elle sera synchronisée une fois la connexion rétablie.'
+      });
     }
-  }, []);
+  }, [isOnline, saveOfflineData, _deleteReportOnServer]);
+
+  // --- Sync effect ---
+  useEffect(() => {
+    if (isOnline && hasOfflineData) {
+      toast.loading('Synchronisation des données en cours...');
+      
+      syncOfflineData(async (item) => {
+        try {
+          const { action, payload, id, tempId } = item;
+          console.log(`📡 Synchronisation de l'action ${action} pour l'id ${id || tempId}`);
+
+          if (action === 'CREATE') {
+            const newReport = await _createReportOnServer(payload);
+            setReports(prev => [newReport, ...prev.filter(r => r.id !== tempId)]);
+          } else if (action === 'UPDATE') {
+            await _updateReportOnServer(id, payload);
+          } else if (action === 'DELETE') {
+            await _deleteReportOnServer(id);
+          }
+          
+          return true; // Succès -> retire de la file d'attente
+        } catch (error) {
+          console.error(`❌ Erreur de synchronisation pour ${item.id || item.tempId}:`, error);
+          return false; // Échec -> reste dans la file
+        }
+      }).then(results => {
+        const successes = Object.values(results).filter(r => r).length;
+        const failures = Object.values(results).length - successes;
+        
+        toast.dismiss();
+
+        if (successes > 0) {
+          toast.success(`${successes} action(s) synchronisée(s) avec succès !`);
+        }
+        if (failures > 0) {
+          toast.error(`${failures} action(s) n'ont pas pu être synchronisées.`);
+        }
+      });
+    }
+  }, [isOnline, hasOfflineData, syncOfflineData, _createReportOnServer, _updateReportOnServer, _deleteReportOnServer]);
+
 
   useEffect(() => {
     fetchReports();

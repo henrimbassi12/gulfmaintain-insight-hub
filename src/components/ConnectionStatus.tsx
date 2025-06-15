@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Wifi, WifiOff, Database, AlertCircle, Upload } from 'lucide-react';
@@ -8,7 +7,9 @@ import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 export function ConnectionStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
-  const { hasOfflineData } = useOfflineStorage('maintenance');
+  const { hasOfflineData: hasMaintenanceOfflineData } = useOfflineStorage('maintenance');
+  const { hasOfflineData: hasReportsOfflineData } = useOfflineStorage('reports');
+  const hasOfflineData = hasMaintenanceOfflineData || hasReportsOfflineData;
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);

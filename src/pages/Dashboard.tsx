@@ -16,6 +16,7 @@ import TrendsChart from '@/components/dashboard/TrendsChart';
 import AISummary from '@/components/dashboard/AISummary';
 import QuickActions from '@/components/dashboard/QuickActions';
 import { NotificationSystem } from '@/components/NotificationSystem';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { 
   Wrench, 
   AlertTriangle, 
@@ -167,6 +168,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
+              <ConnectionStatus />
               <Select value={timeRange} onValueChange={setTimeRange}>
                 <SelectTrigger className="w-full sm:w-32 border-gray-200">
                   <SelectValue />
