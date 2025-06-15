@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +26,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fonction pour récupérer le profil utilisateur
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('🔍 Recherche du profil pour userId:', userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -34,28 +35,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (error) {
-        console.error('Erreur lors de la récupération du profil:', error);
+        console.error('❌ Erreur lors de la récupération du profil:', error);
         return null;
       }
       
+      console.log('✅ Profil récupéré:', data);
       return data;
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('❌ Erreur:', error);
       return null;
     }
   };
 
   useEffect(() => {
+    console.log('🚀 Initialisation AuthProvider');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔄 Auth state change:', event, session?.user?.email);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('👤 Utilisateur connecté, récupération du profil...');
           const profile = await fetchUserProfile(session.user.id);
           setUserProfile(profile);
+          console.log('📋 Profil défini:', profile);
         } else {
+          console.log('❌ Aucun utilisateur, profil effacé');
           setUserProfile(null);
         }
         
@@ -65,12 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('🔍 Session existante trouvée:', session?.user?.email);
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('👤 Session existante, récupération du profil...');
         const profile = await fetchUserProfile(session.user.id);
         setUserProfile(profile);
+        console.log('📋 Profil défini pour session existante:', profile);
       }
       
       setLoading(false);
@@ -81,18 +94,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('🔐 Tentative de connexion pour:', email);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
+        console.error('❌ Erreur de connexion:', error);
         toast({
           title: "Erreur de connexion",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('✅ Connexion réussie');
         toast({
           title: "Connexion réussie",
           description: "Vous êtes maintenant connecté",
@@ -101,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return { error };
     } catch (error: any) {
+      console.error('❌ Erreur catch:', error);
       return { error };
     }
   };
