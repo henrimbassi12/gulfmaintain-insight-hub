@@ -68,9 +68,8 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
   };
 
   const suggestedNames = [
-    'Ngono Alain', 'Mballa Christine', 'Fombong Joseph', 'Nguema Marie',
-    'Abanda Paul', 'Talla Francine', 'Kamga Michel', 'Biya Sandra',
-    'Ndongo Robert', 'Eyenga Grace', 'Fouda Daniel', 'Manga Sylvie'
+    'CÉDRIC', 'MBAPBOU GRÉGOIRE', 'VOUKENG', 'TCHINDA CONSTANT', 
+    'NDJOKO IV', 'NDOUMBE ETIA'
   ];
 
   return (
@@ -100,7 +99,7 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
             <div className="mt-2">
               <p className="text-xs text-gray-500 mb-1">Suggestions :</p>
               <div className="flex flex-wrap gap-1">
-                {suggestedNames.slice(0, 6).map((name) => (
+                {suggestedNames.map((name) => (
                   <button
                     key={name}
                     onClick={() => setParticipantName(name)}
