@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Route, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -351,63 +350,66 @@ export function GeolocationSystem() {
         </Card>
       </div>
 
-      {/* Interactive Map with Leaflet */}
+      {/* Interactive Map with Leaflet - Fixed structure */}
       <Card>
         <CardHeader>
           <CardTitle>Carte interactive - Douala par secteur</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-96 rounded-lg overflow-hidden shadow-lg">
-            <MapContainer
-              center={[4.0511, 9.7679]}
-              zoom={12}
-              style={{ height: '100%', width: '100%' }}
-              className="z-0"
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              {/* Technician Markers */}
-              {technicians.map((tech) => (
-                <Marker
-                  key={tech.id}
-                  position={[tech.lat, tech.lng]}
-                  icon={technicianIcon}
-                >
-                  <Popup>
-                    <div className="p-2">
-                      <h3 className="font-semibold">{tech.name}</h3>
-                      <p className="text-sm text-gray-600">Status: {tech.status === 'available' ? 'Disponible' : tech.status === 'busy' ? 'Occupé' : 'Hors ligne'}</p>
-                      <p className="text-sm text-gray-600">Secteurs: {tech.sectors}</p>
-                      {tech.currentTask && <p className="text-sm">Tâche: {tech.currentTask}</p>}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+            {userLocation && (
+              <MapContainer
+                center={[userLocation.lat, userLocation.lng]}
+                zoom={12}
+                style={{ height: '100%', width: '100%' }}
+                className="z-0"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                
+                {/* Technician Markers */}
+                {technicians.map((tech) => (
+                  <Marker
+                    key={`tech-${tech.id}`}
+                    position={[tech.lat, tech.lng]}
+                    icon={technicianIcon}
+                  >
+                    <Popup>
+                      <div className="p-2">
+                        <h3 className="font-semibold">{tech.name}</h3>
+                        <p className="text-sm text-gray-600">Status: {tech.status === 'available' ? 'Disponible' : tech.status === 'busy' ? 'Occupé' : 'Hors ligne'}</p>
+                        <p className="text-sm text-gray-600">Secteurs: {tech.sectors}</p>
+                        {tech.currentTask && <p className="text-sm">Tâche: {tech.currentTask}</p>}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
 
-              {/* Maintenance Point Markers */}
-              {maintenancePoints.map((point) => (
-                <Marker
-                  key={point.id}
-                  position={[point.lat, point.lng]}
-                  icon={priorityIcons[point.priority]}
-                >
-                  <Popup>
-                    <div className="p-2">
-                      <h3 className="font-semibold">{point.equipment}</h3>
-                      <p className="text-sm text-gray-600">{point.address}</p>
-                      <p className="text-sm">Priorité: {point.priority === 'high' ? 'Urgent' : point.priority === 'medium' ? 'Moyen' : 'Faible'}</p>
-                      <p className="text-sm">Durée: {point.estimatedDuration}</p>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+                {/* Maintenance Point Markers */}
+                {maintenancePoints.map((point) => (
+                  <Marker
+                    key={`maintenance-${point.id}`}
+                    position={[point.lat, point.lng]}
+                    icon={priorityIcons[point.priority]}
+                  >
+                    <Popup>
+                      <div className="p-2">
+                        <h3 className="font-semibold">{point.equipment}</h3>
+                        <p className="text-sm text-gray-600">{point.address}</p>
+                        <p className="text-sm">Priorité: {point.priority === 'high' ? 'Urgent' : point.priority === 'medium' ? 'Moyen' : 'Faible'}</p>
+                        <p className="text-sm">Durée: {point.estimatedDuration}</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
 
-              {/* User Location Marker */}
-              {userLocation && (
-                <Marker position={[userLocation.lat, userLocation.lng]}>
+                {/* User Location Marker */}
+                <Marker 
+                  key="user-location"
+                  position={[userLocation.lat, userLocation.lng]}
+                >
                   <Popup>
                     <div className="p-2">
                       <h3 className="font-semibold">Votre position</h3>
@@ -417,8 +419,8 @@ export function GeolocationSystem() {
                     </div>
                   </Popup>
                 </Marker>
-              )}
-            </MapContainer>
+              </MapContainer>
+            )}
           </div>
         </CardContent>
       </Card>
