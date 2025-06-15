@@ -15,6 +15,21 @@ import { useReports } from '@/hooks/useReports';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardKPIs } from '@/components/dashboard/DashboardKPIs';
 import { RecentInterventionsTable } from '@/components/dashboard/RecentInterventionsTable';
+import { MaintenanceReport } from '@/types/maintenance';
+
+type ReportStatus = MaintenanceReport['status'];
+type InterventionStatus = 'completed' | 'in-progress' | 'planned';
+
+const mapReportStatusToInterventionStatus = (status: ReportStatus): InterventionStatus => {
+  switch (status) {
+    case 'Terminé':
+      return 'completed';
+    case 'En cours':
+      return 'in-progress';
+    case 'Planifié':
+      return 'planned';
+  }
+};
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -40,8 +55,7 @@ export default function Dashboard() {
       equipment: report.equipment,
       technician: report.technician,
       type: report.type,
-      status: report.status === 'Terminé' ? 'completed' : 
-              report.status === 'En cours' ? 'in-progress' : 'planned',
+      status: mapReportStatusToInterventionStatus(report.status),
       duration: report.duration,
       sector: report.location
     }));
