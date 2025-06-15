@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, RefreshCw, User, Bell, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, RefreshCw, User, Bell, Shield, Save } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -154,7 +153,7 @@ export default function Settings() {
         <ModernButton 
           onClick={handleSaveSettings}
           disabled={loading}
-          icon={SettingsIcon}
+          icon={Save}
         >
           {loading ? 'Sauvegarde...' : 'Sauvegarder'}
         </ModernButton>
