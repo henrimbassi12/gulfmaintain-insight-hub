@@ -27,9 +27,28 @@ export function NotificationSystem() {
   const { toast } = useToast();
   const { sendNotification, isEnabled: pushEnabled } = usePushNotifications();
 
+  // Fonction pour vérifier si les notifications sont activées
+  const areNotificationsEnabled = () => {
+    const emailNotifications = localStorage.getItem('emailNotifications');
+    const maintenanceReminders = localStorage.getItem('maintenanceReminders');
+    
+    // Si pas de préférences sauvegardées, considérer comme activées par défaut
+    const emailEnabled = emailNotifications !== null ? JSON.parse(emailNotifications) : true;
+    const maintenanceEnabled = maintenanceReminders !== null ? JSON.parse(maintenanceReminders) : true;
+    
+    return { emailEnabled, maintenanceEnabled };
+  };
+
   // Simuler des notifications en temps réel
   useEffect(() => {
     const interval = setInterval(() => {
+      const { emailEnabled, maintenanceEnabled } = areNotificationsEnabled();
+      
+      // Ne pas générer de notifications si elles sont désactivées
+      if (!emailEnabled && !maintenanceEnabled && !pushEnabled) {
+        return;
+      }
+
       const mockNotifications: Notification[] = [
         {
           id: Date.now().toString(),
@@ -37,7 +56,7 @@ export function NotificationSystem() {
           title: 'Maintenance Urgente',
           message: 'Température critique détectée sur le réfrigérateur',
           equipment: 'FR-2024-012',
-          location: 'Agence Rabat Centre',
+          location: 'Région Littoral',
           timestamp: new Date(),
           read: false
         },
@@ -47,7 +66,7 @@ export function NotificationSystem() {
           title: 'Maintenance Préventive',
           message: 'Entretien programmé nécessaire',
           equipment: 'FR-2024-089',
-          location: 'Agence Casablanca Nord',
+          location: 'Région Ouest',
           timestamp: new Date(),
           read: false
         },
@@ -57,7 +76,7 @@ export function NotificationSystem() {
           title: 'Réparation Terminée',
           message: 'L\'intervention a été completée avec succès',
           equipment: 'FR-2024-156',
-          location: 'Agence Fès Centre',
+          location: 'Région Nord',
           timestamp: new Date(),
           read: false
         }
@@ -65,22 +84,38 @@ export function NotificationSystem() {
 
       if (Math.random() > 0.8) {
         const randomNotification = mockNotifications[Math.floor(Math.random() * mockNotifications.length)];
-        setNotifications(prev => [randomNotification, ...prev.slice(0, 9)]);
         
-        // Toast notification
-        toast({
-          title: randomNotification.title,
-          description: randomNotification.message,
-          variant: randomNotification.type === 'urgent' ? 'destructive' : 'default'
-        });
+        // Vérifier le type de notification et les préférences
+        let shouldShowNotification = false;
+        
+        if (randomNotification.type === 'urgent' && emailEnabled) {
+          shouldShowNotification = true;
+        } else if (randomNotification.type === 'maintenance' && maintenanceEnabled) {
+          shouldShowNotification = true;
+        } else if (randomNotification.type === 'success' && emailEnabled) {
+          shouldShowNotification = true;
+        } else if (randomNotification.type === 'info' && emailEnabled) {
+          shouldShowNotification = true;
+        }
 
-        // Push notification si activée
-        if (pushEnabled) {
-          sendNotification(randomNotification.title, {
-            body: `${randomNotification.message} - ${randomNotification.equipment}`,
-            tag: randomNotification.id,
-            requireInteraction: randomNotification.type === 'urgent'
+        if (shouldShowNotification) {
+          setNotifications(prev => [randomNotification, ...prev.slice(0, 9)]);
+          
+          // Toast notification
+          toast({
+            title: randomNotification.title,
+            description: randomNotification.message,
+            variant: randomNotification.type === 'urgent' ? 'destructive' : 'default'
           });
+
+          // Push notification si activée
+          if (pushEnabled) {
+            sendNotification(randomNotification.title, {
+              body: `${randomNotification.message} - ${randomNotification.equipment}`,
+              tag: randomNotification.id,
+              requireInteraction: randomNotification.type === 'urgent'
+            });
+          }
         }
       }
     }, 15000); // Toutes les 15 secondes pour demo

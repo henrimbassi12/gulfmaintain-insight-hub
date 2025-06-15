@@ -69,7 +69,15 @@ export function usePushNotifications() {
     tag?: string;
     requireInteraction?: boolean;
   }) => {
+    // Vérifier si les notifications push sont vraiment activées
     if (!permissionState.isSupported || permissionState.permission !== 'granted') {
+      console.log('Notifications push non disponibles ou non autorisées');
+      return;
+    }
+
+    // Vérifier si l'utilisateur n'est pas en ligne (pour éviter les notifications hors ligne)
+    if (!navigator.onLine) {
+      console.log('Mode hors ligne - notification push ignorée');
       return;
     }
 
@@ -90,16 +98,33 @@ export function usePushNotifications() {
         }, 5000);
       }
 
+      // Gérer les clics sur la notification
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
       return notification;
     } catch (error) {
       console.error('Erreur lors de l\'envoi de la notification:', error);
     }
   };
 
+  const revokePermission = () => {
+    // Note: JavaScript ne peut pas révoquer les permissions de notification
+    // L'utilisateur doit le faire manuellement dans les paramètres du navigateur
+    toast({
+      title: "Information",
+      description: "Pour désactiver les notifications push, utilisez les paramètres de votre navigateur.",
+      variant: "default"
+    });
+  };
+
   return {
     permissionState,
     requestPermission,
     sendNotification,
+    revokePermission,
     isEnabled: permissionState.permission === 'granted'
   };
 }

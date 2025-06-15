@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { NotificationSettings } from '@/components/NotificationSettings';
 
 export default function Settings() {
   const { user, userProfile } = useAuth();
@@ -24,6 +26,10 @@ export default function Settings() {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
   const [agency, setAgency] = useState('');
+
+  // États pour les notifications
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [maintenanceReminders, setMaintenanceReminders] = useState(true);
 
   // Vérifier si l'utilisateur est admin
   const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
@@ -39,6 +45,17 @@ export default function Settings() {
       setEmail(user.email || '');
       setFullName(user.user_metadata?.full_name || '');
       setRole(user.user_metadata?.role || 'technician');
+    }
+
+    // Charger les préférences de notifications depuis localStorage
+    const savedEmailNotifications = localStorage.getItem('emailNotifications');
+    const savedMaintenanceReminders = localStorage.getItem('maintenanceReminders');
+    
+    if (savedEmailNotifications !== null) {
+      setEmailNotifications(JSON.parse(savedEmailNotifications));
+    }
+    if (savedMaintenanceReminders !== null) {
+      setMaintenanceReminders(JSON.parse(savedMaintenanceReminders));
     }
   }, [user, userProfile]);
 
@@ -95,6 +112,10 @@ export default function Settings() {
         console.error('Erreur lors de la sauvegarde:', error);
         toast.error('Erreur lors de la sauvegarde');
       } else {
+        // Sauvegarder les préférences de notifications dans localStorage
+        localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
+        localStorage.setItem('maintenanceReminders', JSON.stringify(maintenanceReminders));
+        
         toast.success('Paramètres sauvegardés avec succès');
       }
     } catch (error) {
@@ -246,38 +267,43 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Notifications Push */}
+      {/* Configuration des notifications */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100">
           <CardTitle className="flex items-center gap-3 text-lg">
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Bell className="w-5 h-5 text-white" />
             </div>
-            Notifications Push
+            Paramètres de notification
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-gray-900">Notifications push</h4>
-                <p className="text-sm text-gray-500">Recevoir des notifications sur le bureau</p>
+            {/* Composant pour les notifications push */}
+            <NotificationSettings />
+            
+            <div className="border-t pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900">Alertes par email</h4>
+                  <p className="text-sm text-gray-500">Notifications importantes par email</p>
+                </div>
+                <Switch 
+                  checked={emailNotifications}
+                  onCheckedChange={setEmailNotifications}
+                />
               </div>
-              <Switch defaultChecked />
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-gray-900">Alertes par email</h4>
-                <p className="text-sm text-gray-500">Notifications importantes par email</p>
-              </div>
-              <Switch defaultChecked />
-            </div>
+            
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-gray-900">Rappels de maintenance</h4>
                 <p className="text-sm text-gray-500">Alertes automatiques de maintenance</p>
               </div>
-              <Switch defaultChecked />
+              <Switch 
+                checked={maintenanceReminders}
+                onCheckedChange={setMaintenanceReminders}
+              />
             </div>
           </div>
         </CardContent>
