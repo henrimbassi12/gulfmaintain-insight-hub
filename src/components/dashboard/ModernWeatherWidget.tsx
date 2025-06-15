@@ -20,8 +20,9 @@ export function ModernWeatherWidget() {
   };
 
   const nextDays = getNextDays();
-  const icons = [Sun, Cloud, CloudRain, Wind];
-  const temps = ['24°', '21°', '19°', '23°'];
+  // Rotation des icônes pour correspondre aux jours réels
+  const icons = [Cloud, Sun, CloudRain, Wind];
+  const temps = ['21°', '24°', '19°', '23°'];
 
   return (
     <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -46,7 +47,12 @@ export function ModernWeatherWidget() {
             const IconComponent = icons[index];
             return (
               <div key={day} className="text-center p-2 bg-gray-50 rounded-lg">
-                <IconComponent className="h-4 w-4 mx-auto mb-1 text-blue-500" />
+                <IconComponent className={`h-4 w-4 mx-auto mb-1 ${
+                  IconComponent === Sun ? 'text-yellow-500' :
+                  IconComponent === Cloud ? 'text-gray-400' :
+                  IconComponent === CloudRain ? 'text-blue-400' :
+                  'text-gray-500'
+                }`} />
                 <p className="text-gray-500 mb-1">{day}</p>
                 <p className="font-medium text-gray-900">{temps[index]}</p>
               </div>
