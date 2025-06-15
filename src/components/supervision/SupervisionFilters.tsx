@@ -55,20 +55,6 @@ const SupervisionFilters: React.FC<SupervisionFiltersProps> = ({ filters, onFilt
             </SelectContent>
           </Select>
 
-          <Select value={filters.equipmentType} onValueChange={(value) => onFilterChange('equipmentType', value)}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Type d'équipement" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les types</SelectItem>
-              <SelectItem value="refrigeration">Réfrigération</SelectItem>
-              <SelectItem value="climatisation">Climatisation</SelectItem>
-              <SelectItem value="hvac">HVAC</SelectItem>
-              <SelectItem value="electrique">Électrique</SelectItem>
-              <SelectItem value="mecanique">Mécanique</SelectItem>
-            </SelectContent>
-          </Select>
-
           <Select value={filters.timeframe} onValueChange={(value) => onFilterChange('timeframe', value)}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Période" />

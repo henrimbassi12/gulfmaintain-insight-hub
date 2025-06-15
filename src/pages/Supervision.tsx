@@ -1,11 +1,7 @@
-
 import React, { useState } from 'react';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
-import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
-import RecurrenceAnalysis from '@/components/supervision/RecurrenceAnalysis';
 import { TechnicianRecommendations } from '@/components/supervision/TechnicianRecommendations';
 import { PredictionsList } from '@/components/supervision/PredictionsList';
-import AIReliabilityScore from '@/components/supervision/AIReliabilityScore';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +23,7 @@ export default function Supervision() {
   const [filters, setFilters] = useState({
     region: 'all',
     riskLevel: 'all',
-    equipmentType: 'all',
+    equipmentType: 'refrigeration',
     timeframe: '30'
   });
   
@@ -86,39 +82,6 @@ export default function Supervision() {
   const highRiskPredictions = predictions.filter(p => p.failure_risk > 70).length;
   const mediumRiskPredictions = predictions.filter(p => p.failure_risk >= 30 && p.failure_risk <= 70).length;
   const lowRiskPredictions = predictions.filter(p => p.failure_risk < 30).length;
-
-  const mockAIMetrics = {
-    predictionAccuracy: 92,
-    confidenceScore: 87,
-    totalPredictions: totalPredictions,
-    correctPredictions: Math.floor(totalPredictions * 0.92),
-    modelVersion: 'v2.1.3',
-    lastUpdated: new Date().toLocaleString('fr-FR')
-  };
-
-  const mockRecurrenceData = [
-    {
-      equipment: 'Réfrigérateur Commercial A1',
-      recurrenceRate: 45,
-      category: 'Critique',
-      totalFailures: 8,
-      avgTimeBetweenFailures: 22
-    },
-    {
-      equipment: 'Climatiseur Bureau B2',
-      recurrenceRate: 25,
-      category: 'Modéré',
-      totalFailures: 4,
-      avgTimeBetweenFailures: 45
-    },
-    {
-      equipment: 'Système HVAC C3',
-      recurrenceRate: 35,
-      category: 'Modéré',
-      totalFailures: 6,
-      avgTimeBetweenFailures: 30
-    }
-  ];
 
   if (error) {
     return (
@@ -253,24 +216,6 @@ export default function Supervision() {
                 onShowDetails={handleShowPredictionDetails}
               />
             )}
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardContent className="p-6">
-            <AIPredictionPanel />
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardContent className="p-6">
-            <AIReliabilityScore metrics={mockAIMetrics} />
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-          <CardContent className="p-6">
-            <RecurrenceAnalysis data={mockRecurrenceData} />
           </CardContent>
         </Card>
         
