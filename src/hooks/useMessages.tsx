@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 
 export interface Conversation {
@@ -36,12 +37,19 @@ export interface ConversationWithParticipant extends Conversation {
 }
 
 export function useMessages() {
+  const { user, userProfile } = useAuth();
   const [conversations, setConversations] = useState<ConversationWithParticipant[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchConversations = async () => {
+    if (!user) {
+      setConversations([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       console.log('Fetching conversations...');
       const { data: conversationsData, error: convError } = await supabase
@@ -127,14 +135,23 @@ export function useMessages() {
   };
 
   const sendMessage = async (conversationId: string, content: string) => {
+    if (!user || !userProfile) {
+      toast.error('Vous devez être connecté pour envoyer un message');
+      return;
+    }
+
     try {
       console.log('Sending message to conversation:', conversationId, content);
+      
+      // Utiliser le nom du profil utilisateur ou son email comme nom d'expéditeur
+      const senderName = userProfile.full_name || user.email || 'Utilisateur';
+      
       const { error } = await supabase
         .from('messages')
         .insert([
           {
             conversation_id: conversationId,
-            sender_name: 'Vous',
+            sender_name: senderName,
             content,
             is_me: true
           }
@@ -165,8 +182,10 @@ export function useMessages() {
   };
 
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    if (user) {
+      fetchConversations();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -177,6 +196,8 @@ export function useMessages() {
 
   // Écouter les nouveaux messages en temps réel
   useEffect(() => {
+    if (!user) return;
+
     console.log('Setting up realtime subscription');
     const channel = supabase
       .channel('messages-changes')
@@ -203,7 +224,7 @@ export function useMessages() {
       console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
-  }, [selectedConversationId]);
+  }, [selectedConversationId, user]);
 
   return {
     conversations,

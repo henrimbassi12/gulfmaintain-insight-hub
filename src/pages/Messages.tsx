@@ -8,10 +8,13 @@ import { MessageCircle, RefreshCw, Activity, Send, Search, User } from 'lucide-r
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
+import { NewConversationModal } from '@/components/NewConversationModal';
 import { useMessages } from '@/hooks/useMessages';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 export default function Messages() {
+  const { user } = useAuth();
   const {
     conversations,
     messages,
@@ -24,6 +27,23 @@ export default function Messages() {
 
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Rediriger vers la connexion si l'utilisateur n'est pas connecté
+  if (!user) {
+    return (
+      <AirbnbContainer>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-gray-500 mb-4">Vous devez être connecté pour accéder aux messages</p>
+            <Button onClick={() => window.location.href = '/login'}>
+              Se connecter
+            </Button>
+          </div>
+        </div>
+      </AirbnbContainer>
+    );
+  }
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversationId) return;
@@ -110,6 +130,7 @@ export default function Messages() {
             {/* Liste des conversations */}
             <div className="w-1/3 border-r border-gray-100">
               <div className="p-4 border-b border-gray-100">
+                <NewConversationModal onConversationCreated={refetch} />
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
@@ -125,7 +146,12 @@ export default function Messages() {
                 {isLoading ? (
                   <div className="p-4 text-center text-gray-500">Chargement...</div>
                 ) : filteredConversations.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">Aucune conversation trouvée</div>
+                  <div className="p-4 text-center text-gray-500">
+                    {conversations.length === 0 ? 
+                      "Aucune conversation. Créez-en une nouvelle !" : 
+                      "Aucune conversation trouvée"
+                    }
+                  </div>
                 ) : (
                   filteredConversations.map((conversation) => (
                     <div
@@ -219,6 +245,11 @@ export default function Messages() {
                                 : 'bg-gray-100 text-gray-900'
                             }`}
                           >
+                            {!message.is_me && (
+                              <p className="text-xs font-medium mb-1 opacity-75">
+                                {message.sender_name}
+                              </p>
+                            )}
                             <p className="text-sm">{message.content}</p>
                             <p className={`text-xs mt-1 ${
                               message.is_me ? 'text-blue-200' : 'text-gray-500'
@@ -259,6 +290,7 @@ export default function Messages() {
                   <div className="text-center">
                     <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Sélectionnez une conversation pour commencer</p>
+                    <p className="text-sm mt-2">ou créez une nouvelle conversation</p>
                   </div>
                 </div>
               )}
