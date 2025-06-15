@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import SupervisionFilters from '@/components/supervision/SupervisionFilters';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
@@ -14,7 +15,8 @@ import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
-import { useSupervision, FailurePrediction, TechnicianRecommendation } from '@/hooks/useSupervision';
+import { useSupervision } from '@/hooks/useSupervision';
+import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
 import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
 import { PredictionDetails } from '@/components/supervision/PredictionDetails';
 import { TechnicianProfileSheet } from '@/components/supervision/TechnicianProfileSheet';
