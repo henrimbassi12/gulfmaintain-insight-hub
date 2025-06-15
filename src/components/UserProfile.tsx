@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, User, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
 
 export function UserProfile() {
   const { user, userProfile, signOut } = useAuth();
@@ -93,7 +93,7 @@ export function UserProfile() {
           {getRoleIcon(userRole)}
           {getRoleLabel(userRole)}
         </Badge>
-        <OfflineIndicator />
+        <ConnectionStatus />
       </div>
 
       <Button 

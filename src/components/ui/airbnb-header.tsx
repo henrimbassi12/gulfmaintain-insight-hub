@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { LucideIcon } from "lucide-react";
-import { ConnectionStatus } from '@/components/ConnectionStatus';
 
 interface AirbnbHeaderProps {
   title: string;
@@ -23,7 +22,6 @@ export function AirbnbHeader({ title, subtitle, icon: Icon, children }: AirbnbHe
               <h1 className="text-3xl font-bold text-gray-900 mb-1">{title}</h1>
               <p className="text-gray-500 text-sm">{subtitle}</p>
             </div>
-            <ConnectionStatus />
           </div>
           
           {children && (
