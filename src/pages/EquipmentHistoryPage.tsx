@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { EquipmentHistory } from '@/components/EquipmentHistory';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, RefreshCw, Activity, FileText } from 'lucide-react';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';

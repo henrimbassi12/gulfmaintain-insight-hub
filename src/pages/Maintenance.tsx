@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { EquipmentList } from '@/components/EquipmentList';
 import MaintenanceForm from '@/components/maintenance/MaintenanceForm';
@@ -12,7 +11,6 @@ import { MovementForm } from '@/components/forms/MovementForm';
 import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
 import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
 import { useEquipments } from '@/hooks/useEquipments';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
