@@ -15,7 +15,6 @@ import UrgentAlerts from '@/components/dashboard/UrgentAlerts';
 import TrendsChart from '@/components/dashboard/TrendsChart';
 import AISummary from '@/components/dashboard/AISummary';
 import QuickActions from '@/components/dashboard/QuickActions';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { 
   Wrench, 
   AlertTriangle, 
@@ -167,7 +166,6 @@ export default function Dashboard() {
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
                   <p className="text-sm text-gray-500">Vue d'ensemble de votre activité par secteur - Douala</p>
                 </div>
-                <ConnectionStatus />
               </div>
             </div>
             <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
