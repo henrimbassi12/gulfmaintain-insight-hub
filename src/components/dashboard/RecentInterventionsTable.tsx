@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users } from 'lucide-react';
+import { Users, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { PermissionCheck } from '@/components/auth/PermissionCheck';
 
 interface Intervention {
   id: string;
@@ -29,6 +30,21 @@ export function RecentInterventionsTable({ interventions, isLoading }: RecentInt
     toast({
       title: "✅ Détails intervention",
       description: `Ouverture des détails de l'intervention ${interventionId}`,
+    });
+  };
+
+  const handleEditIntervention = (interventionId: string) => {
+    toast({
+      title: "✏️ Modification",
+      description: `Modification de l'intervention ${interventionId}`,
+    });
+  };
+
+  const handleDeleteIntervention = (interventionId: string) => {
+    toast({
+      title: "🗑️ Suppression",
+      description: `L'intervention ${interventionId} a été supprimée.`,
+      variant: "destructive",
     });
   };
 
@@ -57,7 +73,7 @@ export function RecentInterventionsTable({ interventions, isLoading }: RecentInt
                 <th className="py-4 px-6 font-semibold hidden md:table-cell">Type</th>
                 <th className="py-4 px-6 font-semibold">Statut</th>
                 <th className="py-4 px-6 font-semibold hidden lg:table-cell">Durée</th>
-                <th className="py-4 px-6 font-semibold">Actions</th>
+                <th className="py-4 px-6 font-semibold text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -100,14 +116,34 @@ export function RecentInterventionsTable({ interventions, isLoading }: RecentInt
                   </td>
                   <td className="py-4 px-6 text-xs md:text-sm text-gray-600 hidden lg:table-cell font-medium">{intervention.duration}</td>
                   <td className="py-4 px-6">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-xs px-3 py-2 hover:bg-blue-50 hover:text-blue-700 transition-colors font-medium"
-                      onClick={() => handleViewIntervention(intervention.id)}
-                    >
-                      Voir
-                    </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-xs px-3 py-2 hover:bg-blue-50 hover:text-blue-700 transition-colors font-medium"
+                        onClick={() => handleViewIntervention(intervention.id)}
+                      >
+                        Voir
+                      </Button>
+                      <PermissionCheck allowedRoles={['admin', 'manager']}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8 text-gray-500 hover:bg-yellow-50 hover:text-yellow-700"
+                          onClick={() => handleEditIntervention(intervention.id)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8 text-gray-500 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => handleDeleteIntervention(intervention.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </PermissionCheck>
+                    </div>
                   </td>
                 </tr>
               ))}

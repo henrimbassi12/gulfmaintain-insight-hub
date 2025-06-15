@@ -2,35 +2,25 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
+type Role = 'admin' | 'manager' | 'technician';
+
 interface PermissionCheckProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'manager' | 'technician';
+  allowedRoles: Role[];
   fallback?: React.ReactNode;
 }
 
-export function PermissionCheck({ children, requiredRole, fallback }: PermissionCheckProps) {
-  const { user } = useAuth();
+export function PermissionCheck({ children, allowedRoles, fallback }: PermissionCheckProps) {
+  const { userProfile, loading } = useAuth();
 
-  if (!user) {
-    return fallback || null;
+  if (loading) {
+    return null; // On n'affiche rien pendant le chargement du profil
   }
 
-  if (requiredRole) {
-    const userRole = user.user_metadata?.role || 'technician';
-    
-    // Hiérarchie des rôles : admin > manager > technician
-    const roleHierarchy = {
-      'admin': 3,
-      'manager': 2,
-      'technician': 1
-    };
+  const userRole = userProfile?.role as Role;
 
-    const userLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] || 1;
-    const requiredLevel = roleHierarchy[requiredRole];
-
-    if (userLevel < requiredLevel) {
-      return fallback || null;
-    }
+  if (!userRole || !allowedRoles.includes(userRole)) {
+    return fallback || null;
   }
 
   return <>{children}</>;
