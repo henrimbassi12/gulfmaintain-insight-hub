@@ -67,6 +67,12 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
     }
   };
 
+  const suggestedNames = [
+    'Ngono Alain', 'Mballa Christine', 'Fombong Joseph', 'Nguema Marie',
+    'Abanda Paul', 'Talla Francine', 'Kamga Michel', 'Biya Sandra',
+    'Ndongo Robert', 'Eyenga Grace', 'Fouda Daniel', 'Manga Sylvie'
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -91,6 +97,20 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
               value={participantName}
               onChange={(e) => setParticipantName(e.target.value)}
             />
+            <div className="mt-2">
+              <p className="text-xs text-gray-500 mb-1">Suggestions :</p>
+              <div className="flex flex-wrap gap-1">
+                {suggestedNames.slice(0, 6).map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => setParticipantName(name)}
+                    className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-gray-700"
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           <div>
             <Label htmlFor="participant-role">Rôle</Label>
