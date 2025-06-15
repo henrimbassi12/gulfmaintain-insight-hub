@@ -83,6 +83,7 @@ export function useMessages() {
         name: `Conversation avec ${member.name}`,
         created_at: new Date(Date.now() - Math.random() * 86400000 * 30).toISOString(),
         updated_at: lastMessageTime.toISOString(),
+        is_archived: false,
         participant: {
           id: `participant-${index + 1}`,
           conversation_id: conversationId,
@@ -206,7 +207,7 @@ export function useMessages() {
                  isAuthorizedMember(participant.user_name) && 
                  !deletedConversationIds.has(conv.id) && 
                  !archivedConversationIds.has(conv.id) &&
-                 !conv.is_archived;
+                 !(conv.is_archived === true);
         });
 
       const conversationsWithData = authorizedConversations.map(conv => {
