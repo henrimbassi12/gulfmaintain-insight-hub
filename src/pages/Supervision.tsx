@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -18,9 +17,9 @@ export default function Supervision() {
 
   const { predictions: allPredictions, recommendations: allRecommendations, isLoading } = useSupervision();
 
-  // Filtrer pour ne montrer que les prédictions à haut risque et limiter le nombre d'exemples
-  const highRiskPredictions = allPredictions.filter(p => p.failure_risk > 70).slice(0, 3);
-  const recommendedTechnicians = allRecommendations.slice(0, 2);
+  // On affiche toutes les prédictions et recommandations des données d'exemple.
+  const highRiskPredictions = allPredictions.filter(p => p.failure_risk > 70);
+  const recommendedTechnicians = allRecommendations;
 
   return (
     <AirbnbContainer>

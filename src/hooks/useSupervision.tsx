@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+// import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
 import { failurePredictionSamples, technicianRecommendationSamples } from '@/data/supervision-samples';
@@ -15,43 +16,11 @@ export function useSupervision() {
       setIsLoading(true);
       setError(null);
       
-      const [predictionsResult, recommendationsResult] = await Promise.all([
-        supabase
-          .from('failure_predictions')
-          .select('*')
-          .order('failure_risk', { ascending: false }),
-        supabase
-          .from('technician_recommendations')
-          .select('*')
-          .order('match_score', { ascending: false })
-      ]);
-
-      let finalPredictions: FailurePrediction[];
-      if (predictionsResult.error) {
-        console.warn('Erreur prédictions:', predictionsResult.error);
-        finalPredictions = failurePredictionSamples;
-      } else if (predictionsResult.data && predictionsResult.data.length > 0) {
-        finalPredictions = predictionsResult.data.map(item => ({
-          ...item,
-          type: item.type as 'AF' | 'NF'
-        })) as FailurePrediction[];
-      } else {
-        finalPredictions = failurePredictionSamples;
-      }
-      setPredictions(finalPredictions);
-
-      let finalRecommendations: TechnicianRecommendation[];
-      if (recommendationsResult.error) {
-        console.warn('Erreur recommandations:', recommendationsResult.error);
-        finalRecommendations = technicianRecommendationSamples;
-      } else if (recommendationsResult.data && recommendationsResult.data.length > 0) {
-        finalRecommendations = recommendationsResult.data as TechnicianRecommendation[];
-      } else {
-        finalRecommendations = technicianRecommendationSamples;
-      }
-      setRecommendations(finalRecommendations);
+      // On utilise directement les données d'exemple
+      setPredictions(failurePredictionSamples);
+      setRecommendations(technicianRecommendationSamples);
       
-      console.log(`✅ Récupération supervision: ${finalPredictions.length} prédictions, ${finalRecommendations.length} recommandations`);
+      console.log(`✅ Utilisation des données d'exemple : ${failurePredictionSamples.length} prédictions, ${technicianRecommendationSamples.length} recommandations`);
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des données de supervision:', error);
       setError('Erreur lors de la récupération des données de supervision');
@@ -59,14 +28,16 @@ export function useSupervision() {
       setRecommendations(technicianRecommendationSamples);
       toast.info('Utilisation des données de démonstration');
     } finally {
-      setIsLoading(false);
+      // On simule un petit temps de chargement
+      setTimeout(() => setIsLoading(false), 300);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
 
-    // Set up real-time subscriptions
+    // Les souscriptions en temps réel sont désactivées pour le moment
+    /*
     const predictionsChannel = supabase
       .channel('failure_predictions_changes')
       .on(
@@ -135,6 +106,7 @@ export function useSupervision() {
       supabase.removeChannel(predictionsChannel);
       supabase.removeChannel(recommendationsChannel);
     };
+    */
   }, [fetchData]);
 
   const refetch = useCallback(() => {

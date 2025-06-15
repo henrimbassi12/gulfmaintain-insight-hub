@@ -1,4 +1,3 @@
-
 import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
 
 // Données d'exemple avec les nouvelles régions et équipements
@@ -60,6 +59,18 @@ export const failurePredictionSamples: FailurePrediction[] = [
     location: 'JAPOMA',
     predicted_date: '2025-07-05',
     recommended_action: 'Nettoyage des serpentins et vérification de la charge de réfrigérant.',
+    created_at: '2025-06-15T10:00:00Z',
+    updated_at: '2025-06-15T10:00:00Z'
+  },
+  {
+    id: '6',
+    equipment_id: 'FR-SAN-300-02',
+    equipment_name: 'SANDEN 300',
+    failure_risk: 75,
+    type: 'NF',
+    location: 'MBOPPI',
+    predicted_date: '2025-06-25',
+    recommended_action: 'Vérification du système de dégivrage.',
     created_at: '2025-06-15T10:00:00Z',
     updated_at: '2025-06-15T10:00:00Z'
   }
@@ -133,6 +144,20 @@ export const technicianRecommendationSamples: TechnicianRecommendation[] = [
     experience: '7 ans en maintenance',
     success_rate: 95,
     expertise: ['Réfrigération', 'Maintenance', 'Diagnostic'],
+    created_at: '2025-06-15T10:00:00Z',
+    updated_at: '2025-06-15T10:00:00Z'
+  },
+  {
+    id: '6',
+    technician: 'MBAPBOU',
+    equipment_id: 'FR-SAN-300-02',
+    equipment_name: 'SANDEN 300',
+    location: 'MBOPPI',
+    match_score: 90,
+    availability: 'Disponible',
+    experience: '5 ans, spécialiste SANDEN',
+    success_rate: 92,
+    expertise: ['Réfrigération', 'SANDEN', 'Dépannage'],
     created_at: '2025-06-15T10:00:00Z',
     updated_at: '2025-06-15T10:00:00Z'
   }
