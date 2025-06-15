@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -31,19 +30,7 @@ export interface TechnicianRecommendation {
   updated_at: string;
 }
 
-// Noms d'agences cohérents avec les autres pages
-const AGENCY_LOCATIONS = [
-  'Agence Douala Centre',
-  'Agence Douala Nord',
-  'Agence Yaoundé Centre',
-  'Agence Yaoundé Nord',
-  'Agence Bamenda',
-  'Agence Bafoussam',
-  'Agence Garoua',
-  'Agence Maroua'
-];
-
-// Données d'exemple avec noms cohérents
+// Données d'exemple avec les nouvelles régions
 const generateSamplePredictions = (): FailurePrediction[] => {
   return [
     {
@@ -52,7 +39,7 @@ const generateSamplePredictions = (): FailurePrediction[] => {
       equipment_name: 'Réfrigérateur Commercial A1',
       failure_risk: 85,
       type: 'AF',
-      location: 'Agence Douala Centre',
+      location: 'Littoral',
       predicted_date: '2024-02-15',
       recommended_action: 'Maintenance préventive immédiate',
       created_at: '2024-01-20T10:00:00Z',
@@ -64,7 +51,7 @@ const generateSamplePredictions = (): FailurePrediction[] => {
       equipment_name: 'Climatiseur Bureau B2',
       failure_risk: 72,
       type: 'NF',
-      location: 'Agence Yaoundé Centre',
+      location: 'Ouest',
       predicted_date: '2024-02-22',
       recommended_action: 'Inspection programmée',
       created_at: '2024-01-20T10:00:00Z',
@@ -76,7 +63,7 @@ const generateSamplePredictions = (): FailurePrediction[] => {
       equipment_name: 'Système HVAC C3',
       failure_risk: 68,
       type: 'AF',
-      location: 'Agence Bamenda',
+      location: 'Nord',
       predicted_date: '2024-03-01',
       recommended_action: 'Surveillance renforcée',
       created_at: '2024-01-20T10:00:00Z',
@@ -88,7 +75,7 @@ const generateSamplePredictions = (): FailurePrediction[] => {
       equipment_name: 'Réfrigérateur Vitrine D4',
       failure_risk: 79,
       type: 'AF',
-      location: 'Agence Douala Nord',
+      location: 'Sud-Ouest',
       predicted_date: '2024-02-18',
       recommended_action: 'Remplacement du compresseur',
       created_at: '2024-01-20T10:00:00Z',
@@ -100,7 +87,7 @@ const generateSamplePredictions = (): FailurePrediction[] => {
       equipment_name: 'Climatiseur Central E5',
       failure_risk: 63,
       type: 'NF',
-      location: 'Agence Bafoussam',
+      location: 'Nord-Ouest',
       predicted_date: '2024-03-05',
       recommended_action: 'Nettoyage des filtres',
       created_at: '2024-01-20T10:00:00Z',
@@ -116,7 +103,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
       technician: 'CÉDRIC',
       equipment_id: 'FR-2024-089',
       equipment_name: 'Réfrigérateur Commercial A1',
-      location: 'Agence Douala Centre',
+      location: 'Littoral',
       match_score: 92,
       availability: 'Disponible demain',
       experience: '8 ans en réfrigération',
@@ -130,7 +117,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
       technician: 'MBAPBOU GRÉGOIRE',
       equipment_id: 'FR-2024-012',
       equipment_name: 'Climatiseur Bureau B2',
-      location: 'Agence Yaoundé Centre',
+      location: 'Ouest',
       match_score: 87,
       availability: 'Disponible aujourd\'hui',
       experience: '6 ans en HVAC',
@@ -144,7 +131,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
       technician: 'VOUKENG',
       equipment_id: 'FR-2024-134',
       equipment_name: 'Système HVAC C3',
-      location: 'Agence Bamenda',
+      location: 'Nord',
       match_score: 89,
       availability: 'Disponible demain matin',
       experience: '7 ans en HVAC',
@@ -158,7 +145,7 @@ const generateSampleRecommendations = (): TechnicianRecommendation[] => {
       technician: 'TCHINDA CONSTANT',
       equipment_id: 'FR-2024-156',
       equipment_name: 'Réfrigérateur Vitrine D4',
-      location: 'Agence Douala Nord',
+      location: 'Sud-Ouest',
       match_score: 95,
       availability: 'Disponible immédiatement',
       experience: '10 ans en réfrigération',

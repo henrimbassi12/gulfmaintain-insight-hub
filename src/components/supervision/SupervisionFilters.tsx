@@ -26,18 +26,15 @@ const SupervisionFilters: React.FC<SupervisionFiltersProps> = ({ filters, onFilt
           
           <Select value={filters.region} onValueChange={(value) => onFilterChange('region', value)}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Agence" />
+              <SelectValue placeholder="Région" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes les agences</SelectItem>
-              <SelectItem value="douala-centre">Agence Douala Centre</SelectItem>
-              <SelectItem value="douala-nord">Agence Douala Nord</SelectItem>
-              <SelectItem value="yaounde-centre">Agence Yaoundé Centre</SelectItem>
-              <SelectItem value="yaounde-nord">Agence Yaoundé Nord</SelectItem>
-              <SelectItem value="bamenda">Agence Bamenda</SelectItem>
-              <SelectItem value="bafoussam">Agence Bafoussam</SelectItem>
-              <SelectItem value="garoua">Agence Garoua</SelectItem>
-              <SelectItem value="maroua">Agence Maroua</SelectItem>
+              <SelectItem value="all">Toutes les régions</SelectItem>
+              <SelectItem value="littoral">Littoral</SelectItem>
+              <SelectItem value="ouest">Ouest</SelectItem>
+              <SelectItem value="nord">Nord</SelectItem>
+              <SelectItem value="sud-ouest">Sud-Ouest</SelectItem>
+              <SelectItem value="nord-ouest">Nord-Ouest</SelectItem>
             </SelectContent>
           </Select>
 

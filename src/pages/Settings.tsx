@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -199,21 +198,18 @@ export default function Settings() {
                 <p className="text-xs text-gray-500 mt-1">Le rôle est géré par l'administrateur</p>
               </div>
               <div>
-                <Label htmlFor="agency">Agence</Label>
+                <Label htmlFor="agency">Région</Label>
                 <Select value={agency} onValueChange={setAgency}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Sélectionner une agence" />
+                    <SelectValue placeholder="Sélectionner une région" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="non-assigne">Non assigné</SelectItem>
-                    <SelectItem value="Agence Douala Centre">Agence Douala Centre</SelectItem>
-                    <SelectItem value="Agence Douala Nord">Agence Douala Nord</SelectItem>
-                    <SelectItem value="Agence Yaoundé Centre">Agence Yaoundé Centre</SelectItem>
-                    <SelectItem value="Agence Yaoundé Nord">Agence Yaoundé Nord</SelectItem>
-                    <SelectItem value="Agence Bamenda">Agence Bamenda</SelectItem>
-                    <SelectItem value="Agence Bafoussam">Agence Bafoussam</SelectItem>
-                    <SelectItem value="Agence Garoua">Agence Garoua</SelectItem>
-                    <SelectItem value="Agence Maroua">Agence Maroua</SelectItem>
+                    <SelectItem value="Littoral">Littoral</SelectItem>
+                    <SelectItem value="Ouest">Ouest</SelectItem>
+                    <SelectItem value="Nord">Nord</SelectItem>
+                    <SelectItem value="Sud-Ouest">Sud-Ouest</SelectItem>
+                    <SelectItem value="Nord-Ouest">Nord-Ouest</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
