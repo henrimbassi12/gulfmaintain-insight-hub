@@ -102,6 +102,7 @@ export function useMessages() {
 
     const messageCount = Math.floor(Math.random() * 10) + 5; // 5-15 messages
     const messages: Message[] = [];
+    const participantName = conversation.participant?.user_name || 'Utilisateur';
     
     for (let i = 0; i < messageCount; i++) {
       const isMe = Math.random() > 0.6; // 40% de chance que ce soit moi
@@ -110,7 +111,7 @@ export function useMessages() {
       messages.push({
         id: `msg-${conversationId}-${i + 1}`,
         conversation_id: conversationId,
-        sender_name: isMe ? (userProfile?.full_name || user?.email || 'Moi') : conversation.participant!.user_name,
+        sender_name: isMe ? (userProfile?.full_name || user?.email || 'Moi') : participantName,
         content: SAMPLE_MESSAGES[Math.floor(Math.random() * SAMPLE_MESSAGES.length)],
         is_me: isMe,
         created_at: messageTime.toISOString()
