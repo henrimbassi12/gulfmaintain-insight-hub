@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,9 @@ export default function Settings() {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
   const [agency, setAgency] = useState('');
+
+  // Vérifier si l'utilisateur est admin
+  const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
 
   // Charger les données utilisateur
   useEffect(() => {
@@ -73,12 +77,19 @@ export default function Settings() {
     try {
       const agencyValue = agency === 'non-assigne' ? null : agency;
       
+      const updateData: any = {
+        full_name: fullName,
+        agency: agencyValue
+      };
+
+      // Si l'utilisateur est admin, permettre la modification du rôle
+      if (isAdmin) {
+        updateData.role = role;
+      }
+      
       const { error } = await supabase
         .from('profiles')
-        .update({
-          full_name: fullName,
-          agency: agencyValue
-        })
+        .update(updateData)
         .eq('id', user.id);
 
       if (error) {
@@ -189,13 +200,31 @@ export default function Settings() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="role">Rôle</Label>
-                <Input 
-                  id="role" 
-                  value={getRoleLabel(role)}
-                  disabled
-                  className="mt-1 bg-gray-50" 
-                />
-                <p className="text-xs text-gray-500 mt-1">Le rôle est géré par l'administrateur</p>
+                {isAdmin ? (
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Sélectionner un rôle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Administrateur</SelectItem>
+                      <SelectItem value="manager">Gestionnaire</SelectItem>
+                      <SelectItem value="technician">Technicien</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <>
+                    <Input 
+                      id="role" 
+                      value={getRoleLabel(role)}
+                      disabled
+                      className="mt-1 bg-gray-50" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Le rôle est géré par l'administrateur</p>
+                  </>
+                )}
+                {isAdmin && (
+                  <p className="text-xs text-green-600 mt-1">En tant qu'administrateur, vous pouvez modifier votre rôle</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="agency">Région</Label>
