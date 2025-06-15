@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Clock, Wrench, User, FileText, Filter, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,7 +49,7 @@ export function EquipmentHistory() {
       type: 'maintenance',
       title: 'Maintenance préventive trimestrielle',
       description: 'Nettoyage complet, vérification des joints, contrôle de température, remplacement des filtres',
-      technician: 'Ahmed Benali',
+      technician: 'CÉDRIC MBARGA',
       duration: '2h 30min',
       cost: 350,
       parts: ['Filtre air', 'Joint étanchéité'],
@@ -63,7 +62,7 @@ export function EquipmentHistory() {
       type: 'repair',
       title: 'Réparation thermostat défaillant',
       description: 'Remplacement du thermostat principal suite à dysfonctionnement détecté lors de la surveillance',
-      technician: 'Fatima Zahra',
+      technician: 'MBAPBOU GRÉGOIRE',
       duration: '1h 45min',
       cost: 125,
       parts: ['Thermostat digital'],
@@ -75,7 +74,7 @@ export function EquipmentHistory() {
       type: 'installation',
       title: 'Installation initiale',
       description: 'Installation et mise en service du réfrigérateur professionnel',
-      technician: 'Mohamed Alami',
+      technician: 'VOUKENG JULES',
       duration: '3h 00min',
       cost: 200,
       status: 'completed',
@@ -87,7 +86,7 @@ export function EquipmentHistory() {
       type: 'inspection',
       title: 'Inspection de réception',
       description: 'Contrôle qualité et vérification de conformité avant installation',
-      technician: 'Youssef Idrissi',
+      technician: 'TCHINDA CONSTANT',
       duration: '45min',
       status: 'completed'
     }
