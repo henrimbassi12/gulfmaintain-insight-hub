@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ModernKPICard } from '@/components/dashboard/ModernKPICard';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
 import { ModernStatsGrid } from '@/components/dashboard/ModernStatsGrid';
@@ -27,11 +27,39 @@ import {
   Settings
 } from 'lucide-react';
 import { PermissionCheck } from '@/components/auth/PermissionCheck';
+import { useReports } from '@/hooks/useReports';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const [timeRange, setTimeRange] = useState("today");
   const [refreshing, setRefreshing] = useState(false);
+  const { reports, isLoading: isLoadingReports, refetch: refetchReports } = useReports();
+
+  const kpiData = useMemo(() => {
+    if (!reports) return { total: 0, inProgress: 0, completed: 0, planned: 0 };
+    
+    const total = reports.length;
+    const inProgress = reports.filter(r => r.status === 'En cours').length;
+    const completed = reports.filter(r => r.status === 'Terminé').length;
+    const planned = reports.filter(r => r.status === 'Planifié').length; // NF Terminées = Planifiées
+
+    return { total, inProgress, completed, planned };
+  }, [reports]);
+
+  const recentInterventions = useMemo(() => {
+    if (!reports) return [];
+    return reports.slice(0, 3).map(report => ({
+      id: report.report_id,
+      equipment: report.equipment,
+      technician: report.technician,
+      type: report.type,
+      status: report.status === 'Terminé' ? 'completed' : 
+              report.status === 'En cours' ? 'in-progress' : 'planned',
+      duration: report.duration,
+      sector: report.location
+    }));
+  }, [reports]);
 
   // Fonctions corrigées pour les actions
   const handleNewAlert = () => {
@@ -68,13 +96,13 @@ export default function Dashboard() {
       description: "Mise à jour des données en cours...",
     });
     
-    setTimeout(() => {
+    refetchReports().finally(() => {
       setRefreshing(false);
       toast({
         title: "Données actualisées",
         description: "Les données ont été mises à jour avec succès.",
       });
-    }, 1500);
+    });
   };
 
   // Fonctions pour les cartes KPI
@@ -113,36 +141,6 @@ export default function Dashboard() {
       description: `Ouverture des détails de l'intervention ${interventionId}`,
     });
   };
-
-  const recentInterventions = [
-    {
-      id: 'INT-2024-156',
-      equipment: 'FR-2024-089',
-      technician: 'CÉDRIC',
-      type: 'Maintenance préventive',
-      status: 'completed',
-      duration: '2h 30min',
-      sector: 'JAPOMA'
-    },
-    {
-      id: 'INT-2024-157',
-      equipment: 'FR-2024-012',
-      technician: 'MBAPBOU GRÉGOIRE',
-      type: 'Réparation urgente',
-      status: 'in-progress',
-      duration: '1h 15min',
-      sector: 'AKWA'
-    },
-    {
-      id: 'INT-2024-158',
-      equipment: 'FR-2024-134',
-      technician: 'VOUKENG',
-      type: 'Inspection',
-      status: 'planned',
-      duration: '45min',
-      sector: 'BONABERI'
-    }
-  ];
 
   const performanceStats = [
     { label: "Temps moyen", value: "2.3h", change: "-12%", isPositive: true },
@@ -185,10 +183,10 @@ export default function Dashboard() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleRefreshData}
-                disabled={refreshing}
+                disabled={refreshing || isLoadingReports}
                 className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
               >
-                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing || isLoadingReports ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Actualiser</span>
                 <span className="sm:hidden">Sync</span>
               </Button>
@@ -204,34 +202,30 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <ModernKPICard
             title="Interventions totales"
-            value="247"
-            subtitle="Ce mois"
+            value={isLoadingReports ? <Skeleton className="h-8 w-20" /> : kpiData.total}
+            subtitle="Toutes périodes"
             icon={Wrench}
-            trend={{ value: 12, isPositive: true }}
             onClick={handleInterventionsClick}
           />
           <ModernKPICard
             title="En cours"
-            value="8"
+            value={isLoadingReports ? <Skeleton className="h-8 w-12" /> : kpiData.inProgress}
             subtitle="Interventions actives"
             icon={Clock}
-            trend={{ value: -25, isPositive: true }}
             onClick={handleActiveInterventionsClick}
           />
           <ModernKPICard
-            title="AF Terminées"
-            value="23"
+            title="Terminées"
+            value={isLoadingReports ? <Skeleton className="h-8 w-12" /> : kpiData.completed}
             subtitle="Avec Accord de Fin"
             icon={TrendingUp}
-            trend={{ value: 3, isPositive: true }}
             onClick={handleCompletedClick}
           />
           <ModernKPICard
-            title="NF Terminées"
-            value="5"
-            subtitle="Non-Fermées"
+            title="Planifiées"
+            value={isLoadingReports ? <Skeleton className="h-8 w-12" /> : kpiData.planned}
+            subtitle="À venir"
             icon={AlertTriangle}
-            trend={{ value: -8, isPositive: true }}
             onClick={handleNonClosedClick}
           />
         </div>
@@ -283,7 +277,7 @@ export default function Dashboard() {
               </div>
               Interventions récentes par secteur
               <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
-                {recentInterventions.length} interventions
+                {isLoadingReports ? "..." : `${recentInterventions.length} récentes`}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -303,7 +297,17 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentInterventions.map((intervention, index) => (
+                  {isLoadingReports ? (
+                    <tr>
+                      <td colSpan={8} className="p-6 text-center">
+                        <div className="space-y-3">
+                          <Skeleton className="h-5 w-3/4 mx-auto" />
+                          <Skeleton className="h-5 w-1/2 mx-auto" />
+                          <Skeleton className="h-5 w-2/3 mx-auto" />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : recentInterventions.map((intervention, index) => (
                     <tr key={intervention.id} className={`border-b last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                       <td className="py-4 px-6">
                         <span className="font-mono text-xs md:text-sm text-blue-600 cursor-pointer hover:underline font-semibold">
