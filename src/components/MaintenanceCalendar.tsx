@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -127,7 +126,7 @@ export function MaintenanceCalendar() {
         </div>
       </div>
 
-      {/* Navigation Calendar - Full Width Card */}
+      {/* Navigation Calendar - Full Width Card with Extended Height */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100">
           <CardTitle className="flex items-center gap-3 text-lg">
@@ -138,12 +137,24 @@ export function MaintenanceCalendar() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="w-full">
+          <div className="w-full h-96">
             <CalendarComponent
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="w-full mx-auto rounded-md border"
+              className="w-full h-full mx-auto rounded-md border flex flex-col"
+              classNames={{
+                months: "flex-1 w-full",
+                month: "w-full h-full flex flex-col",
+                table: "w-full h-full",
+                head_row: "flex w-full",
+                head_cell: "flex-1 text-center p-2",
+                row: "flex w-full flex-1",
+                cell: "flex-1 h-full p-1 border border-gray-100",
+                day: "w-full h-full flex items-center justify-center text-sm hover:bg-blue-50",
+                day_selected: "bg-blue-600 text-white hover:bg-blue-700",
+                day_today: "bg-blue-100 text-blue-900"
+              }}
             />
           </div>
         </CardContent>
