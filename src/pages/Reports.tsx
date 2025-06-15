@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +8,19 @@ import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
+import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
+import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
+import { MovementForm } from '@/components/forms/MovementForm';
+import { RepairForm } from '@/components/forms/RepairForm';
+import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
 
 export default function Reports() {
   const [refreshing, setRefreshing] = useState(false);
+  const [isTrackingFormOpen, setTrackingFormOpen] = useState(false);
+  const [isMaintenanceFormOpen, setMaintenanceFormOpen] = useState(false);
+  const [isMovementFormOpen, setMovementFormOpen] = useState(false);
+  const [isRepairFormOpen, setRepairFormOpen] = useState(false);
+  const [isDepotFormOpen, setDepotFormOpen] = useState(false);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -54,6 +63,44 @@ export default function Reports() {
       date: '05/01/2024',
       status: 'En cours',
       size: '-'
+    }
+  ];
+
+  const handleSaveForm = (data: any) => {
+    console.log('Form data saved:', data);
+    toast.success('Fiche enregistrée avec succès !');
+  };
+
+  const reportForms = [
+    { 
+      id: 'tracking', 
+      title: 'Fiche de Suivi et de Maintenance du Réfrigérateur Guinness', 
+      description: 'Suivi détaillé et historique de la maintenance par réfrigérateur.', 
+      action: () => setTrackingFormOpen(true) 
+    },
+    { 
+      id: 'maintenance', 
+      title: 'Fiche d’Entretien des Frigos', 
+      description: 'Formulaire pour l’entretien périodique des réfrigérateurs.', 
+      action: () => setMaintenanceFormOpen(true) 
+    },
+    { 
+      id: 'movement', 
+      title: 'Fiche de Suivi de Mouvement des Frigos', 
+      description: 'Enregistrement des déplacements et transferts de frigos.', 
+      action: () => setMovementFormOpen(true) 
+    },
+    { 
+      id: 'repair', 
+      title: 'Fiche de Suivi des Réparations des Frigos', 
+      description: 'Documentation des pannes et des réparations effectuées.', 
+      action: () => setRepairFormOpen(true) 
+    },
+    { 
+      id: 'depot', 
+      title: 'Fiche de Passe au Dépôt', 
+      description: 'Suivi des passages des techniciens au dépôt.', 
+      action: () => setDepotFormOpen(true) 
     }
   ];
 
@@ -120,22 +167,20 @@ export default function Reports() {
       {/* Types de rapports disponibles */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="text-lg">Types de rapports disponibles</CardTitle>
+          <CardTitle className="text-lg">Fiches de maintenance disponibles</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer">
-              <h3 className="font-semibold text-gray-900 mb-2">Rapport de maintenance</h3>
-              <p className="text-sm text-gray-600">Synthèse des activités de maintenance préventive et curative</p>
-            </div>
-            <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer">
-              <h3 className="font-semibold text-gray-900 mb-2">Analyse des pannes</h3>
-              <p className="text-sm text-gray-600">Statistiques détaillées sur les défaillances d'équipements</p>
-            </div>
-            <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer">
-              <h3 className="font-semibold text-gray-900 mb-2">Performance techniciens</h3>
-              <p className="text-sm text-gray-600">Évaluation des performances et KPIs des techniciens</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {reportForms.map((form) => (
+              <div 
+                key={form.id} 
+                className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer flex flex-col"
+                onClick={form.action}
+              >
+                <h3 className="font-semibold text-gray-900 mb-2">{form.title}</h3>
+                <p className="text-sm text-gray-600 flex-grow">{form.description}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -197,6 +242,13 @@ export default function Reports() {
           </div>
         </CardContent>
       </Card>
+
+      <MaintenanceTrackingForm isOpen={isTrackingFormOpen} onClose={() => setTrackingFormOpen(false)} onSave={handleSaveForm} />
+      <RefrigeratorMaintenanceForm isOpen={isMaintenanceFormOpen} onClose={() => setMaintenanceFormOpen(false)} onSave={handleSaveForm} />
+      <MovementForm isOpen={isMovementFormOpen} onClose={() => setMovementFormOpen(false)} onSave={handleSaveForm} />
+      <RepairForm isOpen={isRepairFormOpen} onClose={() => setRepairFormOpen(false)} onSave={handleSaveForm} />
+      <DepotScheduleForm isOpen={isDepotFormOpen} onClose={() => setDepotFormOpen(false)} onSave={handleSaveForm} />
+
     </AirbnbContainer>
   );
 }
