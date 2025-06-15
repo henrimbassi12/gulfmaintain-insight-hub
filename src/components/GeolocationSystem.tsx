@@ -1,13 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Route, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default markers in Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 interface TechnicianLocation {
   id: string;
@@ -33,10 +42,6 @@ export function GeolocationSystem() {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [mapboxToken, setMapboxToken] = useState('');
-  
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
   
   const [technicians] = useState<TechnicianLocation[]>([
     { id: '1', name: 'CÉDRIC', lat: 4.0511, lng: 9.7679, status: 'available', sectors: 'JAPOMA, VILLAGE, NGODI BAKOKO' },
@@ -143,79 +148,22 @@ export function GeolocationSystem() {
     getCurrentLocation();
   }, []);
 
-  // Initialize Mapbox map
-  useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+  // Custom icons for different marker types
+  const createCustomIcon = (color: string) => {
+    return L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+      iconSize: [15, 15],
+      iconAnchor: [7.5, 7.5]
+    });
+  };
 
-    try {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [9.7679, 4.0511], // Douala coordinates
-        zoom: 12,
-        projection: 'mercator'
-      });
-
-      // Add navigation controls
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-      // Add markers for technicians
-      technicians.forEach(tech => {
-        const el = document.createElement('div');
-        el.className = 'w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg';
-        
-        new mapboxgl.Marker(el)
-          .setLngLat([tech.lng, tech.lat])
-          .setPopup(new mapboxgl.Popup().setHTML(`
-            <div class="p-2">
-              <h3 class="font-semibold">${tech.name}</h3>
-              <p class="text-sm text-gray-600">Status: ${tech.status}</p>
-              <p class="text-sm text-gray-600">Secteurs: ${tech.sectors}</p>
-              ${tech.currentTask ? `<p class="text-sm">Tâche: ${tech.currentTask}</p>` : ''}
-            </div>
-          `))
-          .addTo(map.current!);
-      });
-
-      // Add markers for maintenance points
-      maintenancePoints.forEach(point => {
-        const el = document.createElement('div');
-        el.className = point.priority === 'high' ? 
-          'w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg' :
-          point.priority === 'medium' ?
-          'w-4 h-4 bg-yellow-500 rounded-full border-2 border-white shadow-lg' :
-          'w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-lg';
-        
-        new mapboxgl.Marker(el)
-          .setLngLat([point.lng, point.lat])
-          .setPopup(new mapboxgl.Popup().setHTML(`
-            <div class="p-2">
-              <h3 class="font-semibold">${point.equipment}</h3>
-              <p class="text-sm text-gray-600">${point.address}</p>
-              <p class="text-sm">Priorité: ${point.priority}</p>
-              <p class="text-sm">Durée: ${point.estimatedDuration}</p>
-            </div>
-          `))
-          .addTo(map.current!);
-      });
-
-    } catch (error) {
-      console.error('Erreur lors de l\'initialisation de la carte:', error);
-      toast({
-        title: "Erreur de carte",
-        description: "Impossible d'initialiser la carte. Vérifiez votre token Mapbox.",
-        variant: "destructive"
-      });
-    }
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
-  }, [mapboxToken, technicians, maintenancePoints]);
+  const technicianIcon = createCustomIcon('#3b82f6'); // Blue
+  const priorityIcons = {
+    high: createCustomIcon('#ef4444'),    // Red
+    medium: createCustomIcon('#eab308'),  // Yellow
+    low: createCustomIcon('#22c55e')      // Green
+  };
 
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
     const R = 6371; // Earth's radius in km
@@ -285,32 +233,6 @@ export function GeolocationSystem() {
         </div>
       </div>
 
-      {/* Mapbox Token Input */}
-      {!mapboxToken && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-blue-900">Configuration Mapbox requise</h3>
-              <p className="text-sm text-blue-800">
-                Pour afficher la carte interactive, veuillez entrer votre token Mapbox public.
-                Vous pouvez l'obtenir sur <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="underline">mapbox.com</a>.
-              </p>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Votre token Mapbox public..."
-                  value={mapboxToken}
-                  onChange={(e) => setMapboxToken(e.target.value)}
-                  className="flex-1"
-                />
-                <Button onClick={() => toast({ title: "Token configuré", description: "La carte va se charger" })}>
-                  Configurer
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Status de géolocalisation */}
       {locationError && (
         <Alert className="border-orange-200 bg-orange-50">
@@ -333,7 +255,7 @@ export function GeolocationSystem() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Technicians Map */}
+        {/* Technicians List */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -429,23 +351,75 @@ export function GeolocationSystem() {
         </Card>
       </div>
 
-      {/* Interactive Map */}
+      {/* Interactive Map with Leaflet */}
       <Card>
         <CardHeader>
           <CardTitle>Carte interactive - Douala par secteur</CardTitle>
         </CardHeader>
         <CardContent>
-          {mapboxToken ? (
-            <div ref={mapContainer} className="h-96 rounded-lg shadow-lg" />
-          ) : (
-            <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <MapPin className="w-12 h-12 mx-auto mb-2" />
-                <p>Carte interactive de Douala par secteur</p>
-                <p className="text-sm">Configurez votre token Mapbox pour afficher la carte</p>
-              </div>
-            </div>
-          )}
+          <div className="h-96 rounded-lg overflow-hidden shadow-lg">
+            <MapContainer
+              center={[4.0511, 9.7679]}
+              zoom={12}
+              style={{ height: '100%', width: '100%' }}
+              className="z-0"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              
+              {/* Technician Markers */}
+              {technicians.map((tech) => (
+                <Marker
+                  key={tech.id}
+                  position={[tech.lat, tech.lng]}
+                  icon={technicianIcon}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <h3 className="font-semibold">{tech.name}</h3>
+                      <p className="text-sm text-gray-600">Status: {tech.status === 'available' ? 'Disponible' : tech.status === 'busy' ? 'Occupé' : 'Hors ligne'}</p>
+                      <p className="text-sm text-gray-600">Secteurs: {tech.sectors}</p>
+                      {tech.currentTask && <p className="text-sm">Tâche: {tech.currentTask}</p>}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              {/* Maintenance Point Markers */}
+              {maintenancePoints.map((point) => (
+                <Marker
+                  key={point.id}
+                  position={[point.lat, point.lng]}
+                  icon={priorityIcons[point.priority]}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <h3 className="font-semibold">{point.equipment}</h3>
+                      <p className="text-sm text-gray-600">{point.address}</p>
+                      <p className="text-sm">Priorité: {point.priority === 'high' ? 'Urgent' : point.priority === 'medium' ? 'Moyen' : 'Faible'}</p>
+                      <p className="text-sm">Durée: {point.estimatedDuration}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              {/* User Location Marker */}
+              {userLocation && (
+                <Marker position={[userLocation.lat, userLocation.lng]}>
+                  <Popup>
+                    <div className="p-2">
+                      <h3 className="font-semibold">Votre position</h3>
+                      <p className="text-sm text-gray-600">
+                        {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+            </MapContainer>
+          </div>
         </CardContent>
       </Card>
     </div>
