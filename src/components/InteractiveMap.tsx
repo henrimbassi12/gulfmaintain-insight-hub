@@ -40,8 +40,11 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
   const [mapboxToken, setMapboxToken] = useState<string>('');
   const [tokenError, setTokenError] = useState<string>('');
   const [isTokenSet, setIsTokenSet] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(false);
 
   const handleTokenSubmit = () => {
+    console.log('🗺️ Tentative d\'initialisation de la carte avec token:', mapboxToken.substring(0, 10) + '...');
+    
     if (!mapboxToken.trim()) {
       setTokenError('Veuillez entrer un token Mapbox valide');
       return;
@@ -53,42 +56,82 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
     }
 
     setTokenError('');
+    setIsMapLoading(true);
     setIsTokenSet(true);
-    initializeMap(mapboxToken);
+    
+    // Délai pour permettre le rendu du container
+    setTimeout(() => {
+      initializeMap(mapboxToken);
+    }, 100);
   };
 
   const initializeMap = (token: string) => {
-    if (!mapContainer.current) return;
-
-    mapboxgl.accessToken = token;
+    console.log('🗺️ Initialisation de la carte...');
     
+    if (!mapContainer.current) {
+      console.error('❌ Container de carte non disponible');
+      setTokenError('Container de carte non disponible');
+      setIsMapLoading(false);
+      return;
+    }
+
+    console.log('✅ Container trouvé, dimensions:', {
+      width: mapContainer.current.offsetWidth,
+      height: mapContainer.current.offsetHeight
+    });
+
     try {
+      mapboxgl.accessToken = token;
+      console.log('🔑 Token Mapbox configuré');
+      
+      const centerLng = userLocation ? userLocation.lng : 9.7679;
+      const centerLat = userLocation ? userLocation.lat : 4.0511;
+      
+      console.log('🎯 Centre de la carte:', { lat: centerLat, lng: centerLng });
+
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
-        center: userLocation ? [userLocation.lng, userLocation.lat] : [9.7679, 4.0511], // Douala, Cameroun
+        center: [centerLng, centerLat],
         zoom: 12,
         pitch: 0,
       });
 
+      console.log('🗺️ Carte Mapbox créée');
+
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       map.current.on('load', () => {
+        console.log('✅ Carte chargée avec succès');
+        setIsMapLoading(false);
         addMarkersToMap();
       });
 
+      map.current.on('error', (e) => {
+        console.error('❌ Erreur Mapbox:', e);
+        setTokenError('Erreur lors du chargement de la carte: ' + e.error?.message);
+        setIsMapLoading(false);
+      });
+
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation de la carte:', error);
+      console.error('❌ Erreur lors de l\'initialisation de la carte:', error);
       setTokenError('Erreur lors de l\'initialisation de la carte. Vérifiez votre token.');
       setIsTokenSet(false);
+      setIsMapLoading(false);
     }
   };
 
   const addMarkersToMap = () => {
-    if (!map.current) return;
+    if (!map.current) {
+      console.error('❌ Carte non disponible pour ajouter les marqueurs');
+      return;
+    }
+
+    console.log('📍 Ajout des marqueurs...');
 
     // Position utilisateur
     if (userLocation) {
+      console.log('👤 Ajout marqueur utilisateur:', userLocation);
       const userMarker = new mapboxgl.Marker({ color: '#3b82f6' })
         .setLngLat([userLocation.lng, userLocation.lat])
         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`
@@ -101,6 +144,7 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
     }
 
     // Techniciens
+    console.log('👷 Ajout de', technicians.length, 'techniciens');
     technicians.forEach(tech => {
       const color = tech.status === 'available' ? '#22c55e' : 
                    tech.status === 'busy' ? '#eab308' : '#6b7280';
@@ -123,6 +167,7 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
     });
 
     // Points de maintenance
+    console.log('🔧 Ajout de', maintenancePoints.length, 'points de maintenance');
     maintenancePoints.forEach(point => {
       const color = point.priority === 'high' ? '#ef4444' : 
                    point.priority === 'medium' ? '#eab308' : '#22c55e';
@@ -143,11 +188,14 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
         `))
         .addTo(map.current);
     });
+
+    console.log('✅ Tous les marqueurs ajoutés');
   };
 
   useEffect(() => {
     return () => {
       if (map.current) {
+        console.log('🧹 Nettoyage de la carte');
         map.current.remove();
       }
     };
@@ -203,7 +251,27 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
         <CardTitle>Carte interactive - Douala par secteur</CardTitle>
       </CardHeader>
       <CardContent>
-        <div ref={mapContainer} className="h-96 rounded-lg overflow-hidden shadow-lg" />
+        {isMapLoading && (
+          <div className="h-96 rounded-lg bg-gray-100 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-sm text-gray-600">Chargement de la carte...</p>
+            </div>
+          </div>
+        )}
+        <div 
+          ref={mapContainer} 
+          className={`h-96 rounded-lg overflow-hidden shadow-lg ${isMapLoading ? 'hidden' : ''}`}
+          style={{ minHeight: '384px' }}
+        />
+        {tokenError && (
+          <Alert className="mt-4 border-red-200 bg-red-50">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">
+              {tokenError}
+            </AlertDescription>
+          </Alert>
+        )}
         <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
