@@ -84,10 +84,10 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
     setIsMapLoading(true);
     setIsTokenSet(true);
     
-    // Délai pour permettre le rendu du container
+    // Délai plus long pour permettre le rendu du container
     setTimeout(() => {
       initializeMap(mapboxToken);
-    }, 200);
+    }, 500);
   };
 
   const initializeMap = (token: string) => {
@@ -100,95 +100,81 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
       return;
     }
 
-    const containerRect = mapContainer.current.getBoundingClientRect();
-    console.log('✅ Container trouvé, dimensions:', {
-      width: containerRect.width,
-      height: containerRect.height,
-      visible: containerRect.width > 0 && containerRect.height > 0
-    });
+    // Forcer le rendu du container en définissant ses dimensions explicitement
+    mapContainer.current.style.width = '100%';
+    mapContainer.current.style.height = '400px';
+    mapContainer.current.style.minHeight = '400px';
 
-    if (containerRect.width === 0 || containerRect.height === 0) {
-      setMapLoadError('Le container de carte a des dimensions nulles');
-      setIsMapLoading(false);
-      return;
-    }
-
-    try {
-      // Test du token avant initialisation
-      mapboxgl.accessToken = token;
-      console.log('🔑 Token Mapbox configuré');
-      
-      const centerLng = userLocation ? userLocation.lng : 9.7679;
-      const centerLat = userLocation ? userLocation.lat : 4.0511;
-      
-      console.log('🎯 Centre de la carte:', { lat: centerLat, lng: centerLng });
-
-      // Création de la carte avec plus d'options de diagnostic
-      const mapOptions = {
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12', // Style plus fiable
-        center: [centerLng, centerLat] as [number, number],
-        zoom: 12,
-        pitch: 0,
-        antialias: true,
-      };
-
-      console.log('🔧 Options de carte:', mapOptions);
-
-      map.current = new mapboxgl.Map(mapOptions);
-
-      console.log('🗺️ Carte Mapbox créée');
-
-      // Ajout des contrôles
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-      // Gestion des événements
-      map.current.on('load', () => {
-        console.log('✅ Carte chargée avec succès');
-        console.log('📊 Informations de la carte:', {
-          style: map.current?.getStyle(),
-          center: map.current?.getCenter(),
-          zoom: map.current?.getZoom()
-        });
-        setIsMapLoading(false);
-        setMapLoadError('');
-        addMarkersToMap();
+    // Attendre que le container soit complètement rendu
+    setTimeout(() => {
+      const containerRect = mapContainer.current!.getBoundingClientRect();
+      console.log('✅ Container après redimensionnement:', {
+        width: containerRect.width,
+        height: containerRect.height,
+        visible: containerRect.width > 0 && containerRect.height > 0
       });
 
-      map.current.on('error', (e) => {
-        console.error('❌ Erreur Mapbox:', e);
-        const errorMsg = e.error?.message || 'Erreur inconnue lors du chargement de la carte';
-        setMapLoadError(errorMsg);
+      if (containerRect.width === 0 || containerRect.height === 0) {
+        setMapLoadError('Le container de carte a toujours des dimensions nulles. Réessayez.');
         setIsMapLoading(false);
+        return;
+      }
+
+      try {
+        // Configuration du token Mapbox
+        mapboxgl.accessToken = token;
+        console.log('🔑 Token Mapbox configuré');
         
-        if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
-          setTokenError('Token Mapbox invalide ou expiré. Vérifiez votre token.');
-        }
-      });
+        const centerLng = userLocation ? userLocation.lng : 9.7679;
+        const centerLat = userLocation ? userLocation.lat : 4.0511;
+        
+        console.log('🎯 Centre de la carte:', { lat: centerLat, lng: centerLng });
 
-      map.current.on('style.load', () => {
-        console.log('🎨 Style de carte chargé');
-      });
+        // Création de la carte avec options spécifiques
+        const mapOptions = {
+          container: mapContainer.current!,
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [centerLng, centerLat] as [number, number],
+          zoom: 12,
+          pitch: 0,
+          antialias: true,
+        };
 
-      map.current.on('sourcedata', (e) => {
-        if (e.isSourceLoaded) {
-          console.log('📡 Source de données chargée:', e.sourceId);
-        }
-      });
+        console.log('🔧 Options de carte:', mapOptions);
 
-      // Test de connectivité réseau
-      map.current.on('data', (e) => {
-        if (e.dataType === 'style') {
-          console.log('🌐 Données de style reçues');
-        }
-      });
+        map.current = new mapboxgl.Map(mapOptions);
+        console.log('🗺️ Carte Mapbox créée');
 
-    } catch (error) {
-      console.error('❌ Erreur lors de l\'initialisation de la carte:', error);
-      setMapLoadError('Erreur lors de l\'initialisation: ' + (error as Error).message);
-      setIsTokenSet(false);
-      setIsMapLoading(false);
-    }
+        // Ajout des contrôles
+        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+        // Gestion des événements
+        map.current.on('load', () => {
+          console.log('✅ Carte chargée avec succès');
+          setIsMapLoading(false);
+          setMapLoadError('');
+          addMarkersToMap();
+        });
+
+        map.current.on('error', (e) => {
+          console.error('❌ Erreur Mapbox:', e);
+          const errorMsg = e.error?.message || 'Erreur inconnue lors du chargement de la carte';
+          setMapLoadError(errorMsg);
+          setIsMapLoading(false);
+          
+          if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+            setTokenError('Token Mapbox invalide ou expiré. Vérifiez votre token.');
+            setIsTokenSet(false);
+          }
+        });
+
+      } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation de la carte:', error);
+        setMapLoadError('Erreur lors de l\'initialisation: ' + (error as Error).message);
+        setIsTokenSet(false);
+        setIsMapLoading(false);
+      }
+    }, 100);
   };
 
   const addMarkersToMap = () => {
@@ -333,21 +319,21 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
       </CardHeader>
       <CardContent>
         {isMapLoading && (
-          <div className="h-96 rounded-lg bg-gray-100 flex items-center justify-center">
+          <div className="h-[400px] rounded-lg bg-gray-100 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
               <p className="text-sm text-gray-600">Chargement de la carte...</p>
-              <p className="text-xs text-gray-500 mt-1">Vérification du token et téléchargement des tuiles</p>
+              <p className="text-xs text-gray-500 mt-1">Initialisation du container et téléchargement des tuiles</p>
             </div>
           </div>
         )}
         
         <div 
           ref={mapContainer} 
-          className={`h-96 rounded-lg overflow-hidden shadow-lg border border-gray-200 ${isMapLoading ? 'hidden' : ''}`}
+          className={`h-[400px] w-full rounded-lg overflow-hidden shadow-lg border border-gray-200 ${isMapLoading ? 'hidden' : 'block'}`}
           style={{ 
-            minHeight: '384px',
-            backgroundColor: '#f8f9fa' // Couleur de fond pour voir le container
+            minHeight: '400px',
+            backgroundColor: '#f8f9fa'
           }}
         />
         
@@ -356,14 +342,10 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
               {tokenError || mapLoadError}
-              {mapLoadError && mapLoadError.includes('401') && (
+              {mapLoadError && mapLoadError.includes('dimensions nulles') && (
                 <div className="mt-2">
-                  <p className="text-sm">Solutions possibles :</p>
-                  <ul className="text-xs mt-1 list-disc list-inside">
-                    <li>Vérifiez que votre token Mapbox est valide</li>
-                    <li>Assurez-vous que le token n'a pas expiré</li>
-                    <li>Vérifiez les restrictions de domaine sur votre token</li>
-                  </ul>
+                  <p className="text-sm">Le container de carte n'arrive pas à s'afficher correctement.</p>
+                  <p className="text-xs mt-1">Essayez de recharger la page ou cliquez sur "Recharger".</p>
                 </div>
               )}
             </AlertDescription>
