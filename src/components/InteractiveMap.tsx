@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MapPin, AlertCircle } from 'lucide-react';
+import { MapPin, AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface TechnicianLocation {
@@ -41,20 +41,45 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
   const [tokenError, setTokenError] = useState<string>('');
   const [isTokenSet, setIsTokenSet] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(false);
+  const [mapLoadError, setMapLoadError] = useState<string>('');
+
+  const validateToken = (token: string): boolean => {
+    if (!token.trim()) {
+      setTokenError('Veuillez entrer un token Mapbox valide');
+      return false;
+    }
+    
+    if (!token.startsWith('pk.')) {
+      setTokenError('Le token Mapbox doit commencer par "pk."');
+      return false;
+    }
+
+    if (token.length < 20) {
+      setTokenError('Le token Mapbox semble trop court');
+      return false;
+    }
+
+    return true;
+  };
+
+  const resetMap = () => {
+    console.log('🔄 Réinitialisation de la carte...');
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
+    setMapLoadError('');
+    setIsMapLoading(false);
+  };
 
   const handleTokenSubmit = () => {
     console.log('🗺️ Tentative d\'initialisation de la carte avec token:', mapboxToken.substring(0, 10) + '...');
     
-    if (!mapboxToken.trim()) {
-      setTokenError('Veuillez entrer un token Mapbox valide');
-      return;
-    }
-    
-    if (!mapboxToken.startsWith('pk.')) {
-      setTokenError('Le token Mapbox doit commencer par "pk."');
+    if (!validateToken(mapboxToken)) {
       return;
     }
 
+    resetMap();
     setTokenError('');
     setIsMapLoading(true);
     setIsTokenSet(true);
@@ -62,7 +87,7 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
     // Délai pour permettre le rendu du container
     setTimeout(() => {
       initializeMap(mapboxToken);
-    }, 100);
+    }, 200);
   };
 
   const initializeMap = (token: string) => {
@@ -70,17 +95,26 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
     
     if (!mapContainer.current) {
       console.error('❌ Container de carte non disponible');
-      setTokenError('Container de carte non disponible');
+      setMapLoadError('Container de carte non disponible');
       setIsMapLoading(false);
       return;
     }
 
+    const containerRect = mapContainer.current.getBoundingClientRect();
     console.log('✅ Container trouvé, dimensions:', {
-      width: mapContainer.current.offsetWidth,
-      height: mapContainer.current.offsetHeight
+      width: containerRect.width,
+      height: containerRect.height,
+      visible: containerRect.width > 0 && containerRect.height > 0
     });
 
+    if (containerRect.width === 0 || containerRect.height === 0) {
+      setMapLoadError('Le container de carte a des dimensions nulles');
+      setIsMapLoading(false);
+      return;
+    }
+
     try {
+      // Test du token avant initialisation
       mapboxgl.accessToken = token;
       console.log('🔑 Token Mapbox configuré');
       
@@ -89,33 +123,69 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
       
       console.log('🎯 Centre de la carte:', { lat: centerLat, lng: centerLng });
 
-      map.current = new mapboxgl.Map({
+      // Création de la carte avec plus d'options de diagnostic
+      const mapOptions = {
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [centerLng, centerLat],
+        style: 'mapbox://styles/mapbox/streets-v12', // Style plus fiable
+        center: [centerLng, centerLat] as [number, number],
         zoom: 12,
         pitch: 0,
-      });
+        antialias: true,
+      };
+
+      console.log('🔧 Options de carte:', mapOptions);
+
+      map.current = new mapboxgl.Map(mapOptions);
 
       console.log('🗺️ Carte Mapbox créée');
 
+      // Ajout des contrôles
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
+      // Gestion des événements
       map.current.on('load', () => {
         console.log('✅ Carte chargée avec succès');
+        console.log('📊 Informations de la carte:', {
+          style: map.current?.getStyle(),
+          center: map.current?.getCenter(),
+          zoom: map.current?.getZoom()
+        });
         setIsMapLoading(false);
+        setMapLoadError('');
         addMarkersToMap();
       });
 
       map.current.on('error', (e) => {
         console.error('❌ Erreur Mapbox:', e);
-        setTokenError('Erreur lors du chargement de la carte: ' + e.error?.message);
+        const errorMsg = e.error?.message || 'Erreur inconnue lors du chargement de la carte';
+        setMapLoadError(errorMsg);
         setIsMapLoading(false);
+        
+        if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+          setTokenError('Token Mapbox invalide ou expiré. Vérifiez votre token.');
+        }
+      });
+
+      map.current.on('style.load', () => {
+        console.log('🎨 Style de carte chargé');
+      });
+
+      map.current.on('sourcedata', (e) => {
+        if (e.isSourceLoaded) {
+          console.log('📡 Source de données chargée:', e.sourceId);
+        }
+      });
+
+      // Test de connectivité réseau
+      map.current.on('data', (e) => {
+        if (e.dataType === 'style') {
+          console.log('🌐 Données de style reçues');
+        }
       });
 
     } catch (error) {
       console.error('❌ Erreur lors de l\'initialisation de la carte:', error);
-      setTokenError('Erreur lors de l\'initialisation de la carte. Vérifiez votre token.');
+      setMapLoadError('Erreur lors de l\'initialisation: ' + (error as Error).message);
       setIsTokenSet(false);
       setIsMapLoading(false);
     }
@@ -248,7 +318,18 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Carte interactive - Douala par secteur</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          Carte interactive - Douala par secteur
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleTokenSubmit()}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Recharger
+          </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {isMapLoading && (
@@ -256,22 +337,39 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
               <p className="text-sm text-gray-600">Chargement de la carte...</p>
+              <p className="text-xs text-gray-500 mt-1">Vérification du token et téléchargement des tuiles</p>
             </div>
           </div>
         )}
+        
         <div 
           ref={mapContainer} 
-          className={`h-96 rounded-lg overflow-hidden shadow-lg ${isMapLoading ? 'hidden' : ''}`}
-          style={{ minHeight: '384px' }}
+          className={`h-96 rounded-lg overflow-hidden shadow-lg border border-gray-200 ${isMapLoading ? 'hidden' : ''}`}
+          style={{ 
+            minHeight: '384px',
+            backgroundColor: '#f8f9fa' // Couleur de fond pour voir le container
+          }}
         />
-        {tokenError && (
+        
+        {(tokenError || mapLoadError) && (
           <Alert className="mt-4 border-red-200 bg-red-50">
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
-              {tokenError}
+              {tokenError || mapLoadError}
+              {mapLoadError && mapLoadError.includes('401') && (
+                <div className="mt-2">
+                  <p className="text-sm">Solutions possibles :</p>
+                  <ul className="text-xs mt-1 list-disc list-inside">
+                    <li>Vérifiez que votre token Mapbox est valide</li>
+                    <li>Assurez-vous que le token n'a pas expiré</li>
+                    <li>Vérifiez les restrictions de domaine sur votre token</li>
+                  </ul>
+                </div>
+              )}
             </AlertDescription>
           </Alert>
         )}
+        
         <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
