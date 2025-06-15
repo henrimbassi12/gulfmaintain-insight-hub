@@ -15,7 +15,7 @@ const UrgentAlerts: React.FC = () => {
     {
       id: "ALT-001",
       equipment: "FR-2024-089",
-      location: "Casablanca - Zone Industrielle",
+      location: "Douala - Zone Industrielle",
       priority: "critical",
       description: "Panne électrique majeure",
       time: "Il y a 15 min",
@@ -24,20 +24,20 @@ const UrgentAlerts: React.FC = () => {
     {
       id: "ALT-002", 
       equipment: "FR-2024-156",
-      location: "Rabat - Centre Ville",
+      location: "Yaoundé - Centre Ville",
       priority: "high",
       description: "Surchauffe système",
       time: "Il y a 1h",
-      technician: "Ahmed Benali"
+      technician: "MBAPBOU GRÉGOIRE"
     },
     {
       id: "ALT-003",
       equipment: "FR-2024-203",
-      location: "Marrakech - Gueliz",
+      location: "Bamenda - Quartier Commercial",
       priority: "medium",
       description: "Maintenance préventive",
       time: "Il y a 3h",
-      technician: "Fatima Zahra"
+      technician: "VOUKENG"
     }
   ];
 

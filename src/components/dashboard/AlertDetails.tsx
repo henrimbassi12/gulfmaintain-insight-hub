@@ -19,7 +19,7 @@ export function AlertDetails({ alertId, isOpen, onClose }: AlertDetailsProps) {
   const alertData = {
     id: alertId,
     equipment: "FR-2024-089",
-    location: "Casablanca - Zone Industrielle",
+    location: "Douala - Zone Industrielle",
     priority: "critical",
     description: "Panne électrique majeure",
     time: "Il y a 15 min",
@@ -31,9 +31,9 @@ export function AlertDetails({ alertId, isOpen, onClose }: AlertDetailsProps) {
       requiredParts: ["Fusible principal", "Relais de contrôle"],
       safetyPrecautions: ["Couper l'alimentation principale", "Porter équipement de sécurité"],
       contactInfo: {
-        onSiteContact: "Hassan Alami",
-        phone: "+212 6 12 34 56 78",
-        email: "hassan.alami@entreprise.ma"
+        onSiteContact: "TCHINDA CONSTANT",
+        phone: "+237 6 12 34 56 78",
+        email: "tchinda.constant@entreprise.cm"
       }
     }
   };
