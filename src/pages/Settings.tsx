@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +26,8 @@ export default function Settings() {
   const [role, setRole] = useState('');
   const [agency, setAgency] = useState('');
 
-  // États pour les notifications
+  // État pour les notifications
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [maintenanceReminders, setMaintenanceReminders] = useState(true);
 
   // Vérifier si l'utilisateur est admin
   const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
@@ -49,13 +47,9 @@ export default function Settings() {
 
     // Charger les préférences de notifications depuis localStorage
     const savedEmailNotifications = localStorage.getItem('emailNotifications');
-    const savedMaintenanceReminders = localStorage.getItem('maintenanceReminders');
     
     if (savedEmailNotifications !== null) {
       setEmailNotifications(JSON.parse(savedEmailNotifications));
-    }
-    if (savedMaintenanceReminders !== null) {
-      setMaintenanceReminders(JSON.parse(savedMaintenanceReminders));
     }
   }, [user, userProfile]);
 
@@ -114,7 +108,6 @@ export default function Settings() {
       } else {
         // Sauvegarder les préférences de notifications dans localStorage
         localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
-        localStorage.setItem('maintenanceReminders', JSON.stringify(maintenanceReminders));
         
         toast.success('Paramètres sauvegardés avec succès');
       }
@@ -293,17 +286,6 @@ export default function Settings() {
                   onCheckedChange={setEmailNotifications}
                 />
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-gray-900">Rappels de maintenance</h4>
-                <p className="text-sm text-gray-500">Alertes automatiques de maintenance</p>
-              </div>
-              <Switch 
-                checked={maintenanceReminders}
-                onCheckedChange={setMaintenanceReminders}
-              />
             </div>
           </div>
         </CardContent>

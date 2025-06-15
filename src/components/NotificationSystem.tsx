@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bell, X, Clock, Wrench, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Notification {
   id: string;
@@ -26,6 +27,14 @@ export function NotificationSystem() {
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
   const { sendNotification, isEnabled: pushEnabled } = usePushNotifications();
+  const { user } = useAuth();
+
+  // Fonction pour vérifier si les notifications par email sont activées
+  const areEmailNotificationsEnabled = () => {
+    const emailNotifications = localStorage.getItem('emailNotifications');
+    // Si pas de préférences sauvegardées, considérer comme activées par défaut
+    return emailNotifications !== null ? JSON.parse(emailNotifications) : true;
+  };
 
   // Fonction pour vérifier si les notifications sont activées
   const areNotificationsEnabled = () => {
@@ -85,43 +94,55 @@ export function NotificationSystem() {
       if (Math.random() > 0.8) {
         const randomNotification = mockNotifications[Math.floor(Math.random() * mockNotifications.length)];
         
-        // Vérifier le type de notification et les préférences
-        let shouldShowNotification = false;
+        // Toujours ajouter la notification à la liste et afficher un toast
+        setNotifications(prev => [randomNotification, ...prev.slice(0, 9)]);
         
-        if (randomNotification.type === 'urgent' && emailEnabled) {
-          shouldShowNotification = true;
-        } else if (randomNotification.type === 'maintenance' && maintenanceEnabled) {
-          shouldShowNotification = true;
-        } else if (randomNotification.type === 'success' && emailEnabled) {
-          shouldShowNotification = true;
-        } else if (randomNotification.type === 'info' && emailEnabled) {
-          shouldShowNotification = true;
-        }
+        toast({
+          title: randomNotification.title,
+          description: randomNotification.message,
+          variant: randomNotification.type === 'urgent' ? 'destructive' : 'default'
+        });
 
-        if (shouldShowNotification) {
-          setNotifications(prev => [randomNotification, ...prev.slice(0, 9)]);
-          
-          // Toast notification
-          toast({
-            title: randomNotification.title,
-            description: randomNotification.message,
-            variant: randomNotification.type === 'urgent' ? 'destructive' : 'default'
+        // Envoyer une notification Push si activée
+        if (pushEnabled) {
+          sendNotification(randomNotification.title, {
+            body: `${randomNotification.message} - ${randomNotification.equipment}`,
+            tag: randomNotification.id,
+            requireInteraction: randomNotification.type === 'urgent'
           });
-
-          // Push notification si activée
-          if (pushEnabled) {
-            sendNotification(randomNotification.title, {
-              body: `${randomNotification.message} - ${randomNotification.equipment}`,
-              tag: randomNotification.id,
-              requireInteraction: randomNotification.type === 'urgent'
-            });
-          }
+        }
+        
+        // Envoyer une notification par email si activée
+        const emailEnabled = areEmailNotificationsEnabled();
+        if (emailEnabled && user?.email) {
+          const emailHtml = `
+            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+              <h1 style="color: #333;">${randomNotification.title}</h1>
+              <p style="font-size: 16px;">${randomNotification.message}</p>
+              <hr style="border: 0; border-top: 1px solid #eee;" />
+              <p><strong>Équipement:</strong> ${randomNotification.equipment || 'N/A'}</p>
+              <p><strong>Lieu:</strong> ${randomNotification.location || 'N/A'}</p>
+              <p style="font-size: 12px; color: #888;">Ceci est une notification automatique.</p>
+            </div>
+          `;
+          
+          supabase.functions.invoke('send-notification-email', {
+            body: {
+              to: user.email,
+              subject: `Alerte de maintenance : ${randomNotification.title}`,
+              html: emailHtml,
+            }
+          }).then(({ error }) => {
+            if (error) {
+              console.error("Erreur lors de l'envoi de l'email via la fonction Supabase:", error);
+            }
+          });
         }
       }
     }, 15000); // Toutes les 15 secondes pour demo
 
     return () => clearInterval(interval);
-  }, [toast, sendNotification, pushEnabled]);
+  }, [toast, sendNotification, pushEnabled, user]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
