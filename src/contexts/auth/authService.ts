@@ -7,23 +7,42 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
     try {
       console.log('🔐 Tentative de connexion pour:', email);
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
         console.error('❌ Erreur de connexion:', error);
+        
+        // Messages d'erreur plus spécifiques
+        let errorMessage = "Email ou mot de passe incorrect";
+        
+        if (error.message.includes('email_not_confirmed')) {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (error.message.includes('invalid_credentials')) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.message.includes('too_many_requests')) {
+          errorMessage = "Trop de tentatives. Veuillez réessayer plus tard";
+        }
+        
         toast({
           title: "Erreur de connexion",
-          description: "Email ou mot de passe incorrect",
+          description: errorMessage,
           variant: "destructive",
         });
-      } else {
-        console.log('✅ Connexion réussie');
+      } else if (data.user && data.session) {
+        console.log('✅ Connexion réussie avec session');
         toast({
           title: "Connexion réussie",
           description: "Vous êtes maintenant connecté",
+        });
+      } else if (data.user && !data.session) {
+        console.log('⚠️ Utilisateur créé mais session manquante - email non confirmé');
+        toast({
+          title: "Email non confirmé",
+          description: "Veuillez vérifier votre email et cliquer sur le lien de confirmation",
+          variant: "destructive",
         });
       }
       
@@ -59,9 +78,15 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
 
       if (error) {
         console.error('❌ Erreur d\'inscription:', error);
+        
+        let errorMessage = error.message;
+        if (error.message.includes('already_registered')) {
+          errorMessage = "Cette adresse email est déjà utilisée. Essayez de vous connecter.";
+        }
+        
         toast({
           title: "Erreur d'inscription",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
@@ -70,7 +95,7 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
         if (data.user && !data.user.email_confirmed_at) {
           toast({
             title: "Inscription réussie",
-            description: "Vérifiez votre email pour confirmer votre compte",
+            description: "Vérifiez votre email pour confirmer votre compte avant de vous connecter",
           });
         } else if (data.user) {
           toast({

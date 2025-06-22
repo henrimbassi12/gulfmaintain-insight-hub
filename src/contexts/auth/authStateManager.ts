@@ -15,29 +15,33 @@ export const useAuthState = () => {
     
     let isMounted = true;
     
-    // Timeout de sécurité simplifié
+    // Timeout de sécurité
     const globalTimeout = setTimeout(() => {
       if (isMounted && loading) {
         console.log('⏰ AuthProvider - Timeout global, arrêt du loading');
         setLoading(false);
       }
-    }, 10000);
+    }, 8000); // Réduit à 8 secondes
 
     // Gestionnaire d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
         
-        console.log('🔄 AuthProvider - Auth state change:', event, session?.user?.email);
+        console.log('🔄 AuthProvider - Auth state change:', event, {
+          userEmail: session?.user?.email,
+          hasSession: !!session,
+          emailConfirmed: session?.user?.email_confirmed_at
+        });
         
         try {
           setSession(session);
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            console.log('👤 AuthProvider - Utilisateur connecté, récupération du profil...');
+            console.log('👤 AuthProvider - Utilisateur avec session active');
             
-            // Attendre un peu pour que la base de données soit à jour
+            // Récupération du profil avec délai pour s'assurer que la base de données est à jour
             setTimeout(async () => {
               if (isMounted) {
                 const profile = await fetchUserProfile(session.user.id);
@@ -47,9 +51,9 @@ export const useAuthState = () => {
                   clearTimeout(globalTimeout);
                 }
               }
-            }, 500);
+            }, 300); // Réduit le délai
           } else {
-            console.log('❌ AuthProvider - Déconnexion, effacement du profil');
+            console.log('❌ AuthProvider - Pas de session active');
             setUserProfile(null);
             setLoading(false);
             clearTimeout(globalTimeout);
@@ -64,13 +68,28 @@ export const useAuthState = () => {
       }
     );
 
-    // Vérification de session existante
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!isMounted) return;
-      
-      console.log('🔍 AuthProvider - Session existante:', session?.user?.email);
-      
+    // Vérification de session existante avec gestion d'erreur améliorée
+    const checkExistingSession = async () => {
       try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ Erreur lors de la récupération de session:', error);
+          if (isMounted) {
+            setLoading(false);
+            clearTimeout(globalTimeout);
+          }
+          return;
+        }
+        
+        if (!isMounted) return;
+        
+        console.log('🔍 AuthProvider - Session existante:', {
+          userEmail: session?.user?.email,
+          hasSession: !!session,
+          emailConfirmed: session?.user?.email_confirmed_at
+        });
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -92,7 +111,9 @@ export const useAuthState = () => {
           clearTimeout(globalTimeout);
         }
       }
-    });
+    };
+
+    checkExistingSession();
 
     return () => {
       isMounted = false;

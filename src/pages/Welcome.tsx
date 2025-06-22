@@ -67,41 +67,76 @@ const Welcome = () => {
     );
   }
 
+  const validateForm = () => {
+    if (!email.trim()) {
+      setError('L\'adresse email est requise');
+      return false;
+    }
+
+    if (!password.trim()) {
+      setError('Le mot de passe est requis');
+      return false;
+    }
+
+    if (mode === 'signup') {
+      if (!fullName.trim()) {
+        setError('Le nom complet est requis');
+        return false;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Les mots de passe ne correspondent pas');
+        return false;
+      }
+
+      if (password.length < 6) {
+        setError('Le mot de passe doit contenir au moins 6 caractères');
+        return false;
+      }
+
+      if (!acceptTerms) {
+        setError('Vous devez accepter les conditions d\'utilisation');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
     setAuthLoading(true);
 
     try {
       if (mode === 'signup') {
-        // Validation côté client
-        if (password !== confirmPassword) {
-          setError('Les mots de passe ne correspondent pas');
-          return;
-        }
-
-        if (!acceptTerms) {
-          setError('Vous devez accepter les conditions d\'utilisation');
-          return;
-        }
-
-        if (!fullName.trim()) {
-          setError('Le nom complet est requis');
-          return;
-        }
-
         console.log('📝 Inscription avec:', { email, fullName, role });
         
         const { error: signUpError } = await signUp(email, password, fullName.trim(), role);
-        if (signUpError) {
-          setError(signUpError.message);
+        
+        if (!signUpError) {
+          // Réinitialiser le formulaire après inscription réussie
+          setEmail('');
+          setPassword('');
+          setConfirmPassword('');
+          setFullName('');
+          setAcceptTerms(false);
+          // Basculer vers le mode connexion
+          setMode('login');
         }
       } else {
         console.log('🔐 Connexion avec:', { email });
         
         const { error: signInError } = await signIn(email, password);
+        
         if (signInError) {
-          setError('Email ou mot de passe incorrect');
+          // L'erreur sera affichée par le service d'authentification
+          console.error('Erreur de connexion:', signInError);
         }
       }
     } catch (error: any) {
@@ -158,7 +193,10 @@ const Welcome = () => {
         <div className="flex mb-8 bg-gray-100 rounded-xl p-1">
           <button
             type="button"
-            onClick={() => setMode('login')}
+            onClick={() => {
+              setMode('login');
+              setError('');
+            }}
             className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
               mode === 'login'
                 ? 'bg-white text-blue-600 shadow-sm'
@@ -169,7 +207,10 @@ const Welcome = () => {
           </button>
           <button
             type="button"
-            onClick={() => setMode('signup')}
+            onClick={() => {
+              setMode('signup');
+              setError('');
+            }}
             className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
               mode === 'signup'
                 ? 'bg-white text-blue-600 shadow-sm'
