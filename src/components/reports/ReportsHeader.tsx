@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { FileText, RefreshCw, BarChart3 } from 'lucide-react';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
-import { ReportGeneratorModal } from '@/components/dashboard/ReportGeneratorModal';
+import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
 import { useReportGeneration } from "@/hooks/useReportGeneration";
 
 interface ReportsHeaderProps {
@@ -13,15 +13,11 @@ interface ReportsHeaderProps {
 }
 
 export function ReportsHeader({ refreshing, onRefresh, onGenerateReport }: ReportsHeaderProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const { generateReport, isGenerating } = useReportGeneration();
 
   const handleGenerateReport = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleQuickGenerate = () => {
-    generateReport('maintenance');
+    setIsFilterModalOpen(true);
   };
 
   return (
@@ -42,25 +38,17 @@ export function ReportsHeader({ refreshing, onRefresh, onGenerateReport }: Repor
         </ModernButton>
 
         <ModernButton
-          onClick={handleQuickGenerate}
+          onClick={handleGenerateReport}
           icon={BarChart3}
           disabled={isGenerating}
         >
-          {isGenerating ? 'Génération...' : 'Générer rapport'}
-        </ModernButton>
-
-        <ModernButton
-          onClick={handleGenerateReport}
-          icon={FileText}
-          variant="outline"
-        >
-          Générateur avancé
+          Générer rapport
         </ModernButton>
       </AirbnbHeader>
 
-      <ReportGeneratorModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      <ReportFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
       />
     </>
   );

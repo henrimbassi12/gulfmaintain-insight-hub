@@ -6,7 +6,6 @@ import { ReportsHeader } from '@/components/reports/ReportsHeader';
 import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
 import { RecentReports } from '@/components/reports/RecentReports';
-import { MaintenanceFormsModal } from '@/components/reports/MaintenanceFormsModal';
 import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
 import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
 import { MovementForm } from '@/components/forms/MovementForm';
@@ -25,7 +24,6 @@ interface Report {
 
 export default function Reports() {
   const [refreshing, setRefreshing] = useState(false);
-  const [isFormsModalOpen, setFormsModalOpen] = useState(false);
   const [isTrackingFormOpen, setTrackingFormOpen] = useState(false);
   const [isMaintenanceFormOpen, setMaintenanceFormOpen] = useState(false);
   const [isMovementFormOpen, setMovementFormOpen] = useState(false);
@@ -46,10 +44,10 @@ export default function Reports() {
   };
 
   const handleGenerateReport = () => {
-    setFormsModalOpen(true);
+    // Cette fonction sera gérée par le modal de filtrage dans ReportsHeader
   };
 
-  const handleFormSelect = (formId: string) => {
+  const handleCreateForm = (formId: string) => {
     switch (formId) {
       case 'tracking':
         setTrackingFormOpen(true);
@@ -67,17 +65,6 @@ export default function Reports() {
         setDepotFormOpen(true);
         break;
     }
-  };
-
-  const handleBackToSelection = () => {
-    // Fermer tous les formulaires
-    setTrackingFormOpen(false);
-    setMaintenanceFormOpen(false);
-    setMovementFormOpen(false);
-    setRepairFormOpen(false);
-    setDepotFormOpen(false);
-    // Rouvrir le modal de sélection
-    setFormsModalOpen(true);
   };
 
   const reports: Report[] = [
@@ -122,49 +109,41 @@ export default function Reports() {
       
       <ReportsStats reports={reports} />
       
-      <AvailableForms reportForms={[]} />
+      <AvailableForms 
+        reportForms={[]} 
+        onCreateForm={handleCreateForm}
+      />
       
       <RecentReports reports={reports} />
       
-      <MaintenanceFormsModal
-        isOpen={isFormsModalOpen}
-        onClose={() => setFormsModalOpen(false)}
-        onSelectForm={handleFormSelect}
-      />
-
       <MaintenanceTrackingForm
         isOpen={isTrackingFormOpen}
         onClose={() => setTrackingFormOpen(false)}
         onSave={handleSaveForm}
-        onBack={handleBackToSelection}
       />
 
       <RefrigeratorMaintenanceForm
         isOpen={isMaintenanceFormOpen}
         onClose={() => setMaintenanceFormOpen(false)}
         onSave={handleSaveForm}
-        onBack={handleBackToSelection}
       />
 
       <MovementForm
         isOpen={isMovementFormOpen}
         onClose={() => setMovementFormOpen(false)}
         onSave={handleSaveForm}
-        onBack={handleBackToSelection}
       />
 
       <RepairForm
         isOpen={isRepairFormOpen}
         onClose={() => setRepairFormOpen(false)}
         onSave={handleSaveForm}
-        onBack={handleBackToSelection}
       />
 
       <DepotScheduleForm
         isOpen={isDepotFormOpen}
         onClose={() => setDepotFormOpen(false)}
         onSave={handleSaveForm}
-        onBack={handleBackToSelection}
       />
     </AirbnbContainer>
   );
