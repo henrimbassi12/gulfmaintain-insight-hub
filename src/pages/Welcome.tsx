@@ -182,7 +182,7 @@ const Welcome = () => {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
-            Gulf Maintain
+            GulfMaintain
           </h1>
           <p className="text-gray-600 text-sm leading-relaxed">
             Système de gestion de maintenance

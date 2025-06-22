@@ -46,7 +46,7 @@ export function WelcomeMessage() {
               Bienvenue {getUserName()}
             </h3>
             <p className="text-sm text-gray-600">
-              {getUserRole()} - Gulf Maintain
+              {getUserRole()} - GulfMaintain
             </p>
           </div>
         </div>

@@ -96,7 +96,7 @@ export function AppSidebar() {
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-blue-600" />
             <h1 className="text-lg font-semibold text-gray-900">
-              Gulf Maintain
+              GulfMaintain
             </h1>
           </div>
           
@@ -109,7 +109,7 @@ export function AppSidebar() {
           <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
           <div>
             <h1 className="text-base md:text-lg font-semibold text-gray-900">
-              Gulf Maintain
+              GulfMaintain
             </h1>
             <p className="text-xs text-gray-500 font-normal">
               Gestion de maintenance
