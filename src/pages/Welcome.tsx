@@ -6,13 +6,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 const Welcome = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, signInWithOAuth, user, userProfile, loading } = useAuth();
+  const { signIn, signUp, signInWithOAuth, user, loading } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [error, setError] = useState('');
-  const [debugInfo, setDebugInfo] = useState('');
 
   // Form states
   const [email, setEmail] = useState('');
@@ -30,39 +29,19 @@ const Welcome = () => {
     }
   }, [searchParams]);
 
-  // Redirect authenticated users to dashboard avec timeout de sécurité
+  // Redirect authenticated users to dashboard
   useEffect(() => {
-    console.log('🔍 Welcome - État auth détaillé:', { 
+    console.log('🔍 Welcome - État auth:', { 
       user: user?.email, 
       loading, 
-      userProfile: userProfile?.account_status,
-      hasUser: !!user,
-      hasProfile: !!userProfile 
+      hasUser: !!user
     });
-
-    setDebugInfo(`Loading: ${loading}, User: ${user?.email || 'none'}, Profile: ${userProfile?.account_status || 'none'}`);
-    
-    // Timeout de sécurité : si le loading dure plus de 10 secondes, forcer l'arrêt
-    const timeoutId = setTimeout(() => {
-      if (loading) {
-        console.log('⚠️ Timeout de vérification de session - forçage de l\'arrêt du loading');
-        setDebugInfo('Timeout de vérification - redirection...');
-        // Si il y a un utilisateur mais que ça prend trop de temps, on redirige quand même
-        if (user) {
-          navigate('/dashboard', { replace: true });
-        }
-      }
-    }, 10000); // 10 secondes
 
     if (!loading && user) {
       console.log('✅ Utilisateur connecté, redirection vers dashboard');
-      setDebugInfo('Redirection vers le dashboard...');
-      clearTimeout(timeoutId);
       navigate('/dashboard', { replace: true });
     }
-
-    return () => clearTimeout(timeoutId);
-  }, [user, loading, userProfile, navigate]);
+  }, [user, loading, navigate]);
 
   // Show loading while checking auth state
   if (loading) {
@@ -71,16 +50,12 @@ const Welcome = () => {
         <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 mb-2">Vérification de la session...</p>
-          <p className="text-xs text-gray-400">{debugInfo}</p>
-          <div className="mt-4 text-xs text-gray-500">
-            Si cela prend trop de temps, la page se redirigera automatiquement
-          </div>
         </div>
       </div>
     );
   }
 
-  // Don't render the form if user is authenticated (prevents flash)
+  // Don't render the form if user is authenticated
   if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
@@ -97,33 +72,44 @@ const Welcome = () => {
     setError('');
     setAuthLoading(true);
 
-    if (mode === 'signup') {
-      if (password !== confirmPassword) {
-        setError('Les mots de passe ne correspondent pas');
-        setAuthLoading(false);
-        return;
-      }
+    try {
+      if (mode === 'signup') {
+        // Validation côté client
+        if (password !== confirmPassword) {
+          setError('Les mots de passe ne correspondent pas');
+          return;
+        }
 
-      if (!acceptTerms) {
-        setError('Vous devez accepter les conditions d\'utilisation');
-        setAuthLoading(false);
-        return;
-      }
+        if (!acceptTerms) {
+          setError('Vous devez accepter les conditions d\'utilisation');
+          return;
+        }
 
-      const { error: signUpError } = await signUp(email, password, fullName, role);
-      if (signUpError) {
-        setError(signUpError.message);
+        if (!fullName.trim()) {
+          setError('Le nom complet est requis');
+          return;
+        }
+
+        console.log('📝 Inscription avec:', { email, fullName, role });
+        
+        const { error: signUpError } = await signUp(email, password, fullName.trim(), role);
+        if (signUpError) {
+          setError(signUpError.message);
+        }
+      } else {
+        console.log('🔐 Connexion avec:', { email });
+        
+        const { error: signInError } = await signIn(email, password);
+        if (signInError) {
+          setError('Email ou mot de passe incorrect');
+        }
       }
-      // No manual navigation here - useEffect will handle it
-    } else {
-      const { error: signInError } = await signIn(email, password);
-      if (signInError) {
-        setError(signInError.message);
-      }
-      // No manual navigation here - useEffect will handle it
+    } catch (error: any) {
+      console.error('❌ Erreur handleSubmit:', error);
+      setError('Une erreur inattendue s\'est produite');
+    } finally {
+      setAuthLoading(false);
     }
-
-    setAuthLoading(false);
   };
 
   const handleSocialAuth = async (provider: 'google' | 'facebook' | 'linkedin_oidc') => {
@@ -267,7 +253,7 @@ const Welcome = () => {
           {mode === 'signup' && (
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom complet
+                Nom complet *
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -286,7 +272,7 @@ const Welcome = () => {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Adresse E-mail
+              Adresse E-mail *
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -304,7 +290,7 @@ const Welcome = () => {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Mot de passe
+              Mot de passe *
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -331,7 +317,7 @@ const Welcome = () => {
             <>
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmer le mot de passe
+                  Confirmer le mot de passe *
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -407,7 +393,7 @@ const Welcome = () => {
           <button
             type="submit"
             disabled={authLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:transform-none"
           >
             {authLoading 
               ? (mode === 'signup' ? 'Création...' : 'Connexion...') 

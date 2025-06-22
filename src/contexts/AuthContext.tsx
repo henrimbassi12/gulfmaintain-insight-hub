@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,71 +24,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fonction pour récupérer le profil utilisateur avec timeout
+  // Fonction pour récupérer le profil utilisateur
   const fetchUserProfile = async (userId: string): Promise<any> => {
     try {
-      console.log('🔍 fetchUserProfile - DÉBUT pour userId:', userId);
+      console.log('🔍 fetchUserProfile - Récupération pour userId:', userId);
       
-      // Timeout de 5 secondes pour éviter les blocages
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout')), 5000);
-      });
-
-      const fetchPromise = supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
       
       if (error) {
         console.error('❌ fetchUserProfile - Erreur:', error);
-        
-        // Si le profil n'existe pas, on va le créer
-        if (error.code === 'PGRST116' || error.message?.includes('not found')) {
-          console.log('⚠️ fetchUserProfile - Profil inexistant, création automatique...');
-          
-          const newProfileData = {
-            id: userId,
-            email: session?.user?.email || '',
-            full_name: session?.user?.user_metadata?.full_name || '',
-            role: session?.user?.user_metadata?.role || 'technician',
-            account_status: 'pending' as 'pending'
-          };
-          
-          console.log('📝 fetchUserProfile - Données du nouveau profil:', newProfileData);
-          
-          try {
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert(newProfileData)
-              .select()
-              .single();
-              
-            if (createError) {
-              console.error('❌ fetchUserProfile - Erreur création profil:', createError);
-              return null;
-            }
-            
-            console.log('✅ fetchUserProfile - Profil créé avec succès:', newProfile);
-            return newProfile;
-          } catch (createErr) {
-            console.error('❌ fetchUserProfile - Erreur catch création:', createErr);
-            return null;
-          }
-        }
-        
         return null;
       }
       
-      console.log('✅ fetchUserProfile - Profil récupéré avec succès:', data);
+      console.log('✅ fetchUserProfile - Profil récupéré:', data);
       return data;
     } catch (error) {
       console.error('❌ fetchUserProfile - Erreur catch:', error);
       return null;
-    } finally {
-      console.log('🔍 fetchUserProfile - FIN pour userId:', userId);
     }
   };
 
@@ -96,98 +53,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     let isMounted = true;
     
-    // Timeout général de sécurité pour éviter les blocages
+    // Timeout de sécurité simplifié
     const globalTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.log('⏰ AuthProvider - Timeout global, forçage de setLoading(false)');
+      if (isMounted && loading) {
+        console.log('⏰ AuthProvider - Timeout global, arrêt du loading');
         setLoading(false);
       }
-    }, 8000); // 8 secondes max
+    }, 10000);
 
-    // Set up auth state listener FIRST
+    // Gestionnaire d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
         
         console.log('🔄 AuthProvider - Auth state change:', event, session?.user?.email);
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          console.log('👤 AuthProvider - Utilisateur connecté, récupération du profil...');
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
           
-          try {
-            const profile = await fetchUserProfile(session.user.id);
-            if (isMounted) {
-              console.log('📄 AuthProvider - Profil récupéré:', profile);
-              setUserProfile(profile);
-            }
-          } catch (error) {
-            console.error('❌ AuthProvider - Erreur dans fetchUserProfile:', error);
-            if (isMounted) {
-              setUserProfile(null);
-            }
-          }
-        } else {
-          console.log('❌ AuthProvider - Aucun utilisateur, profil effacé');
-          if (isMounted) {
+          if (session?.user) {
+            console.log('👤 AuthProvider - Utilisateur connecté, récupération du profil...');
+            
+            // Attendre un peu pour que la base de données soit à jour
+            setTimeout(async () => {
+              if (isMounted) {
+                const profile = await fetchUserProfile(session.user.id);
+                if (isMounted) {
+                  setUserProfile(profile);
+                  setLoading(false);
+                  clearTimeout(globalTimeout);
+                }
+              }
+            }, 500);
+          } else {
+            console.log('❌ AuthProvider - Déconnexion, effacement du profil');
             setUserProfile(null);
+            setLoading(false);
+            clearTimeout(globalTimeout);
           }
-        }
-        
-        if (isMounted) {
-          console.log('✅ AuthProvider - Fin du traitement auth state change, setLoading(false)');
-          setLoading(false);
-          clearTimeout(globalTimeout);
+        } catch (error) {
+          console.error('❌ AuthProvider - Erreur dans auth state change:', error);
+          if (isMounted) {
+            setLoading(false);
+            clearTimeout(globalTimeout);
+          }
         }
       }
     );
 
-    // THEN check for existing session
-    console.log('🔍 AuthProvider - Vérification session existante...');
+    // Vérification de session existante
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!isMounted) return;
       
-      console.log('🔍 AuthProvider - Session existante trouvée:', session?.user?.email);
+      console.log('🔍 AuthProvider - Session existante:', session?.user?.email);
       
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        console.log('👤 AuthProvider - Session existante avec utilisateur, récupération du profil...');
+      try {
+        setSession(session);
+        setUser(session?.user ?? null);
         
-        try {
+        if (session?.user) {
           const profile = await fetchUserProfile(session.user.id);
           if (isMounted) {
-            console.log('📄 AuthProvider - Profil session existante récupéré:', profile);
             setUserProfile(profile);
           }
-        } catch (error) {
-          console.error('❌ AuthProvider - Erreur dans fetchUserProfile pour session existante:', error);
-          if (isMounted) {
-            setUserProfile(null);
-          }
         }
-      }
-      
-      if (isMounted) {
-        console.log('✅ AuthProvider - Fin traitement session existante, setLoading(false)');
-        setLoading(false);
-        clearTimeout(globalTimeout);
-      }
-    }).catch((error) => {
-      console.error('❌ AuthProvider - Erreur lors de getSession:', error);
-      if (isMounted) {
-        setLoading(false);
-        clearTimeout(globalTimeout);
+        
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(globalTimeout);
+        }
+      } catch (error) {
+        console.error('❌ AuthProvider - Erreur session existante:', error);
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(globalTimeout);
+        }
       }
     });
 
     return () => {
       isMounted = false;
       clearTimeout(globalTimeout);
-      console.log('🧹 AuthProvider - Cleanup subscription');
       subscription.unsubscribe();
     };
   }, []);
@@ -205,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('❌ Erreur de connexion:', error);
         toast({
           title: "Erreur de connexion",
-          description: error.message,
+          description: "Email ou mot de passe incorrect",
           variant: "destructive",
         });
       } else {
@@ -218,16 +165,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return { error };
     } catch (error: any) {
-      console.error('❌ Erreur catch:', error);
+      console.error('❌ Erreur catch signIn:', error);
+      toast({
+        title: "Erreur de connexion",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
       return { error };
     }
   };
 
   const signUp = async (email: string, password: string, fullName?: string, role?: string) => {
     try {
+      console.log('📝 Tentative d\'inscription pour:', email, { fullName, role });
+      
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -240,20 +194,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
+        console.error('❌ Erreur d\'inscription:', error);
         toast({
           title: "Erreur d'inscription",
           description: error.message,
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Inscription réussie",
-          description: "Vérifiez votre email pour confirmer votre compte",
-        });
+        console.log('✅ Inscription réussie:', data);
+        
+        // Si l'utilisateur est créé immédiatement (pas de confirmation email)
+        if (data.user && !data.user.email_confirmed_at) {
+          toast({
+            title: "Inscription réussie",
+            description: "Vérifiez votre email pour confirmer votre compte",
+          });
+        } else if (data.user) {
+          toast({
+            title: "Inscription réussie",
+            description: "Votre compte a été créé avec succès",
+          });
+        }
       }
 
       return { error };
     } catch (error: any) {
+      console.error('❌ Erreur catch signUp:', error);
+      toast({
+        title: "Erreur d'inscription",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
       return { error };
     }
   };
