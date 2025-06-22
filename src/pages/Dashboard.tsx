@@ -17,6 +17,8 @@ import { RecentInterventionsTable } from '@/components/dashboard/RecentIntervent
 import { MaintenanceReport } from '@/types/maintenance';
 import { useAuth } from '@/contexts/AuthContext';
 import { Wrench, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { OfflineBanner } from '@/components/OfflineBanner';
+import { useSyncNotifications } from '@/hooks/useSyncNotifications';
 
 type ReportStatus = MaintenanceReport['status'];
 type InterventionStatus = 'completed' | 'in-progress' | 'planned';
@@ -38,6 +40,9 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const { reports, isLoading: isLoadingReports, refetch: refetchReports } = useReports();
   const { userProfile, loading: isLoadingAuth } = useAuth();
+
+  // Hook pour les notifications de synchronisation
+  useSyncNotifications();
 
   const kpiData = useMemo(() => {
     if (!reports) return { total: 0, inProgress: 0, completed: 0, planned: 0 };
@@ -122,6 +127,8 @@ export default function Dashboard() {
         refreshing={refreshing}
         isLoading={isLoadingReports || isLoadingAuth}
       />
+
+      <OfflineBanner />
 
       <div className="p-4 md:p-6 space-y-6">
         <DashboardKPIs
