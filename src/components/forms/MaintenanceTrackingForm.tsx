@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Save, Download } from 'lucide-react';
+import { toast } from "sonner";
 
 interface MaintenanceEntry {
   date: string;
@@ -26,9 +27,10 @@ interface MaintenanceTrackingFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  onBack?: () => void;
 }
 
-export function MaintenanceTrackingForm({ isOpen, onClose, onSave }: MaintenanceTrackingFormProps) {
+export function MaintenanceTrackingForm({ isOpen, onClose, onSave, onBack }: MaintenanceTrackingFormProps) {
   const [formData, setFormData] = useState({
     creationDate: '',
     closureDate: '',
@@ -78,21 +80,76 @@ export function MaintenanceTrackingForm({ isOpen, onClose, onSave }: Maintenance
 
   const handleSave = () => {
     onSave(formData);
+    toast.success('Fiche de suivi sauvegardée avec succès !');
     onClose();
   };
 
-  if (!isOpen) return null;
+  const handleDownload = () => {
+    const content = generateFormContent();
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `fiche-suivi-${formData.serialNumber || 'nouveau'}-${formData.creationDate}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    toast.success('Fiche téléchargée avec succès !');
+  };
+
+  const generateFormContent = () => {
+    return `=== FICHE DE SUIVI ET DE MAINTENANCE DU RÉFRIGÉRATEUR GUINNESS ===
+
+Date de création: ${formData.creationDate}
+Date de clôture: ${formData.closureDate}
+Région: ${formData.region}
+Partenaire: ${formData.partnership}
+TAE: ${formData.tae}
+Type de Frigo: ${formData.fridgeType}
+SN ou TAG NUMBER: ${formData.serialNumber}
+PVD1: ${formData.pvd1}
+PVD2: ${formData.pvd2}
+PVD3: ${formData.pvd3}
+
+=== HISTORIQUE DE MAINTENANCE ===
+${formData.maintenanceEntries.map((entry, index) => `
+Entrée ${index + 1}:
+Date: ${entry.date}
+Action: ${entry.action}
+Observations: ${entry.observations}
+Signature: ${entry.signature}
+`).join('\n')}
+
+=== CONTACTS UTILES ===
+${formData.contacts.map(contact => `
+${contact.status}: ${contact.name} - ${contact.phone}
+`).join('\n')}
+
+Généré le: ${new Date().toLocaleString('fr-FR')}
+`;
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="bg-gray-100">
-          <CardTitle className="flex justify-between items-center">
-            <span>Fiche de Suivi et de Maintenance du Réfrigérateur Guinness</span>
-            <Button variant="ghost" onClick={onClose}>×</Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <Button variant="ghost" size="sm" onClick={onBack}>
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            )}
+            <div>
+              <DialogTitle>Fiche de Suivi et de Maintenance du Réfrigérateur Guinness</DialogTitle>
+              <DialogDescription>
+                Suivi détaillé et historique de la maintenance par réfrigérateur
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6">
           {/* En-tête */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -309,13 +366,22 @@ export function MaintenanceTrackingForm({ isOpen, onClose, onSave }: Maintenance
               ))}
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <Button variant="outline" onClick={onClose}>Annuler</Button>
-            <Button onClick={handleSave}>Enregistrer</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button variant="outline" onClick={handleDownload}>
+            <Download className="w-4 h-4 mr-2" />
+            Télécharger
+          </Button>
+          <Button onClick={handleSave}>
+            <Save className="w-4 h-4 mr-2" />
+            Sauvegarder
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
