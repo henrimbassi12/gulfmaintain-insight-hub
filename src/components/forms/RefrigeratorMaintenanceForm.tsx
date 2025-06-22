@@ -1,253 +1,276 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { FormField } from "@/components/ui/form-field";
-import { useFormValidation } from "@/hooks/useFormValidation";
-import { useOfflineStorage } from "@/hooks/useOfflineStorage";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Save, Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface RefrigeratorMaintenanceFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  onBack?: () => void;
 }
 
-export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave }: RefrigeratorMaintenanceFormProps) {
-  const { toast } = useToast();
-  const { isOnline, saveOfflineData } = useOfflineStorage('refrigerator_maintenance');
-  
+export function RefrigeratorMaintenanceForm({ isOpen, onClose, onSave, onBack }: RefrigeratorMaintenanceFormProps) {
   const [formData, setFormData] = useState({
-    // Top section
-    division: '',
-    secteur: '',
-    partenaire: '',
-    ville: '',
-    tazRseGuinness: '',
-    technicienGfi: '',
-    date: '',
-
-    // Client Info
-    nomClient: '',
-    nomPdv: '',
-    telBarman: '',
-    quartier: '',
-    localisation: '',
-    
-    // Fridge Info
-    typeFrigo: '',
-    afNf: '',
-    branding: '',
-    sn: '',
-    tagNumber: '',
-
-    // Checks
-    securiteDmsRegulTerre: '',
-    tauxRemplissage: '',
-    eclairage: '',
+    date: new Date().toISOString().split('T')[0],
+    technician: '',
+    refrigeratorId: '',
+    location: '',
+    maintenanceType: '',
     temperature: '',
-    lineaire: '',
-    tension: '',
-    intensiteAvant: '',
-    intensiteApres: '',
-    purgeCircuit: '',
-    soufflagePartiesActives: '',
-
-    // Comments
-    observationCommentaires: '',
-
-    // Signatures
-    signatureBarman: '',
-    technicoGfiSignature: '',
-    taeOuAsm: ''
+    cleaning: '',
+    gasLevel: '',
+    electricalCheck: '',
+    observations: '',
+    nextMaintenance: ''
   });
-
-  const validationRules = {
-    date: { required: true },
-    technicienGfi: { required: true, minLength: 2 },
-    tagNumber: { required: true, minLength: 3 },
-    ville: { required: true },
-    localisation: { required: true },
-    temperature: {
-      required: true,
-      custom: (value: string) => {
-        const num = parseFloat(value);
-        if (isNaN(num)) return 'Température invalide';
-        if (num < -50 || num > 50) return 'Température hors limites (-50°C à 50°C)';
-        return null;
-      }
-    },
-    tension: {
-      required: true,
-      custom: (value: string) => {
-        const num = parseFloat(value);
-        if (isNaN(num)) return 'Tension invalide';
-        return null;
-      }
-    },
-    intensiteAvant: {
-      required: true,
-      custom: (value: string) => {
-        const num = parseFloat(value);
-        if (isNaN(num)) return 'Intensité invalide';
-        return null;
-      }
-    },
-    intensiteApres: {
-      required: true,
-      custom: (value: string) => {
-        const num = parseFloat(value);
-        if (isNaN(num)) return 'Intensité invalide';
-        return null;
-      }
-    },
-  };
-
-  const { errors, validateForm, clearFieldError } = useFormValidation(validationRules);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    clearFieldError(field);
   };
 
-  const handleSave = async () => {
-    if (!validateForm(formData)) {
-      toast({
-        title: "Erreurs de validation",
-        description: "Veuillez corriger les erreurs avant de sauvegarder",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const dataToSave = {
-      ...formData,
-      type: 'refrigerator_maintenance',
-      created_at: new Date().toISOString()
-    };
-
-    if (!isOnline) {
-      const offlineId = saveOfflineData(dataToSave);
-      toast({
-        title: "Sauvegardé hors-ligne",
-        description: "Les données seront synchronisées lors de la reconnexion",
-        variant: "default"
-      });
-    } else {
-      onSave(dataToSave);
-    }
-    
+  const handleSave = () => {
+    onSave(formData);
+    toast.success('Fiche d\'entretien sauvegardée avec succès !');
     onClose();
   };
 
-  if (!isOpen) return null;
+  const handleDownload = () => {
+    const content = generateFormContent();
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `fiche-entretien-${formData.refrigeratorId || 'nouveau'}-${formData.date}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    toast.success('Fiche téléchargée avec succès !');
+  };
+
+  const generateFormContent = () => {
+    return `=== FICHE D'ENTRETIEN DES FRIGOS ===
+
+Date: ${formData.date}
+Technicien: ${formData.technician}
+ID Réfrigérateur: ${formData.refrigeratorId}
+Localisation: ${formData.location}
+Type d'entretien: ${formData.maintenanceType}
+
+=== CONTRÔLES EFFECTUÉS ===
+Température: ${formData.temperature}
+Nettoyage: ${formData.cleaning}
+Niveau de gaz: ${formData.gasLevel}
+Contrôle électrique: ${formData.electricalCheck}
+
+=== OBSERVATIONS ===
+${formData.observations}
+
+Prochaine maintenance prévue: ${formData.nextMaintenance}
+
+Généré le: ${new Date().toLocaleString('fr-FR')}
+`;
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="bg-blue-50">
-          <CardTitle className="flex justify-between items-center">
-            <span>Fiche d'Entretien des Réfrigérateurs</span>
-            <div className="flex items-center gap-2">
-              {!isOnline && (
-                <span className="text-orange-600 text-sm">Mode hors-ligne</span>
-              )}
-              <Button variant="ghost" onClick={onClose}>×</Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {/* En-tête */}
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-               <FormField label="Division" name="division" value={formData.division} onChange={(value) => handleInputChange('division', value)} />
-               <FormField label="Secteur" name="secteur" value={formData.secteur} onChange={(value) => handleInputChange('secteur', value)} />
-               <FormField label="Partenaire" name="partenaire" value={formData.partenaire} onChange={(value) => handleInputChange('partenaire', value)} />
-               <FormField label="Ville" name="ville" value={formData.ville} onChange={(value) => handleInputChange('ville', value)} error={errors.ville} required />
-            </div>
-             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField label="TAZ/RSE Guinness" name="tazRseGuinness" value={formData.tazRseGuinness} onChange={(value) => handleInputChange('tazRseGuinness', value)} />
-                <FormField label="Technicien GFI" name="technicienGfi" value={formData.technicienGfi} onChange={(value) => handleInputChange('technicienGfi', value)} error={errors.technicienGfi} required/>
-                <FormField label="Date" name="date" type="date" value={formData.date} onChange={(value) => handleInputChange('date', value)} error={errors.date} required/>
-             </div>
-          </div>
-          <Separator />
-          {/* Informations sur le client */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Information sur le Client</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField label="Nom Client" name="nomClient" value={formData.nomClient} onChange={(value) => handleInputChange('nomClient', value)} />
-                <FormField label="Nom PDV" name="nomPdv" value={formData.nomPdv} onChange={(value) => handleInputChange('nomPdv', value)} />
-                <FormField label="Tél. Barman" name="telBarman" value={formData.telBarman} onChange={(value) => handleInputChange('telBarman', value)} />
-            </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Quartier" name="quartier" value={formData.quartier} onChange={(value) => handleInputChange('quartier', value)} />
-                <FormField label="Localisation" name="localisation" value={formData.localisation} onChange={(value) => handleInputChange('localisation', value)} error={errors.localisation} required/>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <Button variant="ghost" size="sm" onClick={onBack}>
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            )}
+            <div>
+              <DialogTitle>Fiche d'Entretien des Frigos</DialogTitle>
+              <DialogDescription>
+                Formulaire pour l'entretien périodique des réfrigérateurs
+              </DialogDescription>
             </div>
           </div>
-          <Separator />
-          {/* Informations sur le frigo */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Informations sur le Frigo</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField label="Type Frigo" name="typeFrigo" value={formData.typeFrigo} onChange={(value) => handleInputChange('typeFrigo', value)} />
-              <FormField label="AF/NF" name="afNf" value={formData.afNf} onChange={(value) => handleInputChange('afNf', value)} />
-              <FormField label="Branding" name="branding" value={formData.branding} onChange={(value) => handleInputChange('branding', value)} />
-            </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="SN (Serial Number)" name="sn" value={formData.sn} onChange={(value) => handleInputChange('sn', value)} />
-                <FormField label="Tag Number" name="tagNumber" value={formData.tagNumber} onChange={(value) => handleInputChange('tagNumber', value)} error={errors.tagNumber} required/>
-            </div>
-          </div>
-          <Separator />
-          {/* Contrôles */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Contrôles</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField label="Sécurité (DMS), Regul.Terre" name="securiteDmsRegulTerre" value={formData.securiteDmsRegulTerre} onChange={(value) => handleInputChange('securiteDmsRegulTerre', value)} />
-                <FormField label="Taux Remplissage (%)" name="tauxRemplissage" type="number" value={formData.tauxRemplissage} onChange={(value) => handleInputChange('tauxRemplissage', value)} />
-                <FormField label="Eclairage (O/N)" name="eclairage" value={formData.eclairage} onChange={(value) => handleInputChange('eclairage', value)} />
-                <FormField label="Température (°C)" name="temperature" type="number" value={formData.temperature} onChange={(value) => handleInputChange('temperature', value)} error={errors.temperature} required/>
-                <FormField label="Linéaire (L/D)" name="lineaire" value={formData.lineaire} onChange={(value) => handleInputChange('lineaire', value)} />
-                <FormField label="Tension (Volt)" name="tension" type="number" value={formData.tension} onChange={(value) => handleInputChange('tension', value)} error={errors.tension} required/>
-                <FormField label="Intensité avant entretien (A)" name="intensiteAvant" type="number" value={formData.intensiteAvant} onChange={(value) => handleInputChange('intensiteAvant', value)} error={errors.intensiteAvant} required/>
-                <FormField label="Intensité après entretien (A)" name="intensiteApres" type="number" value={formData.intensiteApres} onChange={(value) => handleInputChange('intensiteApres', value)} error={errors.intensiteApres} required/>
-                <FormField label="Purge du circuit d'évaluation des eaux" name="purgeCircuit" value={formData.purgeCircuit} onChange={(value) => handleInputChange('purgeCircuit', value)} />
-                <FormField label="Soufflage des parties actives à l'air" name="soufflagePartiesActives" value={formData.soufflagePartiesActives} onChange={(value) => handleInputChange('soufflagePartiesActives', value)} />
-            </div>
-          </div>
-          <Separator />
-          {/* Observations et recommandations */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Observation / Commentaires</h3>
-            <FormField
-              label=""
-              name="observationCommentaires"
-              type="textarea"
-              value={formData.observationCommentaires}
-              onChange={(value) => handleInputChange('observationCommentaires', value)}
-            />
-          </div>
-          <Separator />
-          {/* Signatures et date de prochain entretien */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Signatures</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField label="Signature Barman" name="signatureBarman" value={formData.signatureBarman} onChange={(value) => handleInputChange('signatureBarman', value)} />
-              <FormField label="Technico GFI (Nom, Date, Signature)" name="technicoGfiSignature" value={formData.technicoGfiSignature} onChange={(value) => handleInputChange('technicoGfiSignature', value)} />
-              <FormField label="TAE ou ASM" name="taeOuAsm" value={formData.taeOuAsm} onChange={(value) => handleInputChange('taeOuAsm', value)} />
-            </div>
-          </div>
+        </DialogHeader>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <Button variant="outline" onClick={onClose}>Annuler</Button>
-            <Button onClick={handleSave}>
-              {isOnline ? 'Enregistrer' : 'Sauvegarder hors-ligne'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Informations générales</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="technician">Technicien</Label>
+                  <Input
+                    id="technician"
+                    value={formData.technician}
+                    onChange={(e) => handleInputChange('technician', e.target.value)}
+                    placeholder="Nom du technicien"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="refrigeratorId">ID Réfrigérateur</Label>
+                  <Input
+                    id="refrigeratorId"
+                    value={formData.refrigeratorId}
+                    onChange={(e) => handleInputChange('refrigeratorId', e.target.value)}
+                    placeholder="Ex: FRIG-001"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="location">Localisation</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    placeholder="Adresse ou zone"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maintenanceType">Type d'entretien</Label>
+                <Select value={formData.maintenanceType} onValueChange={(value) => handleInputChange('maintenanceType', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez le type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="preventif">Entretien préventif</SelectItem>
+                    <SelectItem value="correctif">Entretien correctif</SelectItem>
+                    <SelectItem value="urgence">Intervention d'urgence</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Contrôles effectués</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="temperature">Température (°C)</Label>
+                  <Input
+                    id="temperature"
+                    value={formData.temperature}
+                    onChange={(e) => handleInputChange('temperature', e.target.value)}
+                    placeholder="Ex: 4°C"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="gasLevel">Niveau de gaz</Label>
+                  <Select value={formData.gasLevel} onValueChange={(value) => handleInputChange('gasLevel', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="État du gaz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="optimal">Optimal</SelectItem>
+                      <SelectItem value="bas">Bas</SelectItem>
+                      <SelectItem value="rechargé">Rechargé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cleaning">Nettoyage</Label>
+                  <Select value={formData.cleaning} onValueChange={(value) => handleInputChange('cleaning', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="État de propreté" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="effectué">Effectué</SelectItem>
+                      <SelectItem value="partiel">Partiel</SelectItem>
+                      <SelectItem value="nécessaire">Nécessaire</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="electricalCheck">Contrôle électrique</Label>
+                  <Select value={formData.electricalCheck} onValueChange={(value) => handleInputChange('electricalCheck', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="État électrique" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="conforme">Conforme</SelectItem>
+                      <SelectItem value="défaillant">Défaillant</SelectItem>
+                      <SelectItem value="réparé">Réparé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Observations et suivi</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="observations">Observations</Label>
+                <Textarea
+                  id="observations"
+                  value={formData.observations}
+                  onChange={(e) => handleInputChange('observations', e.target.value)}
+                  placeholder="Remarques, problèmes détectés, actions effectuées..."
+                  rows={4}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="nextMaintenance">Prochaine maintenance</Label>
+                <Input
+                  id="nextMaintenance"
+                  type="date"
+                  value={formData.nextMaintenance}
+                  onChange={(e) => handleInputChange('nextMaintenance', e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button variant="outline" onClick={handleDownload}>
+            <Download className="w-4 h-4 mr-2" />
+            Télécharger
+          </Button>
+          <Button onClick={handleSave}>
+            <Save className="w-4 h-4 mr-2" />
+            Sauvegarder
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

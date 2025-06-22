@@ -4,9 +4,14 @@ import { toast } from 'sonner';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { ReportsHeader } from '@/components/reports/ReportsHeader';
 import { ReportsStats } from '@/components/reports/ReportsStats';
-import { AvailableForms, ReportForm } from '@/components/reports/AvailableForms';
+import { AvailableForms } from '@/components/reports/AvailableForms';
 import { RecentReports } from '@/components/reports/RecentReports';
-import { ReportModals } from '@/components/reports/ReportModals';
+import { MaintenanceFormsModal } from '@/components/reports/MaintenanceFormsModal';
+import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
+import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
+import { MovementForm } from '@/components/forms/MovementForm';
+import { RepairForm } from '@/components/forms/RepairForm';
+import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
 
 // We can move these interfaces to a types file later if needed
 interface Report {
@@ -20,6 +25,7 @@ interface Report {
 
 export default function Reports() {
   const [refreshing, setRefreshing] = useState(false);
+  const [isFormsModalOpen, setFormsModalOpen] = useState(false);
   const [isTrackingFormOpen, setTrackingFormOpen] = useState(false);
   const [isMaintenanceFormOpen, setMaintenanceFormOpen] = useState(false);
   const [isMovementFormOpen, setMovementFormOpen] = useState(false);
@@ -40,7 +46,38 @@ export default function Reports() {
   };
 
   const handleGenerateReport = () => {
-    toast.success("Génération du rapport démarrée...");
+    setFormsModalOpen(true);
+  };
+
+  const handleFormSelect = (formId: string) => {
+    switch (formId) {
+      case 'tracking':
+        setTrackingFormOpen(true);
+        break;
+      case 'maintenance':
+        setMaintenanceFormOpen(true);
+        break;
+      case 'movement':
+        setMovementFormOpen(true);
+        break;
+      case 'repair':
+        setRepairFormOpen(true);
+        break;
+      case 'depot':
+        setDepotFormOpen(true);
+        break;
+    }
+  };
+
+  const handleBackToSelection = () => {
+    // Fermer tous les formulaires
+    setTrackingFormOpen(false);
+    setMaintenanceFormOpen(false);
+    setMovementFormOpen(false);
+    setRepairFormOpen(false);
+    setDepotFormOpen(false);
+    // Rouvrir le modal de sélection
+    setFormsModalOpen(true);
   };
 
   const reports: Report[] = [
@@ -75,39 +112,6 @@ export default function Reports() {
     toast.success('Fiche enregistrée avec succès !');
   };
 
-  const reportForms: ReportForm[] = [
-    { 
-      id: 'tracking', 
-      title: 'Fiche de Suivi et de Maintenance du Réfrigérateur Guinness', 
-      description: 'Suivi détaillé et historique de la maintenance par réfrigérateur.', 
-      action: () => setTrackingFormOpen(true) 
-    },
-    { 
-      id: 'maintenance', 
-      title: 'Fiche d’Entretien des Frigos', 
-      description: 'Formulaire pour l’entretien périodique des réfrigérateurs.', 
-      action: () => setMaintenanceFormOpen(true) 
-    },
-    { 
-      id: 'movement', 
-      title: 'Fiche de Suivi de Mouvement des Frigos', 
-      description: 'Enregistrement des déplacements et transferts de frigos.', 
-      action: () => setMovementFormOpen(true) 
-    },
-    { 
-      id: 'repair', 
-      title: 'Fiche de Suivi des Réparations des Frigos', 
-      description: 'Documentation des pannes et des réparations effectuées.', 
-      action: () => setRepairFormOpen(true) 
-    },
-    { 
-      id: 'depot', 
-      title: 'Fiche de Passe au Dépôt', 
-      description: 'Suivi des passages des techniciens au dépôt.', 
-      action: () => setDepotFormOpen(true) 
-    }
-  ];
-
   return (
     <AirbnbContainer>
       <ReportsHeader
@@ -118,22 +122,49 @@ export default function Reports() {
       
       <ReportsStats reports={reports} />
       
-      <AvailableForms reportForms={reportForms} />
+      <AvailableForms reportForms={[]} />
       
       <RecentReports reports={reports} />
       
-      <ReportModals
-        isTrackingFormOpen={isTrackingFormOpen}
-        setTrackingFormOpen={setTrackingFormOpen}
-        isMaintenanceFormOpen={isMaintenanceFormOpen}
-        setMaintenanceFormOpen={setMaintenanceFormOpen}
-        isMovementFormOpen={isMovementFormOpen}
-        setMovementFormOpen={setMovementFormOpen}
-        isRepairFormOpen={isRepairFormOpen}
-        setRepairFormOpen={setRepairFormOpen}
-        isDepotFormOpen={isDepotFormOpen}
-        setDepotFormOpen={setDepotFormOpen}
-        onSaveForm={handleSaveForm}
+      <MaintenanceFormsModal
+        isOpen={isFormsModalOpen}
+        onClose={() => setFormsModalOpen(false)}
+        onSelectForm={handleFormSelect}
+      />
+
+      <MaintenanceTrackingForm
+        isOpen={isTrackingFormOpen}
+        onClose={() => setTrackingFormOpen(false)}
+        onSave={handleSaveForm}
+        onBack={handleBackToSelection}
+      />
+
+      <RefrigeratorMaintenanceForm
+        isOpen={isMaintenanceFormOpen}
+        onClose={() => setMaintenanceFormOpen(false)}
+        onSave={handleSaveForm}
+        onBack={handleBackToSelection}
+      />
+
+      <MovementForm
+        isOpen={isMovementFormOpen}
+        onClose={() => setMovementFormOpen(false)}
+        onSave={handleSaveForm}
+        onBack={handleBackToSelection}
+      />
+
+      <RepairForm
+        isOpen={isRepairFormOpen}
+        onClose={() => setRepairFormOpen(false)}
+        onSave={handleSaveForm}
+        onBack={handleBackToSelection}
+      />
+
+      <DepotScheduleForm
+        isOpen={isDepotFormOpen}
+        onClose={() => setDepotFormOpen(false)}
+        onSave={handleSaveForm}
+        onBack={handleBackToSelection}
       />
     </AirbnbContainer>
   );
