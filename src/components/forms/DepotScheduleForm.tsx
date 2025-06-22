@@ -4,10 +4,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save, Download } from "lucide-react";
+import { ArrowLeft, Save, Download, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface DepotScheduleFormProps {
@@ -17,27 +15,103 @@ interface DepotScheduleFormProps {
   onBack?: () => void;
 }
 
+interface DepotEntry {
+  id: string;
+  depot: string;
+  semaine: string;
+  date: string;
+  heureArrivee: string;
+  heureDepart: string;
+  sigChefSecteur: string;
+  sigTechnicien: string;
+}
+
 export function DepotScheduleForm({ isOpen, onClose, onSave, onBack }: DepotScheduleFormProps) {
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    technician: '',
-    arrivalTime: '',
-    departureTime: '',
-    visitPurpose: '',
-    materialsCollected: '',
-    toolsReturned: '',
-    reportsSubmitted: '',
-    nextTasks: '',
-    supervisor: '',
-    observations: ''
+    nomTechnicien: ''
   });
+
+  const [depotEntries, setDepotEntries] = useState<DepotEntry[]>([
+    { 
+      id: '1', 
+      depot: '', 
+      semaine: 'SEMAINE 1', 
+      date: '', 
+      heureArrivee: '', 
+      heureDepart: '', 
+      sigChefSecteur: '', 
+      sigTechnicien: '' 
+    },
+    { 
+      id: '2', 
+      depot: '', 
+      semaine: 'SEMAINE 2', 
+      date: '', 
+      heureArrivee: '', 
+      heureDepart: '', 
+      sigChefSecteur: '', 
+      sigTechnicien: '' 
+    },
+    { 
+      id: '3', 
+      depot: '', 
+      semaine: 'SEMAINE 3', 
+      date: '', 
+      heureArrivee: '', 
+      heureDepart: '', 
+      sigChefSecteur: '', 
+      sigTechnicien: '' 
+    },
+    { 
+      id: '4', 
+      depot: '', 
+      semaine: 'SEMAINE 4', 
+      date: '', 
+      heureArrivee: '', 
+      heureDepart: '', 
+      sigChefSecteur: '', 
+      sigTechnicien: '' 
+    }
+  ]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateDepotEntry = (id: string, field: string, value: string) => {
+    setDepotEntries(prev => 
+      prev.map(entry => 
+        entry.id === id ? { ...entry, [field]: value } : entry
+      )
+    );
+  };
+
+  const addDepotEntry = () => {
+    const newEntry: DepotEntry = {
+      id: Date.now().toString(),
+      depot: '',
+      semaine: `SEMAINE ${depotEntries.length + 1}`,
+      date: '',
+      heureArrivee: '',
+      heureDepart: '',
+      sigChefSecteur: '',
+      sigTechnicien: ''
+    };
+    setDepotEntries(prev => [...prev, newEntry]);
+  };
+
+  const removeDepotEntry = (id: string) => {
+    if (depotEntries.length > 1) {
+      setDepotEntries(prev => prev.filter(entry => entry.id !== id));
+    }
+  };
+
   const handleSave = () => {
-    onSave(formData);
+    const completeData = {
+      ...formData,
+      depotEntries
+    };
+    onSave(completeData);
     toast.success('Fiche de passage au dépôt sauvegardée avec succès !');
     onClose();
   };
@@ -48,7 +122,7 @@ export function DepotScheduleForm({ isOpen, onClose, onSave, onBack }: DepotSche
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `fiche-depot-${formData.technician || 'nouveau'}-${formData.date}.txt`;
+    link.download = `fiche-passage-depot-${formData.nomTechnicien || 'technicien'}-${new Date().toISOString().split('T')[0]}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -57,31 +131,21 @@ export function DepotScheduleForm({ isOpen, onClose, onSave, onBack }: DepotSche
   };
 
   const generateFormContent = () => {
-    return `=== FICHE DE PASSE AU DÉPÔT ===
+    return `=== FICHE DE PASSAGE AU DEPOT ===
 
-Date: ${formData.date}
-Technicien: ${formData.technician}
-Superviseur: ${formData.supervisor}
+NOM DU TECHNICIEN: ${formData.nomTechnicien}
 
-=== HORAIRES ===
-Heure d'arrivée: ${formData.arrivalTime}
-Heure de départ: ${formData.departureTime}
-
-=== MOTIF DE LA VISITE ===
-${formData.visitPurpose}
-
-=== MATÉRIELS ET OUTILS ===
-Matériels collectés: ${formData.materialsCollected}
-Outils retournés: ${formData.toolsReturned}
-
-=== RAPPORTS ===
-Rapports remis: ${formData.reportsSubmitted}
-
-=== PROCHAINES TÂCHES ===
-${formData.nextTasks}
-
-=== OBSERVATIONS ===
-${formData.observations}
+=== PASSAGES AU DEPOT ===
+${depotEntries.map((entry, index) => `
+=== TABLEAU ${index + 1} ===
+Dépôt: ${entry.depot}
+${entry.semaine}
+Date: ${entry.date}
+Heure d'arrivée: ${entry.heureArrivee}
+Heure de départ: ${entry.heureDepart}
+Signature chef secteur: ${entry.sigChefSecteur}
+Signature technicien: ${entry.sigTechnicien}
+`).join('\n')}
 
 Généré le: ${new Date().toLocaleString('fr-FR')}
 `;
@@ -89,7 +153,7 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
             {onBack && (
@@ -97,174 +161,122 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
-            <div>
-              <DialogTitle>Fiche de Passe au Dépôt</DialogTitle>
-              <DialogDescription>
-                Suivi des passages des techniciens au dépôt
-              </DialogDescription>
+            <div className="text-center w-full">
+              <DialogTitle className="text-xl font-bold">FICHE DE PASSAGE AU DEPOT</DialogTitle>
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* En-tête */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Informations générales</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange('date', e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="technician">Technicien</Label>
-                  <Input
-                    id="technician"
-                    value={formData.technician}
-                    onChange={(e) => handleInputChange('technician', e.target.value)}
-                    placeholder="Nom du technicien"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="arrivalTime">Heure d'arrivée</Label>
-                  <Input
-                    id="arrivalTime"
-                    type="time"
-                    value={formData.arrivalTime}
-                    onChange={(e) => handleInputChange('arrivalTime', e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="departureTime">Heure de départ</Label>
-                  <Input
-                    id="departureTime"
-                    type="time"
-                    value={formData.departureTime}
-                    onChange={(e) => handleInputChange('departureTime', e.target.value)}
-                  />
-                </div>
-              </div>
-
+            <CardContent className="pt-4">
               <div className="space-y-2">
-                <Label htmlFor="supervisor">Superviseur</Label>
+                <Label htmlFor="nomTechnicien">NOM DU TECHNICIEN</Label>
                 <Input
-                  id="supervisor"
-                  value={formData.supervisor}
-                  onChange={(e) => handleInputChange('supervisor', e.target.value)}
-                  placeholder="Nom du superviseur présent"
+                  id="nomTechnicien"
+                  value={formData.nomTechnicien}
+                  onChange={(e) => handleInputChange('nomTechnicien', e.target.value)}
+                  placeholder="Nom du technicien"
+                  className="text-center font-medium"
                 />
               </div>
             </CardContent>
           </Card>
 
+          {/* Tableaux de passage */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Motif de la visite</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Fiche de passage au dépôt</CardTitle>
+                <Button onClick={addDepotEntry} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une semaine
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="visitPurpose">Motif</Label>
-                <Select value={formData.visitPurpose} onValueChange={(value) => handleInputChange('visitPurpose', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez le motif" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="collecte matériel">Collecte de matériel</SelectItem>
-                    <SelectItem value="retour outils">Retour d'outils</SelectItem>
-                    <SelectItem value="rapport activité">Rapport d'activité</SelectItem>
-                    <SelectItem value="briefing">Briefing/Formation</SelectItem>
-                    <SelectItem value="maintenance véhicule">Maintenance véhicule</SelectItem>
-                    <SelectItem value="autre">Autre</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+            <CardContent className="space-y-6">
+              {depotEntries.map((entry, index) => (
+                <div key={entry.id} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-lg">Tableau {index + 1} - {entry.semaine}</h4>
+                    {depotEntries.length > 1 && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => removeDepotEntry(entry.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Matériels et outils</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="materialsCollected">Matériels collectés</Label>
-                <Textarea
-                  id="materialsCollected"
-                  value={formData.materialsCollected}
-                  onChange={(e) => handleInputChange('materialsCollected', e.target.value)}
-                  placeholder="Liste des matériels et pièces collectés..."
-                  rows={3}
-                />
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>DEPOT</Label>
+                      <Input
+                        value={entry.depot}
+                        onChange={(e) => updateDepotEntry(entry.id, 'depot', e.target.value)}
+                        placeholder="Nom du dépôt"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>SEMAINE</Label>
+                      <Input
+                        value={entry.semaine}
+                        onChange={(e) => updateDepotEntry(entry.id, 'semaine', e.target.value)}
+                        placeholder="Ex: SEMAINE 1"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>DATE</Label>
+                      <Input
+                        type="date"
+                        value={entry.date}
+                        onChange={(e) => updateDepotEntry(entry.id, 'date', e.target.value)}
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="toolsReturned">Outils retournés</Label>
-                <Textarea
-                  id="toolsReturned"
-                  value={formData.toolsReturned}
-                  onChange={(e) => handleInputChange('toolsReturned', e.target.value)}
-                  placeholder="Liste des outils rendus au dépôt..."
-                  rows={2}
-                />
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>HEURE D'ARRIVEE</Label>
+                      <Input
+                        type="time"
+                        value={entry.heureArrivee}
+                        onChange={(e) => updateDepotEntry(entry.id, 'heureArrivee', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>HEURE DE DEPART</Label>
+                      <Input
+                        type="time"
+                        value={entry.heureDepart}
+                        onChange={(e) => updateDepotEntry(entry.id, 'heureDepart', e.target.value)}
+                      />
+                    </div>
+                  </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Rapports et tâches</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="reportsSubmitted">Rapports remis</Label>
-                <Textarea
-                  id="reportsSubmitted"
-                  value={formData.reportsSubmitted}
-                  onChange={(e) => handleInputChange('reportsSubmitted', e.target.value)}
-                  placeholder="Rapports d'intervention, fiches de maintenance..."
-                  rows={2}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="nextTasks">Prochaines tâches assignées</Label>
-                <Textarea
-                  id="nextTasks"
-                  value={formData.nextTasks}
-                  onChange={(e) => handleInputChange('nextTasks', e.target.value)}
-                  placeholder="Nouvelles missions, interventions programmées..."
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Observations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label htmlFor="observations">Remarques particulières</Label>
-                <Textarea
-                  id="observations"
-                  value={formData.observations}
-                  onChange={(e) => handleInputChange('observations', e.target.value)}
-                  placeholder="Observations, problèmes signalés, demandes particulières..."
-                  rows={4}
-                />
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>SIG CHEF SECTEUR</Label>
+                      <Input
+                        value={entry.sigChefSecteur}
+                        onChange={(e) => updateDepotEntry(entry.id, 'sigChefSecteur', e.target.value)}
+                        placeholder="Signature chef de secteur"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>SIG TECHNICIEN</Label>
+                      <Input
+                        value={entry.sigTechnicien}
+                        onChange={(e) => updateDepotEntry(entry.id, 'sigTechnicien', e.target.value)}
+                        placeholder="Signature technicien"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>

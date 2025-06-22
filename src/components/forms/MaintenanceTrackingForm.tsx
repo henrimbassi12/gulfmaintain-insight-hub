@@ -1,27 +1,13 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2, ArrowLeft, Save, Download } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Save, Download, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-interface MaintenanceEntry {
-  date: string;
-  action: string;
-  observations: string;
-  signature: string;
-}
-
-interface Contact {
-  name: string;
-  phone: string;
-  status: string;
-}
 
 interface MaintenanceTrackingFormProps {
   isOpen: boolean;
@@ -30,57 +16,92 @@ interface MaintenanceTrackingFormProps {
   onBack?: () => void;
 }
 
+interface MaintenanceEntry {
+  id: string;
+  date: string;
+  action: string;
+  observation: string;
+  nomSignature: string;
+}
+
+interface Contact {
+  id: string;
+  nomPrenom: string;
+  telephone: string;
+  status: string;
+}
+
 export function MaintenanceTrackingForm({ isOpen, onClose, onSave, onBack }: MaintenanceTrackingFormProps) {
   const [formData, setFormData] = useState({
-    creationDate: '',
-    closureDate: '',
+    // En-tête
+    dateCreation: new Date().toISOString().split('T')[0],
+    dateCloture: '',
+    
+    // Informations générales
     region: '',
-    partnership: '',
+    partenaire: '',
     tae: '',
-    fridgeType: '',
-    serialNumber: '',
+    typeFrigo: '',
+    snTagNumber: '',
     pvd1: '',
     pvd2: '',
-    pvd3: '',
-    maintenanceEntries: [] as MaintenanceEntry[],
-    contacts: [
-      { name: '', phone: '', status: 'TECHNICIEN 1' },
-      { name: '', phone: '', status: 'TECHNICIEN 2' },
-      { name: '', phone: '', status: 'CHEF DE REGION' },
-      { name: '', phone: '', status: 'HEAD QUATER' }
-    ] as Contact[]
+    pvd3: ''
   });
 
+  const [maintenanceEntries, setMaintenanceEntries] = useState<MaintenanceEntry[]>([
+    { id: '1', date: '', action: '', observation: '', nomSignature: '' }
+  ]);
+
+  const [contacts, setContacts] = useState<Contact[]>([
+    { id: '1', nomPrenom: '', telephone: '', status: 'TECHNICIEN 1' },
+    { id: '2', nomPrenom: '', telephone: '', status: 'TECHNICIEN 2' },
+    { id: '3', nomPrenom: '', telephone: '', status: 'CHEF DE REGION' },
+    { id: '4', nomPrenom: '', telephone: '', status: 'HEAD QUARTER' }
+  ]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const addMaintenanceEntry = () => {
-    setFormData({
-      ...formData,
-      maintenanceEntries: [
-        ...formData.maintenanceEntries,
-        { date: '', action: '', observations: '', signature: '' }
-      ]
-    });
+    const newEntry: MaintenanceEntry = {
+      id: Date.now().toString(),
+      date: '',
+      action: '',
+      observation: '',
+      nomSignature: ''
+    };
+    setMaintenanceEntries(prev => [...prev, newEntry]);
   };
 
-  const removeMaintenanceEntry = (index: number) => {
-    const newEntries = formData.maintenanceEntries.filter((_, i) => i !== index);
-    setFormData({ ...formData, maintenanceEntries: newEntries });
+  const removeMaintenanceEntry = (id: string) => {
+    setMaintenanceEntries(prev => prev.filter(entry => entry.id !== id));
   };
 
-  const updateMaintenanceEntry = (index: number, field: keyof MaintenanceEntry, value: string) => {
-    const newEntries = [...formData.maintenanceEntries];
-    newEntries[index] = { ...newEntries[index], [field]: value };
-    setFormData({ ...formData, maintenanceEntries: newEntries });
+  const updateMaintenanceEntry = (id: string, field: string, value: string) => {
+    setMaintenanceEntries(prev => 
+      prev.map(entry => 
+        entry.id === id ? { ...entry, [field]: value } : entry
+      )
+    );
   };
 
-  const updateContact = (index: number, field: keyof Contact, value: string) => {
-    const newContacts = [...formData.contacts];
-    newContacts[index] = { ...newContacts[index], [field]: value };
-    setFormData({ ...formData, contacts: newContacts });
+  const updateContact = (id: string, field: string, value: string) => {
+    setContacts(prev => 
+      prev.map(contact => 
+        contact.id === id ? { ...contact, [field]: value } : contact
+      )
+    );
   };
 
   const handleSave = () => {
-    onSave(formData);
-    toast.success('Fiche de suivi sauvegardée avec succès !');
+    const completeData = {
+      ...formData,
+      maintenanceEntries,
+      contacts
+    };
+    onSave(completeData);
+    toast.success('Fiche de suivi et maintenance sauvegardée avec succès !');
     onClose();
   };
 
@@ -90,7 +111,7 @@ export function MaintenanceTrackingForm({ isOpen, onClose, onSave, onBack }: Mai
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `fiche-suivi-${formData.serialNumber || 'nouveau'}-${formData.creationDate}.txt`;
+    link.download = `fiche-suivi-maintenance-${formData.snTagNumber || 'nouveau'}-${formData.dateCreation}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -101,29 +122,33 @@ export function MaintenanceTrackingForm({ isOpen, onClose, onSave, onBack }: Mai
   const generateFormContent = () => {
     return `=== FICHE DE SUIVI ET DE MAINTENANCE DU RÉFRIGÉRATEUR GUINNESS ===
 
-Date de création: ${formData.creationDate}
-Date de clôture: ${formData.closureDate}
+Gulf Froid Industriel, le partenaire de la qualité
+GUINNESS.
+
+Date de création: ${formData.dateCreation}
+Date de clôture: ${formData.dateCloture}
+
+=== INFORMATIONS GÉNÉRALES ===
 Région: ${formData.region}
-Partenaire: ${formData.partnership}
+Partenaire: ${formData.partenaire}
 TAE: ${formData.tae}
-Type de Frigo: ${formData.fridgeType}
-SN ou TAG NUMBER: ${formData.serialNumber}
+Type de frigo: ${formData.typeFrigo}
+SN ou TAG NUMBER: ${formData.snTagNumber}
 PVD1: ${formData.pvd1}
 PVD2: ${formData.pvd2}
 PVD3: ${formData.pvd3}
 
-=== HISTORIQUE DE MAINTENANCE ===
-${formData.maintenanceEntries.map((entry, index) => `
-Entrée ${index + 1}:
+=== SUIVI ET MAINTENANCE ===
+${maintenanceEntries.map(entry => `
 Date: ${entry.date}
 Action: ${entry.action}
-Observations: ${entry.observations}
-Signature: ${entry.signature}
+Observation: ${entry.observation}
+Nom et Signature: ${entry.nomSignature}
 `).join('\n')}
 
 === CONTACTS UTILES ===
-${formData.contacts.map(contact => `
-${contact.status}: ${contact.name} - ${contact.phone}
+${contacts.map(contact => `
+${contact.nomPrenom} - ${contact.telephone} - ${contact.status}
 `).join('\n')}
 
 Généré le: ${new Date().toLocaleString('fr-FR')}
@@ -132,7 +157,7 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
             {onBack && (
@@ -140,232 +165,234 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
-            <div>
-              <DialogTitle>Fiche de Suivi et de Maintenance du Réfrigérateur Guinness</DialogTitle>
-              <DialogDescription>
-                Suivi détaillé et historique de la maintenance par réfrigérateur
-              </DialogDescription>
+            <div className="text-center w-full">
+              <div className="text-sm text-gray-600 mb-1">Gulf Froid Industriel, le partenaire de la qualité</div>
+              <DialogTitle className="text-xl font-bold">FICHE DE SUIVI ET DE MAINTENANCE DU RÉFRIGÉRATEUR GUINNESS</DialogTitle>
+              <div className="text-lg font-semibold text-gray-800 mt-1">GUINNESS.</div>
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* En-tête */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="creationDate">Date de création</Label>
-              <Input 
-                id="creationDate"
-                type="date"
-                value={formData.creationDate}
-                onChange={(e) => setFormData({...formData, creationDate: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="closureDate">Date de clôture</Label>
-              <Input 
-                id="closureDate"
-                type="date"
-                value={formData.closureDate}
-                onChange={(e) => setFormData({...formData, closureDate: e.target.value})}
-              />
-            </div>
-          </div>
+          {/* Dates */}
+          <Card>
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dateCreation">Date de création</Label>
+                  <Input
+                    id="dateCreation"
+                    type="date"
+                    value={formData.dateCreation}
+                    onChange={(e) => handleInputChange('dateCreation', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dateCloture">Date de clôture</Label>
+                  <Input
+                    id="dateCloture"
+                    type="date"
+                    value={formData.dateCloture}
+                    onChange={(e) => handleInputChange('dateCloture', e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Informations du réfrigérateur */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="region">Région</Label>
-              <Input 
-                id="region"
-                value={formData.region}
-                onChange={(e) => setFormData({...formData, region: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="partnership">Partenaire</Label>
-              <Input 
-                id="partnership"
-                value={formData.partnership}
-                onChange={(e) => setFormData({...formData, partnership: e.target.value})}
-              />
-            </div>
-          </div>
+          {/* Informations générales */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations générales</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="region">RÉGION</Label>
+                  <Input
+                    id="region"
+                    value={formData.region}
+                    onChange={(e) => handleInputChange('region', e.target.value)}
+                    placeholder="Région"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="partenaire">PARTENAIRE</Label>
+                  <Input
+                    id="partenaire"
+                    value={formData.partenaire}
+                    onChange={(e) => handleInputChange('partenaire', e.target.value)}
+                    placeholder="Partenaire"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tae">TAE</Label>
+                  <Input
+                    id="tae"
+                    value={formData.tae}
+                    onChange={(e) => handleInputChange('tae', e.target.value)}
+                    placeholder="TAE"
+                  />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="tae">TAE</Label>
-              <Input 
-                id="tae"
-                value={formData.tae}
-                onChange={(e) => setFormData({...formData, tae: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="fridgeType">Type de Frigo</Label>
-              <Select value={formData.fridgeType} onValueChange={(value) => setFormData({...formData, fridgeType: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FV400">FV400</SelectItem>
-                  <SelectItem value="FV420">FV420</SelectItem>
-                  <SelectItem value="SDM1500">SDM1500</SelectItem>
-                  <SelectItem value="SDM650">SDM650</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="typeFrigo">TYPE DE FRIGO</Label>
+                  <Input
+                    id="typeFrigo"
+                    value={formData.typeFrigo}
+                    onChange={(e) => handleInputChange('typeFrigo', e.target.value)}
+                    placeholder="Type de frigo"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="snTagNumber">SN OU TAG NUMBER</Label>
+                  <Input
+                    id="snTagNumber"
+                    value={formData.snTagNumber}
+                    onChange={(e) => handleInputChange('snTagNumber', e.target.value)}
+                    placeholder="Numéro de série ou tag"
+                  />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="serialNumber">SN ou TAG NUMBER</Label>
-              <Input 
-                id="serialNumber"
-                value={formData.serialNumber}
-                onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="pvd1">PVD1</Label>
-              <Input 
-                id="pvd1"
-                value={formData.pvd1}
-                onChange={(e) => setFormData({...formData, pvd1: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="pvd2">PVD2</Label>
-              <Input 
-                id="pvd2"
-                value={formData.pvd2}
-                onChange={(e) => setFormData({...formData, pvd2: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="pvd3">PVD3</Label>
-              <Input 
-                id="pvd3"
-                value={formData.pvd3}
-                onChange={(e) => setFormData({...formData, pvd3: e.target.value})}
-              />
-            </div>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pvd1">PVD1</Label>
+                  <Input
+                    id="pvd1"
+                    value={formData.pvd1}
+                    onChange={(e) => handleInputChange('pvd1', e.target.value)}
+                    placeholder="PVD1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pvd2">PVD2</Label>
+                  <Input
+                    id="pvd2"
+                    value={formData.pvd2}
+                    onChange={(e) => handleInputChange('pvd2', e.target.value)}
+                    placeholder="PVD2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pvd3">PVD3</Label>
+                  <Input
+                    id="pvd3"
+                    value={formData.pvd3}
+                    onChange={(e) => handleInputChange('pvd3', e.target.value)}
+                    placeholder="PVD3"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <Separator />
-
-          {/* Entrées de maintenance */}
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Historique de Maintenance</h3>
-              <Button onClick={addMaintenanceEntry} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter une entrée
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {formData.maintenanceEntries.map((entry, index) => (
-                <Card key={index} className="p-4">
-                  <div className="flex justify-between items-start mb-4">
+          {/* Tableau de suivi et maintenance */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Suivi et Maintenance</CardTitle>
+                <Button onClick={addMaintenanceEntry} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une entrée
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {maintenanceEntries.map((entry, index) => (
+                <div key={entry.id} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between">
                     <h4 className="font-medium">Entrée {index + 1}</h4>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => removeMaintenanceEntry(index)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {maintenanceEntries.length > 1 && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => removeMaintenanceEntry(entry.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
-                  <div className="grid grid-cols-4 gap-4">
-                    <div>
-                      <Label htmlFor={`date-${index}`}>Date</Label>
-                      <Input 
-                        id={`date-${index}`}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>DATES (suivi, retrait, visite)</Label>
+                      <Input
                         type="date"
                         value={entry.date}
-                        onChange={(e) => updateMaintenanceEntry(index, 'date', e.target.value)}
+                        onChange={(e) => updateMaintenanceEntry(entry.id, 'date', e.target.value)}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`action-${index}`}>Actions (suivi, retrait, visite)</Label>
-                      <Select 
-                        value={entry.action} 
-                        onValueChange={(value) => updateMaintenanceEntry(index, 'action', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner l'action" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="suivi">Suivi</SelectItem>
-                          <SelectItem value="retrait">Retrait</SelectItem>
-                          <SelectItem value="visite">Visite</SelectItem>
-                          <SelectItem value="maintenance">Maintenance</SelectItem>
-                          <SelectItem value="reparation">Réparation</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-2">
+                      <Label>ACTIONS</Label>
+                      <Input
+                        value={entry.action}
+                        onChange={(e) => updateMaintenanceEntry(entry.id, 'action', e.target.value)}
+                        placeholder="Actions effectuées"
+                      />
                     </div>
-                    <div>
-                      <Label htmlFor={`observations-${index}`}>Observations</Label>
-                      <Textarea 
-                        id={`observations-${index}`}
-                        value={entry.observations}
-                        onChange={(e) => updateMaintenanceEntry(index, 'observations', e.target.value)}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>OBSERVATIONS</Label>
+                      <Textarea
+                        value={entry.observation}
+                        onChange={(e) => updateMaintenanceEntry(entry.id, 'observation', e.target.value)}
+                        placeholder="Observations..."
                         rows={2}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`signature-${index}`}>Noms et Signatures</Label>
-                      <Input 
-                        id={`signature-${index}`}
-                        value={entry.signature}
-                        onChange={(e) => updateMaintenanceEntry(index, 'signature', e.target.value)}
+                    <div className="space-y-2">
+                      <Label>NOMS ET SIGNATURES</Label>
+                      <Input
+                        value={entry.nomSignature}
+                        onChange={(e) => updateMaintenanceEntry(entry.id, 'nomSignature', e.target.value)}
+                        placeholder="Nom et signature"
                       />
                     </div>
                   </div>
-                </Card>
+                </div>
               ))}
-            </div>
-          </div>
-
-          <Separator />
+            </CardContent>
+          </Card>
 
           {/* Contacts utiles */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Contacts Utiles</h3>
-            <div className="space-y-4">
-              {formData.contacts.map((contact, index) => (
-                <div key={index} className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor={`contact-name-${index}`}>Nom(s) et Prénom(s)</Label>
-                    <Input 
-                      id={`contact-name-${index}`}
-                      value={contact.name}
-                      onChange={(e) => updateContact(index, 'name', e.target.value)}
+          <Card>
+            <CardHeader>
+              <CardTitle>CONTACTS UTILES</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contacts.map((contact) => (
+                <div key={contact.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 border rounded-lg">
+                  <div className="space-y-2">
+                    <Label>Nom(s) et Prénom(s)</Label>
+                    <Input
+                      value={contact.nomPrenom}
+                      onChange={(e) => updateContact(contact.id, 'nomPrenom', e.target.value)}
+                      placeholder="Nom et prénom"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor={`contact-phone-${index}`}>Numéro(s) de téléphone</Label>
-                    <Input 
-                      id={`contact-phone-${index}`}
-                      value={contact.phone}
-                      onChange={(e) => updateContact(index, 'phone', e.target.value)}
+                  <div className="space-y-2">
+                    <Label>Numéro(s) de téléphone</Label>
+                    <Input
+                      value={contact.telephone}
+                      onChange={(e) => updateContact(contact.id, 'telephone', e.target.value)}
+                      placeholder="Numéro de téléphone"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor={`contact-status-${index}`}>Status</Label>
-                    <Input 
-                      id={`contact-status-${index}`}
-                      value={contact.status}
-                      onChange={(e) => updateContact(index, 'status', e.target.value)}
-                      readOnly
-                      className="bg-gray-100"
-                    />
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <div className="p-2 bg-gray-100 rounded text-sm font-medium">
+                      {contact.status}
+                    </div>
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
