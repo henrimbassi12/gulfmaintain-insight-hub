@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, Download } from 'lucide-react';
+import { useReportGeneration } from "@/hooks/useReportGeneration";
 
 interface Report {
   id: number;
@@ -19,6 +20,12 @@ interface RecentReportsProps {
 }
 
 export function RecentReports({ reports }: RecentReportsProps) {
+  const { downloadExistingReport } = useReportGeneration();
+
+  const handleDownload = (report: Report) => {
+    downloadExistingReport(report);
+  };
+
   return (
     <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
       <CardHeader className="bg-gray-50 border-b border-gray-100">
@@ -63,7 +70,12 @@ export function RecentReports({ reports }: RecentReportsProps) {
                   <td className="py-4 px-6 text-sm text-gray-600">{report.size}</td>
                   <td className="py-4 px-6">
                     {report.status === 'Terminé' && (
-                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-700"
+                        onClick={() => handleDownload(report)}
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         Télécharger
                       </Button>
