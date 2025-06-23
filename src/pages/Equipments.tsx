@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,8 @@ import { Wrench, Plus, RefreshCw, Activity } from "lucide-react";
 import { EquipmentStats } from '@/components/EquipmentStats';
 import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
-import { AddEquipmentForm } from '@/components/AddEquipmentForm';
+import { EquipmentFormModal } from '@/components/EquipmentFormModal';
+import { EquipmentExportButton } from '@/components/EquipmentExportButton';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -96,6 +98,8 @@ const Equipments = () => {
         subtitle={`Gestion et suivi de ${equipments.length} équipement${equipments.length > 1 ? 's' : ''}${filteredEquipments.length !== equipments.length ? ` (${filteredEquipments.length} affiché${filteredEquipments.length > 1 ? 's' : ''})` : ''}`}
         icon={Wrench}
       >
+        <EquipmentExportButton equipments={filteredEquipments} />
+        
         <ModernButton 
           variant="outline" 
           onClick={handleRefresh}
@@ -106,7 +110,7 @@ const Equipments = () => {
           Actualiser
         </ModernButton>
         
-        <AddEquipmentForm onSuccess={refetch} />
+        <EquipmentFormModal onSuccess={refetch} />
       </AirbnbHeader>
 
       {/* Statistics épurées */}

@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target, Download } from "lucide-react";
 import { AIAnalysisModal } from './AIAnalysisModal';
+import { toast } from 'sonner';
 
 const AISummary: React.FC = () => {
-  const { toast } = useToast();
+  const { toast: showToast } = useToast();
   const [showAIAnalysisModal, setShowAIAnalysisModal] = useState(false);
 
   const aiInsights = [
@@ -38,29 +39,69 @@ const AISummary: React.FC = () => {
     }
   ];
 
-  const handleApplyRecommendation = (type: string) => {
-    toast({
-      title: "Recommandation appliquée",
-      description: `Application de la recommandation ${type}`,
-    });
+  const handleApplyRecommendation = (type: string, title: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Application de la recommandation "${title}"...`,
+        success: `Recommandation "${title}" appliquée avec succès !`,
+        error: 'Erreur lors de l\'application de la recommandation'
+      }
+    );
   };
 
-  const handleViewDetails = (type: string) => {
-    toast({
-      title: "Détails IA",
-      description: `Ouverture des détails de l'analyse ${type}`,
-    });
+  const handleViewDetails = (type: string, title: string) => {
+    toast.success(`Ouverture des détails : ${title}`);
+    // Ici on pourrait ouvrir un modal spécifique pour chaque type
+  };
+
+  const handleExportAISummary = () => {
+    const exportData = {
+      date: new Date().toISOString(),
+      insights: aiInsights.map(insight => ({
+        type: insight.type,
+        title: insight.title,
+        content: insight.content,
+        confidence: insight.confidence,
+        priority: insight.priority
+      }))
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `resume-ia-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success('Résumé IA exporté avec succès !');
   };
 
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="w-5 h-5 text-purple-500" />
-            Résumé IA
-          </CardTitle>
-          <CardDescription>Insights et recommandations intelligentes</CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-500" />
+              <div>
+                <CardTitle>Résumé IA</CardTitle>
+                <CardDescription>Insights et recommandations intelligentes</CardDescription>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportAISummary}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Exporter
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -102,14 +143,14 @@ const AISummary: React.FC = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleViewDetails(insight.type)}
+                        onClick={() => handleViewDetails(insight.type, insight.title)}
                         className="text-xs"
                       >
                         Détails
                       </Button>
                       <Button 
                         size="sm"
-                        onClick={() => handleApplyRecommendation(insight.type)}
+                        onClick={() => handleApplyRecommendation(insight.type, insight.title)}
                         className="text-xs"
                       >
                         Appliquer
