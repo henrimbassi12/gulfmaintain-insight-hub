@@ -10,6 +10,37 @@ export const useAuthState = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Clé pour le stockage local du profil utilisateur
+  const PROFILE_STORAGE_KEY = 'user_profile_cache';
+
+  // Sauvegarder le profil en cache local
+  const cacheUserProfile = (profile: any) => {
+    if (profile) {
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify({
+        ...profile,
+        cached_at: Date.now()
+      }));
+    }
+  };
+
+  // Récupérer le profil du cache local
+  const getCachedProfile = () => {
+    try {
+      const cached = localStorage.getItem(PROFILE_STORAGE_KEY);
+      if (cached) {
+        const profile = JSON.parse(cached);
+        // Vérifier que le cache n'est pas trop ancien (24h max)
+        if (Date.now() - profile.cached_at < 24 * 60 * 60 * 1000) {
+          console.log('📱 Profil utilisateur récupéré du cache local');
+          return profile;
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erreur lecture cache profil:', error);
+    }
+    return null;
+  };
+
   useEffect(() => {
     console.log('🚀 AuthProvider - Initialisation');
     
@@ -21,7 +52,7 @@ export const useAuthState = () => {
         console.log('⏰ AuthProvider - Timeout global, arrêt du loading');
         setLoading(false);
       }
-    }, 8000); // Réduit à 8 secondes
+    }, 8000);
 
     // Gestionnaire d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -41,20 +72,42 @@ export const useAuthState = () => {
           if (session?.user) {
             console.log('👤 AuthProvider - Utilisateur avec session active');
             
-            // Récupération du profil avec délai pour s'assurer que la base de données est à jour
+            // Tenter de récupérer le profil depuis la base de données
             setTimeout(async () => {
               if (isMounted) {
-                const profile = await fetchUserProfile(session.user.id);
-                if (isMounted) {
-                  setUserProfile(profile);
-                  setLoading(false);
-                  clearTimeout(globalTimeout);
+                try {
+                  const profile = await fetchUserProfile(session.user.id);
+                  if (isMounted && profile) {
+                    console.log('✅ Profil récupéré depuis la base de données');
+                    setUserProfile(profile);
+                    cacheUserProfile(profile);
+                  } else {
+                    // Si échec réseau, utiliser le cache
+                    const cachedProfile = getCachedProfile();
+                    if (cachedProfile) {
+                      setUserProfile(cachedProfile);
+                      console.log('⚠️ Utilisation du profil en cache (mode hors ligne)');
+                    }
+                  }
+                } catch (error) {
+                  console.error('❌ Erreur récupération profil:', error);
+                  // Utiliser le cache en cas d'erreur
+                  const cachedProfile = getCachedProfile();
+                  if (cachedProfile) {
+                    setUserProfile(cachedProfile);
+                    console.log('⚠️ Utilisation du profil en cache (erreur réseau)');
+                  }
                 }
+                
+                setLoading(false);
+                clearTimeout(globalTimeout);
               }
-            }, 300); // Réduit le délai
+            }, 300);
           } else {
             console.log('❌ AuthProvider - Pas de session active');
             setUserProfile(null);
+            // Nettoyer le cache lors de la déconnexion
+            localStorage.removeItem(PROFILE_STORAGE_KEY);
             setLoading(false);
             clearTimeout(globalTimeout);
           }
@@ -94,9 +147,25 @@ export const useAuthState = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (isMounted) {
-            setUserProfile(profile);
+          try {
+            const profile = await fetchUserProfile(session.user.id);
+            if (isMounted && profile) {
+              setUserProfile(profile);
+              cacheUserProfile(profile);
+            } else {
+              // Utiliser le cache si disponible
+              const cachedProfile = getCachedProfile();
+              if (cachedProfile) {
+                setUserProfile(cachedProfile);
+              }
+            }
+          } catch (error) {
+            console.error('❌ Erreur profil session existante:', error);
+            // Utiliser le cache en cas d'erreur
+            const cachedProfile = getCachedProfile();
+            if (cachedProfile) {
+              setUserProfile(cachedProfile);
+            }
           }
         }
         

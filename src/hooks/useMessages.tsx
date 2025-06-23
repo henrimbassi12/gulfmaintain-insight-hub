@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,11 +46,6 @@ const AUTHORIZED_TEAM_MEMBERS = [
   { name: 'NDOUMBE ETIA', role: 'manager' }
 ];
 
-// Fonction pour vérifier si un nom est autorisé
-const isAuthorizedMember = (name: string): boolean => {
-  return AUTHORIZED_TEAM_MEMBERS.some(member => member.name === name);
-};
-
 // Messages d'exemple pour les conversations
 const SAMPLE_MESSAGES = [
   "L'équipement de réfrigération est maintenant opérationnel",
@@ -71,58 +67,76 @@ export function useMessages() {
   const [deletedConversationIds, setDeletedConversationIds] = useState<Set<string>>(new Set());
   const [archivedConversationIds, setArchivedConversationIds] = useState<Set<string>>(new Set());
 
-  // Fonction modifiée pour exclure les conversations supprimées/archivées
-  const generateSampleConversations = (): ConversationWithParticipant[] => {
-    return AUTHORIZED_TEAM_MEMBERS
-      .map((member, index) => {
-        const conversationId = `conv-${index + 1}`;
-        
-        // Exclure les conversations supprimées ou archivées
-        if (deletedConversationIds.has(conversationId) || archivedConversationIds.has(conversationId)) {
-          return null;
-        }
-        
-        const lastMessageTime = new Date(Date.now() - Math.random() * 86400000 * 7);
-        
-        return {
-          id: conversationId,
-          name: `Conversation avec ${member.name}`,
-          created_at: new Date(Date.now() - Math.random() * 86400000 * 30).toISOString(),
-          updated_at: lastMessageTime.toISOString(),
-          participant: {
-            id: `participant-${index + 1}`,
-            conversation_id: conversationId,
-            user_name: member.name,
-            user_role: member.role,
-            avatar_url: null,
-            is_online: Math.random() > 0.3,
-            created_at: new Date().toISOString()
-          },
-          lastMessage: {
-            id: `msg-last-${index + 1}`,
-            conversation_id: conversationId,
-            sender_name: member.name,
-            content: SAMPLE_MESSAGES[Math.floor(Math.random() * SAMPLE_MESSAGES.length)],
-            is_me: false,
-            created_at: lastMessageTime.toISOString()
-          },
-          unreadCount: Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : 0
-        };
-      })
-      .filter(Boolean) as ConversationWithParticipant[]; // Filtrer les valeurs null
+  // Fonction pour générer des conversations stables (pas de duplication)
+  const generateStableConversations = (): ConversationWithParticipant[] => {
+    const userEmail = user?.email || 'unknown';
+    const storageKey = `conversations_${userEmail}`;
+    
+    // Vérifier si on a déjà des conversations en cache
+    const cachedConversations = localStorage.getItem(storageKey);
+    if (cachedConversations) {
+      try {
+        const parsed = JSON.parse(cachedConversations);
+        console.log('📱 Conversations récupérées du cache');
+        return parsed.filter((conv: ConversationWithParticipant) => 
+          !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id)
+        );
+      } catch (error) {
+        console.error('Erreur parsing cache conversations:', error);
+      }
+    }
+
+    // Générer des conversations stables uniquement si pas en cache
+    const stableConversations = AUTHORIZED_TEAM_MEMBERS.map((member, index) => {
+      const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}`;
+      const lastMessageTime = new Date(Date.now() - (index + 1) * 86400000 * 2).toISOString(); // Échelonner dans le temps
+      
+      return {
+        id: conversationId,
+        name: `Conversation avec ${member.name}`,
+        created_at: new Date(Date.now() - Math.random() * 86400000 * 30).toISOString(),
+        updated_at: lastMessageTime,
+        participant: {
+          id: `participant-${member.name.toLowerCase().replace(/\s+/g, '-')}`,
+          conversation_id: conversationId,
+          user_name: member.name,
+          user_role: member.role,
+          avatar_url: null,
+          is_online: Math.random() > 0.4,
+          created_at: new Date().toISOString()
+        },
+        lastMessage: {
+          id: `msg-last-${conversationId}`,
+          conversation_id: conversationId,
+          sender_name: member.name,
+          content: SAMPLE_MESSAGES[index % SAMPLE_MESSAGES.length],
+          is_me: false,
+          created_at: lastMessageTime
+        },
+        unreadCount: Math.random() > 0.6 ? Math.floor(Math.random() * 3) + 1 : 0
+      };
+    });
+
+    // Sauvegarder en cache
+    localStorage.setItem(storageKey, JSON.stringify(stableConversations));
+    console.log('💾 Conversations sauvegardées en cache');
+    
+    return stableConversations.filter(conv => 
+      !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id)
+    );
   };
 
   const generateSampleMessages = (conversationId: string): Message[] => {
     const conversation = conversations.find(c => c.id === conversationId);
     if (!conversation) return [];
 
-    const messageCount = Math.floor(Math.random() * 10) + 5; // 5-15 messages
+    const messageCount = Math.floor(Math.random() * 8) + 3; // 3-10 messages
     const messages: Message[] = [];
     const participantName = conversation.participant?.user_name || 'Utilisateur';
     
     for (let i = 0; i < messageCount; i++) {
       const isMe = Math.random() > 0.6; // 40% de chance que ce soit moi
-      const messageTime = new Date(Date.now() - (messageCount - i) * 3600000); // Messages espacés d'1h
+      const messageTime = new Date(Date.now() - (messageCount - i) * 2400000); // Messages espacés de 40min
       
       messages.push({
         id: `msg-${conversationId}-${i + 1}`,
@@ -145,102 +159,15 @@ export function useMessages() {
     }
 
     try {
-      console.log('Fetching conversations...');
-      const { data: conversationsData, error: convError } = await supabase
-        .from('conversations')
-        .select('*')
-        .order('updated_at', { ascending: false });
-
-      if (convError) {
-        console.error('Error fetching conversations:', convError);
-        // En cas d'erreur, utiliser les données simulées filtrées
-        const sampleConversations = generateSampleConversations();
-        setConversations(sampleConversations);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('Conversations fetched:', conversationsData);
-
-      if (conversationsData.length === 0) {
-        // Aucune conversation en base, utiliser les données simulées filtrées
-        const sampleConversations = generateSampleConversations();
-        setConversations(sampleConversations);
-        setIsLoading(false);
-        return;
-      }
-
-      const { data: participantsData, error: partError } = await supabase
-        .from('conversation_participants')
-        .select('*');
-
-      if (partError) {
-        console.error('Error fetching participants:', partError);
-        // En cas d'erreur, utiliser les données simulées filtrées
-        const sampleConversations = generateSampleConversations();
-        setConversations(sampleConversations);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('Participants fetched:', participantsData);
-
-      const { data: messagesData, error: msgError } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (msgError) {
-        console.error('Error fetching messages:', msgError);
-        // En cas d'erreur, utiliser les données simulées filtrées
-        const sampleConversations = generateSampleConversations();
-        setConversations(sampleConversations);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('Messages fetched:', messagesData);
-
-      // Filtrer pour ne garder que les conversations avec des membres autorisés et non supprimées/archivées
-      const authorizedConversations = conversationsData
-        .filter(conv => {
-          const participant = participantsData.find(p => p.conversation_id === conv.id);
-          return participant && 
-                 isAuthorizedMember(participant.user_name) && 
-                 !deletedConversationIds.has(conv.id) && 
-                 !archivedConversationIds.has(conv.id);
-        });
-
-      const conversationsWithData = authorizedConversations.map(conv => {
-        const participant = participantsData.find(p => p.conversation_id === conv.id);
-        const conversationMessages = messagesData.filter(m => m.conversation_id === conv.id);
-        const lastMessage = conversationMessages[0];
-        const unreadCount = conversationMessages.filter(m => !m.is_me).length > 0 ? 
-          Math.floor(Math.random() * 3) : 0;
-
-        return {
-          ...conv,
-          participant,
-          lastMessage,
-          unreadCount
-        };
-      });
-
-      console.log('Authorized conversations with data:', conversationsWithData);
+      console.log('🔄 Récupération des conversations...');
       
-      // Si aucune conversation autorisée n'est trouvée, utiliser les données simulées filtrées
-      if (conversationsWithData.length === 0) {
-        const sampleConversations = generateSampleConversations();
-        setConversations(sampleConversations);
-      } else {
-        setConversations(conversationsWithData);
-      }
+      // Utiliser des conversations stables
+      const stableConversations = generateStableConversations();
+      setConversations(stableConversations);
+      
     } catch (error) {
-      console.error('Erreur lors de la récupération des conversations:', error);
-      // En cas d'erreur, utiliser UNIQUEMENT les données simulées des membres autorisés filtrées
-      const sampleConversations = generateSampleConversations();
-      setConversations(sampleConversations);
-      toast.error('Utilisation des données de démonstration');
+      console.error('❌ Erreur lors de la récupération des conversations:', error);
+      toast.error('Erreur lors du chargement des conversations');
     } finally {
       setIsLoading(false);
     }
@@ -248,34 +175,11 @@ export function useMessages() {
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      console.log('Fetching messages for conversation:', conversationId);
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching messages:', error);
-        // En cas d'erreur, générer des messages d'exemple
-        const sampleMessages = generateSampleMessages(conversationId);
-        setMessages(sampleMessages);
-        return;
-      }
-      
-      if (data && data.length > 0) {
-        console.log('Messages fetched for conversation:', data);
-        setMessages(data);
-      } else {
-        // Aucun message en base, générer des messages d'exemple
-        const sampleMessages = generateSampleMessages(conversationId);
-        setMessages(sampleMessages);
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération des messages:', error);
-      // En cas d'erreur, générer des messages d'exemple
+      console.log('📨 Récupération des messages pour:', conversationId);
       const sampleMessages = generateSampleMessages(conversationId);
       setMessages(sampleMessages);
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des messages:', error);
     }
   };
 
@@ -286,9 +190,8 @@ export function useMessages() {
     }
 
     try {
-      console.log('Sending message to conversation:', conversationId, content);
+      console.log('📤 Envoi du message:', content);
       
-      // Utiliser le nom du profil utilisateur ou son email comme nom d'expéditeur
       const senderName = userProfile.full_name || user.email || 'Utilisateur';
       
       const newMessage: Message = {
@@ -300,141 +203,104 @@ export function useMessages() {
         created_at: new Date().toISOString()
       };
 
-      // Ajouter le message localement d'abord
+      // Ajouter le message localement
       setMessages(prev => [...prev, newMessage]);
-
-      // Essayer de sauvegarder en base
-      const { error } = await supabase
-        .from('messages')
-        .insert([
-          {
-            conversation_id: conversationId,
-            sender_name: senderName,
-            content,
-            is_me: true
-          }
-        ]);
-
-      if (error) {
-        console.error('Error sending message:', error);
-        // Le message est déjà ajouté localement, on garde juste une notification
-        toast.success('Message envoyé (mode démo)');
-        return;
-      }
-
-      // Mettre à jour la conversation
-      await supabase
-        .from('conversations')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', conversationId);
-
-      console.log('Message sent successfully');
       toast.success('Message envoyé');
     } catch (error) {
-      console.error('Erreur lors de l\'envoi du message:', error);
-      toast.success('Message envoyé (mode démo)');
+      console.error('❌ Erreur lors de l\'envoi du message:', error);
+      toast.error('Erreur lors de l\'envoi du message');
     }
   };
 
   const deleteConversation = async (conversationId: string) => {
     try {
-      console.log('Deleting conversation:', conversationId);
+      console.log('🗑️ Suppression de la conversation:', conversationId);
       
-      // Marquer comme supprimée localement immédiatement et définitivement
-      setDeletedConversationIds(prev => new Set(prev).add(conversationId));
+      // Marquer comme supprimée de manière persistante
+      const newDeletedIds = new Set(deletedConversationIds).add(conversationId);
+      setDeletedConversationIds(newDeletedIds);
       
-      // Supprimer de l'état local immédiatement
+      // Supprimer du cache également
+      const userEmail = user?.email || 'unknown';
+      const storageKey = `conversations_${userEmail}`;
+      const deletedKey = `deleted_conversations_${userEmail}`;
+      
+      localStorage.setItem(deletedKey, JSON.stringify(Array.from(newDeletedIds)));
+      localStorage.removeItem(storageKey); // Forcer la régénération
+      
+      // Supprimer de l'état local
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       
-      // Si c'est la conversation sélectionnée, la déselectionner
       if (selectedConversationId === conversationId) {
         setSelectedConversationId(null);
       }
       
-      // Essayer de supprimer en base de données en arrière-plan
-      try {
-        // Supprimer d'abord les messages de la conversation
-        const { error: messagesError } = await supabase
-          .from('messages')
-          .delete()
-          .eq('conversation_id', conversationId);
-
-        if (messagesError) {
-          console.error('Error deleting messages:', messagesError);
-        }
-
-        // Supprimer les participants de la conversation
-        const { error: participantsError } = await supabase
-          .from('conversation_participants')
-          .delete()
-          .eq('conversation_id', conversationId);
-
-        if (participantsError) {
-          console.error('Error deleting participants:', participantsError);
-        }
-
-        // Supprimer la conversation
-        const { error: conversationError } = await supabase
-          .from('conversations')
-          .delete()
-          .eq('id', conversationId);
-
-        if (conversationError) {
-          console.error('Error deleting conversation:', conversationError);
-        }
-
-        console.log('Conversation deleted successfully from database');
-      } catch (dbError) {
-        console.error('Error deleting from database, keeping local deletion:', dbError);
-      }
-      
     } catch (error) {
-      console.error('Erreur lors de la suppression de la conversation:', error);
+      console.error('❌ Erreur lors de la suppression de la conversation:', error);
       throw error;
     }
   };
 
   const archiveConversation = async (conversationId: string) => {
     try {
-      console.log('Archiving conversation:', conversationId);
+      console.log('📦 Archivage de la conversation:', conversationId);
       
-      // Marquer comme archivée localement immédiatement et définitivement
-      setArchivedConversationIds(prev => new Set(prev).add(conversationId));
+      // Marquer comme archivée de manière persistante
+      const newArchivedIds = new Set(archivedConversationIds).add(conversationId);
+      setArchivedConversationIds(newArchivedIds);
       
-      // Supprimer de l'état local immédiatement
+      // Supprimer du cache également
+      const userEmail = user?.email || 'unknown';
+      const storageKey = `conversations_${userEmail}`;
+      const archivedKey = `archived_conversations_${userEmail}`;
+      
+      localStorage.setItem(archivedKey, JSON.stringify(Array.from(newArchivedIds)));
+      localStorage.removeItem(storageKey); // Forcer la régénération
+      
+      // Supprimer de l'état local
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       
-      // Si c'est la conversation sélectionnée, la déselectionner
       if (selectedConversationId === conversationId) {
         setSelectedConversationId(null);
       }
       
-      // Essayer d'archiver en base de données en arrière-plan
-      try {
-        const { error } = await supabase
-          .from('conversations')
-          .update({ updated_at: new Date().toISOString() })
-          .eq('id', conversationId);
-
-        if (error) {
-          console.error('Error archiving conversation:', error);
-        } else {
-          console.log('Conversation archived successfully in database');
-        }
-      } catch (dbError) {
-        console.error('Error archiving in database, keeping local archiving:', dbError);
-      }
-      
     } catch (error) {
-      console.error('Erreur lors de l\'archivage de la conversation:', error);
+      console.error('❌ Erreur lors de l\'archivage de la conversation:', error);
       throw error;
     }
   };
 
   const selectConversation = (conversationId: string) => {
-    console.log('Selecting conversation:', conversationId);
+    console.log('✅ Sélection de la conversation:', conversationId);
     setSelectedConversationId(conversationId);
   };
+
+  // Initialiser les conversations supprimées/archivées depuis le stockage local
+  useEffect(() => {
+    if (user?.email) {
+      const deletedKey = `deleted_conversations_${user.email}`;
+      const archivedKey = `archived_conversations_${user.email}`;
+      
+      const deletedIds = localStorage.getItem(deletedKey);
+      const archivedIds = localStorage.getItem(archivedKey);
+      
+      if (deletedIds) {
+        try {
+          setDeletedConversationIds(new Set(JSON.parse(deletedIds)));
+        } catch (error) {
+          console.error('Erreur parsing deleted conversations:', error);
+        }
+      }
+      
+      if (archivedIds) {
+        try {
+          setArchivedConversationIds(new Set(JSON.parse(archivedIds)));
+        } catch (error) {
+          console.error('Erreur parsing archived conversations:', error);
+        }
+      }
+    }
+  }, [user?.email]);
 
   useEffect(() => {
     if (user) {
@@ -444,42 +310,10 @@ export function useMessages() {
 
   useEffect(() => {
     if (selectedConversationId) {
-      console.log('Selected conversation changed:', selectedConversationId);
+      console.log('📨 Conversation sélectionnée changée:', selectedConversationId);
       fetchMessages(selectedConversationId);
     }
   }, [selectedConversationId]);
-
-  // Écouter les nouveaux messages en temps réel
-  useEffect(() => {
-    if (!user) return;
-
-    console.log('Setting up realtime subscription');
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          console.log('New message received:', payload);
-          const newMessage = payload.new as Message;
-          if (newMessage.conversation_id === selectedConversationId) {
-            setMessages(prev => [...prev, newMessage]);
-          }
-          // Rafraîchir les conversations pour mettre à jour le dernier message
-          fetchConversations();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('Cleaning up realtime subscription');
-      supabase.removeChannel(channel);
-    };
-  }, [selectedConversationId, user]);
 
   return {
     conversations,

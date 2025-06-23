@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 export default function EquipmentHistoryPage() {
   const handleRefresh = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      new Promise(resolve => setTimeout(resolve, 1000)),
       {
         loading: 'Actualisation de l\'historique...',
         success: 'Historique actualisé avec succès',

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, RefreshCw, Activity, Wifi, Users, CheckCheck } from 'lucide-react';
+import { MessageCircle, RefreshCw, Activity } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -111,7 +111,7 @@ export default function Messages() {
     <AirbnbContainer>
       <AirbnbHeader
         title="Messages"
-        subtitle="Communication temps réel avec fonctionnalités avancées"
+        subtitle="Communication temps réel avec l'équipe"
         icon={MessageCircle}
       >
         <ModernButton 
@@ -124,56 +124,6 @@ export default function Messages() {
           Actualiser
         </ModernButton>
       </AirbnbHeader>
-
-      {/* Fonctionnalités temps réel */}
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-100 shadow-sm">
-        <CardHeader className="bg-white/80 border-b border-blue-100">
-          <CardTitle className="flex items-center gap-3 text-lg">
-            <div className="w-8 h-8 bg-green-600 rounded-xl flex items-center justify-center">
-              <Wifi className="w-5 h-5 text-white" />
-            </div>
-            Fonctionnalités en temps réel
-            <Badge variant="secondary" className="ml-auto text-xs bg-green-50 text-green-700 border-green-200">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
-              Actif
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-blue-100">
-              <CheckCheck className="w-8 h-8 text-blue-600" />
-              <div>
-                <h4 className="font-semibold text-gray-900">Accusés de réception</h4>
-                <p className="text-sm text-gray-600">Double coche bleue quand lu</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-green-100">
-              <Users className="w-8 h-8 text-green-600" />
-              <div>
-                <h4 className="font-semibold text-gray-900">Statut en ligne</h4>
-                <p className="text-sm text-gray-600">Voir qui est connecté</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-purple-100">
-              <MessageCircle className="w-8 h-8 text-purple-600" />
-              <div>
-                <h4 className="font-semibold text-gray-900">Messages instantanés</h4>
-                <p className="text-sm text-gray-600">Livraison en temps réel</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="font-medium text-blue-900 mb-2">🔧 Liaison temps réel assurée par :</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• <strong>WebSockets Supabase</strong> : Connexion bidirectionnelle permanente</li>
-              <li>• <strong>PostgreSQL LISTEN/NOTIFY</strong> : Notifications instantanées base de données</li>
-              <li>• <strong>Présence en temps réel</strong> : Suivi automatique des utilisateurs connectés</li>
-              <li>• <strong>Synchronisation automatique</strong> : Messages synchronisés sur tous les appareils</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Statistiques des messages */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
