@@ -27,14 +27,35 @@ export function RecentReports({ reports }: RecentReportsProps) {
 
   const handleDownload = (report: Report) => {
     if (report.status === 'Terminé') {
-      downloadExistingReport(report);
-      toast.success(`Téléchargement de "${report.title}" démarré`);
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        {
+          loading: `Téléchargement de "${report.title}"...`,
+          success: `"${report.title}" téléchargé avec succès`,
+          error: 'Erreur lors du téléchargement'
+        }
+      );
+      
+      // Simulation du téléchargement
+      setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = `${report.title}.pdf`;
+        link.click();
+      }, 1500);
+    } else {
+      toast.error('Ce rapport n\'est pas encore disponible au téléchargement');
     }
   };
 
   const handleView = (report: Report) => {
-    toast.info(`Ouverture de "${report.title}"`);
-    // Logique pour ouvrir/prévisualiser le rapport
+    if (report.status === 'Terminé') {
+      toast.success(`Ouverture de "${report.title}"`);
+      // Logique pour ouvrir/prévisualiser le rapport
+      console.log('Ouverture du rapport:', report);
+    } else {
+      toast.info('Ce rapport est encore en cours de génération');
+    }
   };
 
   return (
@@ -90,28 +111,25 @@ export function RecentReports({ reports }: RecentReportsProps) {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
-                      {report.status === 'Terminé' && (
-                        <>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-blue-600 hover:text-blue-700"
-                            onClick={() => handleView(report)}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Voir
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-green-600 hover:text-green-700"
-                            onClick={() => handleDownload(report)}
-                          >
-                            <Download className="w-4 h-4 mr-1" />
-                            Télécharger
-                          </Button>
-                        </>
-                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => handleView(report)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Voir
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={() => handleDownload(report)}
+                        disabled={report.status !== 'Terminé'}
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Télécharger
+                      </Button>
                     </div>
                   </td>
                 </tr>

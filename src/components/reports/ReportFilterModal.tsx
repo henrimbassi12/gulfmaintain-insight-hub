@@ -22,6 +22,7 @@ interface Report {
   date: string;
   status: string;
   size: string;
+  cost?: string;
 }
 
 const SAMPLE_REPORTS: Report[] = [
@@ -31,7 +32,8 @@ const SAMPLE_REPORTS: Report[] = [
     type: 'Maintenance',
     date: '31/01/2024',
     status: 'Terminé',
-    size: '2.4 MB'
+    size: '2.4 MB',
+    cost: '1,250,000 FCFA'
   },
   {
     id: 2,
@@ -39,7 +41,8 @@ const SAMPLE_REPORTS: Report[] = [
     type: 'Analyse',
     date: '15/01/2024',
     status: 'Terminé',
-    size: '1.8 MB'
+    size: '1.8 MB',
+    cost: '850,000 FCFA'
   },
   {
     id: 3,
@@ -47,7 +50,8 @@ const SAMPLE_REPORTS: Report[] = [
     type: 'RH',
     date: '05/01/2024',
     status: 'En cours',
-    size: '-'
+    size: '-',
+    cost: '2,100,000 FCFA'
   },
   {
     id: 4,
@@ -55,7 +59,8 @@ const SAMPLE_REPORTS: Report[] = [
     type: 'Financier',
     date: '20/01/2024',
     status: 'Terminé',
-    size: '1.2 MB'
+    size: '1.2 MB',
+    cost: '3,750,000 FCFA'
   },
   {
     id: 5,
@@ -63,7 +68,8 @@ const SAMPLE_REPORTS: Report[] = [
     type: 'Équipement',
     date: '28/01/2024',
     status: 'Terminé',
-    size: '3.1 MB'
+    size: '3.1 MB',
+    cost: '675,000 FCFA'
   }
 ];
 
@@ -80,11 +86,26 @@ export function ReportFilterModal({ isOpen, onClose }: ReportFilterModalProps) {
   });
 
   const handleDownload = (report: Report) => {
-    toast.loading('Téléchargement en cours...');
-    
-    setTimeout(() => {
-      toast.success(`Rapport "${report.title}" téléchargé avec succès !`);
-    }, 1500);
+    if (report.status === 'Terminé') {
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        {
+          loading: `Téléchargement de "${report.title}"...`,
+          success: `"${report.title}" téléchargé avec succès !`,
+          error: 'Erreur lors du téléchargement'
+        }
+      );
+      
+      // Simulation du téléchargement
+      setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = `${report.title}.pdf`;
+        link.click();
+      }, 1500);
+    } else {
+      toast.error('Ce rapport n\'est pas encore disponible au téléchargement');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -190,6 +211,12 @@ export function ReportFilterModal({ isOpen, onClose }: ReportFilterModalProps) {
                               {report.date}
                               <span>•</span>
                               <span>{report.size}</span>
+                              {report.cost && (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-medium text-blue-600">{report.cost}</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -204,6 +231,7 @@ export function ReportFilterModal({ isOpen, onClose }: ReportFilterModalProps) {
                             size="sm"
                             onClick={() => handleDownload(report)}
                             disabled={report.status === 'En cours'}
+                            className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Télécharger

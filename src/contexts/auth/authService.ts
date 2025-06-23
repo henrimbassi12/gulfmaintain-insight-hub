@@ -15,22 +15,27 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
       if (error) {
         console.error('❌ Erreur de connexion:', error);
         
-        // Messages d'erreur plus spécifiques
+        // Messages d'erreur plus spécifiques et toujours affichés
         let errorMessage = "Email ou mot de passe incorrect";
         
         if (error.message.includes('email_not_confirmed')) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (error.message.includes('invalid_credentials')) {
-          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.message.includes('invalid_credentials') || error.message.includes('Invalid login credentials')) {
+          errorMessage = "Email ou mot de passe incorrect. Veuillez vérifier vos informations.";
         } else if (error.message.includes('too_many_requests')) {
           errorMessage = "Trop de tentatives. Veuillez réessayer plus tard";
+        } else if (error.message.includes('signup_disabled')) {
+          errorMessage = "L'inscription est temporairement désactivée";
         }
         
+        // TOUJOURS afficher l'erreur, même pour des mots de passe incorrects
         toast({
           title: "Erreur de connexion",
           description: errorMessage,
           variant: "destructive",
         });
+        
+        return { error };
       } else if (data.user && data.session) {
         console.log('✅ Connexion réussie avec session');
         toast({
@@ -49,9 +54,13 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
       return { error };
     } catch (error: any) {
       console.error('❌ Erreur catch signIn:', error);
+      const errorMessage = error.message?.includes('Invalid login credentials') 
+        ? "Email ou mot de passe incorrect. Veuillez vérifier vos informations."
+        : "Une erreur inattendue s'est produite";
+        
       toast({
         title: "Erreur de connexion",
-        description: "Une erreur inattendue s'est produite",
+        description: errorMessage,
         variant: "destructive",
       });
       return { error };
@@ -156,10 +165,72 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/?mode=reset-password`,
+      });
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      toast({
+        title: "Email envoyé",
+        description: "Vérifiez votre email pour réinitialiser votre mot de passe",
+      });
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'envoyer l'email de réinitialisation",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      toast({
+        title: "Mot de passe mis à jour",
+        description: "Votre mot de passe a été modifié avec succès",
+      });
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le mot de passe",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
   return {
     signIn,
     signUp,
     signInWithOAuth,
     signOut,
+    resetPassword,
+    updatePassword,
   };
 };
