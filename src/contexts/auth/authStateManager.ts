@@ -196,5 +196,6 @@ export const useAuthState = () => {
     session,
     userProfile,
     loading,
+    setUserProfile,
   };
 };

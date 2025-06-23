@@ -4,13 +4,28 @@ import { useToast } from '@/hooks/use-toast';
 import { AuthContextType } from './auth/types';
 import { useAuthState } from './auth/authStateManager';
 import { createAuthService } from './auth/authService';
+import { fetchUserProfile } from './auth/userProfileService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
-  const { user, session, userProfile, loading } = useAuthState();
+  const { user, session, userProfile, loading, setUserProfile } = useAuthState();
   const { signIn, signUp, signInWithOAuth, signOut } = createAuthService(toast);
+
+  const refreshProfile = async () => {
+    if (user) {
+      try {
+        const profile = await fetchUserProfile(user.id);
+        if (profile) {
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Erreur lors du rafraîchissement du profil:', error);
+        throw error;
+      }
+    }
+  };
 
   const value = {
     user,
@@ -21,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signInWithOAuth,
     signOut,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
