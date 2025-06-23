@@ -4,16 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, TrendingUp, BarChart3, PieChart, Calendar } from "lucide-react";
+import { FileText, Download, TrendingUp, BarChart3, PieChart, Calendar, MapPin, Users, Wrench } from "lucide-react";
 import { toast } from 'sonner';
 
 interface QuickActionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'reports' | 'analysis';
+  type?: 'reports' | 'analysis';
 }
 
-export function QuickActionsModal({ isOpen, onClose, type }: QuickActionsModalProps) {
+export function QuickActionsModal({ isOpen, onClose, type = 'reports' }: QuickActionsModalProps) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const reportsData = [
@@ -78,7 +78,36 @@ export function QuickActionsModal({ isOpen, onClose, type }: QuickActionsModalPr
     }
   ];
 
-  const data = type === 'reports' ? reportsData : analysisData;
+  // Nouvelles actions disponibles pour remplacer les boutons supprimés
+  const quickActionsData = [
+    {
+      id: 'assign-technician',
+      title: 'Assigner technicien',
+      description: 'Affecter automatiquement un technicien',
+      icon: Users,
+      status: 'Disponible',
+      lastUsed: 'Jamais'
+    },
+    {
+      id: 'create-intervention',
+      title: 'Nouvelle intervention',
+      description: 'Créer une intervention d\'urgence',
+      icon: Wrench,
+      status: 'Prêt',
+      lastUsed: '2024-01-28'
+    },
+    {
+      id: 'locate-equipment',
+      title: 'Localiser équipement',
+      description: 'Trouver la position d\'un équipement',
+      icon: MapPin,
+      status: 'Actif',
+      lastUsed: '2024-01-28'
+    }
+  ];
+
+  const data = type === 'reports' ? reportsData : type === 'analysis' ? analysisData : quickActionsData;
+  const title = type === 'reports' ? 'Rapports disponibles' : type === 'analysis' ? 'Analyses disponibles' : 'Actions rapides disponibles';
 
   const handleToggleSelection = (id: string) => {
     setSelectedItems(prev => 
@@ -88,7 +117,7 @@ export function QuickActionsModal({ isOpen, onClose, type }: QuickActionsModalPr
     );
   };
 
-  const handleExportSelected = () => {
+  const handleExecuteSelected = () => {
     if (selectedItems.length === 0) {
       toast.error('Veuillez sélectionner au moins un élément');
       return;
@@ -99,12 +128,18 @@ export function QuickActionsModal({ isOpen, onClose, type }: QuickActionsModalPr
       .map(item => item.title)
       .join(', ');
 
-    toast.success(`Exportation en cours: ${selectedNames}`);
+    if (type === 'reports' || type === 'analysis') {
+      toast.success(`Exportation en cours: ${selectedNames}`);
+    } else {
+      toast.success(`Exécution en cours: ${selectedNames}`);
+    }
     onClose();
   };
 
-  const handleExportAll = () => {
-    toast.success(`Exportation de tous les ${type === 'reports' ? 'rapports' : 'analyses'} en cours`);
+  const handleExecuteAll = () => {
+    const actionText = type === 'reports' || type === 'analysis' ? 'Exportation' : 'Exécution';
+    const itemType = type === 'reports' ? 'rapports' : type === 'analysis' ? 'analyses' : 'actions';
+    toast.success(`${actionText} de toutes les ${itemType} en cours`);
     onClose();
   };
 
@@ -114,27 +149,27 @@ export function QuickActionsModal({ isOpen, onClose, type }: QuickActionsModalPr
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            {type === 'reports' ? 'Rapports disponibles' : 'Analyses disponibles'}
+            {title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              Sélectionnez les {type === 'reports' ? 'rapports' : 'analyses'} à exporter
+              Sélectionnez les éléments à {type === 'reports' || type === 'analysis' ? 'exporter' : 'exécuter'}
             </p>
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={handleExportSelected}
+                onClick={handleExecuteSelected}
                 disabled={selectedItems.length === 0}
               >
                 <Download className="w-4 h-4 mr-2" />
-                Exporter sélection ({selectedItems.length})
+                {type === 'reports' || type === 'analysis' ? 'Exporter' : 'Exécuter'} sélection ({selectedItems.length})
               </Button>
-              <Button onClick={handleExportAll}>
+              <Button onClick={handleExecuteAll}>
                 <Download className="w-4 h-4 mr-2" />
-                Exporter tout
+                {type === 'reports' || type === 'analysis' ? 'Exporter' : 'Exécuter'} tout
               </Button>
             </div>
           </div>
@@ -177,10 +212,15 @@ export function QuickActionsModal({ isOpen, onClose, type }: QuickActionsModalPr
                           <span>Taille: {item.size}</span>
                           <span>Généré le: {item.lastGenerated}</span>
                         </>
-                      ) : (
+                      ) : type === 'analysis' ? (
                         <>
                           <span>Précision: {item.accuracy}</span>
                           <span>MAJ: {item.lastUpdated}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Statut: {item.status}</span>
+                          <span>Utilisé: {item.lastUsed}</span>
                         </>
                       )}
                     </div>
