@@ -4,7 +4,7 @@ import { GeolocationSystem } from '@/components/GeolocationSystem';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, RefreshCw, Activity, Navigation, Route } from 'lucide-react';
+import { MapPin, RefreshCw, Activity } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -26,33 +26,6 @@ export default function GeolocationPage() {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleOptimizeRoutes = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Optimisation des trajets en cours...',
-        success: 'Trajets optimisés avec succès! Économie estimée: 15%',
-        error: 'Erreur lors de l\'optimisation'
-      }
-    );
-  };
-
-  const handleGetCurrentPosition = () => {
-    if (navigator.geolocation) {
-      toast.loading('Localisation en cours...');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          toast.success(`Position obtenue: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
-        },
-        (error) => {
-          toast.error('Erreur de géolocalisation: ' + error.message);
-        }
-      );
-    } else {
-      toast.error('Géolocalisation non supportée par ce navigateur');
-    }
-  };
-
   return (
     <AirbnbContainer>
       <AirbnbHeader
@@ -68,21 +41,6 @@ export default function GeolocationPage() {
           className={refreshing ? 'animate-spin' : ''}
         >
           Actualiser
-        </ModernButton>
-        
-        <ModernButton 
-          variant="outline"
-          onClick={handleGetCurrentPosition}
-          icon={Navigation}
-        >
-          Ma position
-        </ModernButton>
-        
-        <ModernButton 
-          onClick={handleOptimizeRoutes}
-          icon={Route}
-        >
-          Optimiser trajets
         </ModernButton>
       </AirbnbHeader>
 

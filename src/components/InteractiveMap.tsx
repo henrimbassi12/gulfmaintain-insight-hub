@@ -216,7 +216,7 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
 
     console.log('📍 Ajout des marqueurs...');
 
-    // Position utilisateur
+    // Position utilisateur (bleu)
     if (userLocation) {
       console.log('👤 Ajout marqueur utilisateur:', userLocation);
       const userMarker = new mapboxgl.Marker({ color: '#3b82f6' })
@@ -230,7 +230,7 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
         .addTo(map.current);
     }
 
-    // Techniciens
+    // Techniciens (couleurs selon statut)
     console.log('👷 Ajout de', technicians.length, 'techniciens');
     technicians.forEach(tech => {
       const color = tech.status === 'available' ? '#22c55e' : 
@@ -253,7 +253,7 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
         .addTo(map.current);
     });
 
-    // Points de maintenance
+    // Points de maintenance (couleurs selon priorité des tâches)
     console.log('🔧 Ajout de', maintenancePoints.length, 'points de maintenance');
     maintenancePoints.forEach(point => {
       const color = point.priority === 'high' ? '#ef4444' : 
@@ -267,8 +267,8 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
             <p class="text-sm text-gray-600">${point.address}</p>
             <p class="text-xs mt-1">
               <span class="inline-block w-2 h-2 rounded-full mr-1" style="background-color: ${color}"></span>
-              Priorité: ${point.priority === 'high' ? 'Urgent' : 
-                          point.priority === 'medium' ? 'Moyen' : 'Faible'}
+              Priorité: ${point.priority === 'high' ? 'Critique' : 
+                          point.priority === 'medium' ? 'Moyenne' : 'Faible'}
             </p>
             <p class="text-xs text-gray-600 mt-1">Durée estimée: ${point.estimatedDuration}</p>
           </div>
@@ -386,18 +386,26 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
           </Alert>
         )}
         
-        <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+        <div className="mt-4 grid grid-cols-5 gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <span>Votre position</span>
+          </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span>Techniciens disponibles</span>
+            <span>Disponible / Priorité faible</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span>Occupés / Priorité moyenne</span>
+            <span>Occupé / Priorité moyenne</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span>Interventions urgentes</span>
+            <span>Priorité critique</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+            <span>Hors ligne</span>
           </div>
         </div>
       </CardContent>

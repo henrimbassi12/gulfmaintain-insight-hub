@@ -193,21 +193,19 @@ export function GeolocationSystem() {
       return;
     }
 
-    // Simulation de l'optimisation de route
+    // Simulation de l'optimisation de route basée sur les secteurs des techniciens
     const optimizations = [
       {
         destination: "Agence AKWA Centre",
         currentRoute: "Via Boulevard de la Liberté → Rue Joss → Akwa (25 min)",
         suggestedRoute: "Via Rond-point Deïdo → Avenue Kennedy → Akwa (18 min)",
-        timeSaved: "7 minutes",
-        fuelSaved: "15%"
+        timeSaved: "7 minutes"
       },
       {
         destination: "Agence BONABERI Port",
         currentRoute: "Via Pont du Wouri → Route principale (30 min)",
         suggestedRoute: "Via Ferry → Route côtière (22 min)",
-        timeSaved: "8 minutes", 
-        fuelSaved: "20%"
+        timeSaved: "8 minutes"
       }
     ];
 
@@ -231,15 +229,6 @@ export function GeolocationSystem() {
       case 'available': return 'bg-green-100 text-green-800';
       case 'busy': return 'bg-orange-100 text-orange-800';
       case 'offline': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -314,12 +303,9 @@ export function GeolocationSystem() {
                       <span className="text-green-600 font-medium">✅ Route suggérée:</span>
                       <p className="text-green-800">{opt.suggestedRoute}</p>
                     </div>
-                    <div className="flex gap-4 mt-2">
+                    <div className="mt-2">
                       <Badge variant="outline" className="text-green-700 border-green-300">
                         ⏱️ Économie: {opt.timeSaved}
-                      </Badge>
-                      <Badge variant="outline" className="text-blue-700 border-blue-300">
-                        ⛽ Carburant: -{opt.fuelSaved}
                       </Badge>
                     </div>
                   </div>
@@ -330,113 +316,50 @@ export function GeolocationSystem() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Technicians List - Synchronisé avec Dashboard */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Navigation className="w-5 h-5" />
-              Techniciens par secteur
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {technicians.map((tech) => (
-                <div key={tech.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      tech.status === 'available' ? 'bg-green-500' :
-                      tech.status === 'busy' ? 'bg-orange-500' : 'bg-gray-500'
-                    }`}></div>
-                    <div>
-                      <p className="font-medium">{tech.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {tech.sectors}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {userLocation && calculateDistance(
-                          userLocation.lat, userLocation.lng,
-                          tech.lat, tech.lng
-                        )} km de votre position
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(tech.status)}>
-                      {tech.status === 'available' ? 'Disponible' :
-                       tech.status === 'busy' ? 'Occupé' : 'Hors ligne'}
-                    </Badge>
-                    {tech.currentTask && (
-                      <Badge variant="outline">{tech.currentTask}</Badge>
-                    )}
+      {/* Technicians List - Étendu sur toute la largeur */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Navigation className="w-5 h-5" />
+            Techniciens par secteur
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {technicians.map((tech) => (
+              <div key={tech.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${
+                    tech.status === 'available' ? 'bg-green-500' :
+                    tech.status === 'busy' ? 'bg-orange-500' : 'bg-gray-500'
+                  }`}></div>
+                  <div>
+                    <p className="font-medium">{tech.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {tech.sectors}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {userLocation && calculateDistance(
+                        userLocation.lat, userLocation.lng,
+                        tech.lat, tech.lng
+                      )} km de votre position
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Points de maintenance - Résumé des déplacements */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              Résumé des déplacements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {maintenancePoints.map((point) => (
-                <div key={point.id} className="p-3 border rounded-lg">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="font-medium">{point.equipment}</p>
-                      <p className="text-sm text-gray-600">{point.address}</p>
-                      {userLocation && (
-                        <p className="text-xs text-blue-600">
-                          📍 Distance: {calculateDistance(
-                            userLocation.lat, userLocation.lng,
-                            point.lat, point.lng
-                          )} km
-                        </p>
-                      )}
-                    </div>
-                    <Badge className={getPriorityColor(point.priority)}>
-                      {point.priority === 'high' ? 'Urgent' :
-                       point.priority === 'medium' ? 'Moyen' : 'Faible'}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      {point.estimatedDuration}
-                    </div>
-                    
-                    <select 
-                      className="text-sm border rounded px-2 py-1"
-                      onChange={(e) => assignTechnician(point.id, e.target.value)}
-                    >
-                      <option value="">Assigner technicien</option>
-                      {technicians
-                        .filter(t => t.status === 'available')
-                        .map(tech => (
-                          <option key={tech.id} value={tech.id}>
-                            {tech.name} - {userLocation && calculateDistance(
-                              userLocation.lat, userLocation.lng,
-                              tech.lat, tech.lng
-                            )} km
-                          </option>
-                        ))
-                      }
-                    </select>
-                  </div>
+                <div className="flex flex-col items-end gap-2">
+                  <Badge className={getStatusColor(tech.status)}>
+                    {tech.status === 'available' ? 'Disponible' :
+                     tech.status === 'busy' ? 'Occupé' : 'Hors ligne'}
+                  </Badge>
+                  {tech.currentTask && (
+                    <Badge variant="outline">{tech.currentTask}</Badge>
+                  )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Carte interactive */}
       <InteractiveMap 

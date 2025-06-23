@@ -22,6 +22,8 @@ interface CreateInterventionModalProps {
 export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateInterventionModalProps) {
   const [taskDate, setTaskDate] = useState<Date>();
   const [formData, setFormData] = useState({
+    names: '',
+    barmanNumber: '',
     serialNumber: '',
     tagNumber: '',
     type: '',
@@ -31,8 +33,6 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
     description: '',
     estimatedDuration: '',
     timeSlot: '',
-    names: '',
-    barmanNumber: '',
     division: '',
     sector: '',
     partner: '',
@@ -56,6 +56,8 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
     toast.success('Tâche programmée avec succès');
     onClose();
     setFormData({
+      names: '',
+      barmanNumber: '',
       serialNumber: '',
       tagNumber: '',
       type: '',
@@ -65,8 +67,6 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
       description: '',
       estimatedDuration: '',
       timeSlot: '',
-      names: '',
-      barmanNumber: '',
       division: '',
       sector: '',
       partner: '',
@@ -88,7 +88,30 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Première ligne - Identification équipement */}
+          {/* Première ligne - Informations personnelles */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="names">Noms</Label>
+              <Input
+                id="names"
+                value={formData.names}
+                onChange={(e) => setFormData({...formData, names: e.target.value})}
+                placeholder="Nom du responsable"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="barmanNumber">Numéro Barman</Label>
+              <Input
+                id="barmanNumber"
+                value={formData.barmanNumber}
+                onChange={(e) => setFormData({...formData, barmanNumber: e.target.value})}
+                placeholder="Ex: BM-001"
+              />
+            </div>
+          </div>
+
+          {/* Deuxième ligne - Identification équipement */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="serialNumber">SERIAL NUMBER *</Label>
@@ -112,8 +135,8 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
             </div>
           </div>
 
-          {/* Deuxième ligne - Type et technicien */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Troisième ligne - Type et technicien */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Type *</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value})}>
@@ -144,29 +167,6 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                   <SelectItem value="NDOUMBE ETIA">NDOUMBE ETIA - AKWA, BALI</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-
-          {/* Troisième ligne - Informations personnelles */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="names">Noms</Label>
-              <Input
-                id="names"
-                value={formData.names}
-                onChange={(e) => setFormData({...formData, names: e.target.value})}
-                placeholder="Nom du responsable"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="barmanNumber">Numéro Barman</Label>
-              <Input
-                id="barmanNumber"
-                value={formData.barmanNumber}
-                onChange={(e) => setFormData({...formData, barmanNumber: e.target.value})}
-                placeholder="Ex: BM-001"
-              />
             </div>
 
             <div className="space-y-2">
@@ -289,8 +289,8 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="AF">AF (Ancien Fonctionnel)</SelectItem>
-                  <SelectItem value="NF">NF (Non Fonctionnel)</SelectItem>
+                  <SelectItem value="AF">AF (Ancien Frigo)</SelectItem>
+                  <SelectItem value="NF">NF (Nouveau Frigo)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
