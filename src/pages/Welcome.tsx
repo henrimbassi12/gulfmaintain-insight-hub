@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Shield, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -134,9 +135,20 @@ const Welcome = () => {
         
         const { error: signInError } = await signIn(email, password);
         
+        // Afficher l'erreur directement dans l'interface si la connexion échoue
         if (signInError) {
-          // L'erreur sera affichée par le service d'authentification
           console.error('Erreur de connexion:', signInError);
+          let errorMessage = "Email ou mot de passe incorrect";
+          
+          if (signInError.message?.includes('invalid_credentials') || signInError.message?.includes('Invalid login credentials')) {
+            errorMessage = "Email ou mot de passe incorrect. Veuillez vérifier vos informations.";
+          } else if (signInError.message?.includes('email_not_confirmed')) {
+            errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+          } else if (signInError.message?.includes('too_many_requests')) {
+            errorMessage = "Trop de tentatives. Veuillez réessayer plus tard";
+          }
+          
+          setError(errorMessage);
         }
       }
     } catch (error: any) {
@@ -224,7 +236,7 @@ const Welcome = () => {
         {/* Formulaire */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
               {error}
             </div>
           )}

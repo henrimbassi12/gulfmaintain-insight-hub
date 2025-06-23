@@ -5,360 +5,273 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { History, Search, Calendar, User, MapPin, Wrench, Clock, AlertCircle, X } from 'lucide-react';
-import { PermissionCheck } from '@/components/auth/PermissionCheck';
+import { Activity, Search, Filter, X, Wrench, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Separator } from "@/components/ui/separator";
 
-interface HistoryEvent {
+interface HistoryEntry {
   id: string;
-  date: string;
-  time: string;
-  type: string;
-  equipment: string;
+  equipmentId: string;
+  equipmentName: string;
+  action: string;
   technician: string;
+  date: string;
+  status: 'completed' | 'pending' | 'failed';
+  details: string;
+  cost: string;
+  duration: string;
   location: string;
-  description: string;
-  status: 'completed' | 'pending' | 'cancelled';
-  duration?: string;
-  cost?: number;
-  priority: 'low' | 'medium' | 'high';
 }
 
-const mockHistory: HistoryEvent[] = [
+const mockHistory: HistoryEntry[] = [
   {
     id: '1',
-    date: '2024-01-31',
-    time: '14:30',
-    type: 'Maintenance préventive',
-    equipment: 'Frigo Commercial FC-001',
-    technician: 'CÉDRIC',
-    location: 'Douala Centre',
-    description: 'Maintenance trimestrielle - Nettoyage condenseur, vérification gaz',
+    equipmentId: 'EQ001',
+    equipmentName: 'Réfrigérateur Commercial A1',
+    action: 'Maintenance préventive',
+    technician: 'Jean Dupont',
+    date: '2024-01-15',
     status: 'completed',
+    details: 'Vérification du système de refroidissement, nettoyage des condenseurs',
+    cost: '45,000 FCFA',
     duration: '2h 30min',
-    cost: 25000,
-    priority: 'medium'
+    location: 'Douala - Zone Industrielle'
   },
   {
     id: '2',
-    date: '2024-01-30',
-    time: '09:15',
-    type: 'Réparation urgente',
-    equipment: 'Climatiseur Split AC-015',
-    technician: 'VOUKENG',
-    location: 'Bonapriso',
-    description: 'Panne compresseur - Remplacement unité complète',
+    equipmentId: 'EQ002',
+    equipmentName: 'Climatiseur Bureau B2',
+    action: 'Réparation',
+    technician: 'Marie Ngono',
+    date: '2024-01-14',
     status: 'completed',
+    details: 'Remplacement du compresseur défaillant',
+    cost: '125,000 FCFA',
     duration: '4h 15min',
-    cost: 180000,
-    priority: 'high'
+    location: 'Yaoundé - Centre-ville'
   },
   {
     id: '3',
-    date: '2024-01-29',
-    time: '11:00',
-    type: 'Installation',
-    equipment: 'Réfrigérateur RF-032',
-    technician: 'NDJOKO IV',
-    location: 'Akwa',
-    description: 'Installation nouveau réfrigérateur - Mise en service',
-    status: 'completed',
-    duration: '1h 45min',
-    cost: 15000,
-    priority: 'low'
+    equipmentId: 'EQ003',
+    equipmentName: 'Groupe électrogène C3',
+    action: 'Installation',
+    technician: 'Paul Kamdem',
+    date: '2024-01-13',
+    status: 'pending',
+    details: 'Installation et configuration initiale',
+    cost: '89,500 FCFA',
+    duration: '6h 00min',
+    location: 'Bafoussam - Industrial'
   },
   {
     id: '4',
-    date: '2024-01-29',
-    time: '08:30',
-    type: 'Diagnostic',
-    equipment: 'Frigo Vitrine FV-008',
-    technician: 'MBAPBOU GRÉGOIRE',
-    location: 'Bonanjo',
-    description: 'Diagnostic problème température - En attente pièces',
-    status: 'pending',
-    duration: '1h 00min',
-    cost: 8000,
-    priority: 'medium'
-  },
-  {
-    id: '5',
-    date: '2024-01-28',
-    time: '16:45',
-    type: 'Maintenance corrective',
-    equipment: 'Climatiseur Central CC-003',
-    technician: 'TCHINDA CONSTANT',
-    location: 'Bali',
-    description: 'Réparation fuite circuit frigorifique',
-    status: 'cancelled',
-    duration: '-',
-    cost: 0,
-    priority: 'high'
+    equipmentId: 'EQ004',
+    equipmentName: 'Système CVC D4',
+    action: 'Diagnostic',
+    technician: 'Sophie Tchounga',
+    date: '2024-01-12',
+    status: 'failed',
+    details: 'Diagnostic complet du système de ventilation',
+    cost: '32,000 FCFA',
+    duration: '1h 45min',
+    location: 'Douala - Bonabéri'
   }
 ];
 
 export function EquipmentHistory() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterTechnician, setFilterTechnician] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [actionFilter, setActionFilter] = useState('');
+  const [filteredHistory, setFilteredHistory] = useState(mockHistory);
 
-  const filteredHistory = mockHistory.filter(event => {
-    const matchesSearch = event.equipment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = !filterType || event.type === filterType;
-    const matchesStatus = !filterStatus || event.status === filterStatus;
-    const matchesTechnician = !filterTechnician || event.technician === filterTechnician;
-    
-    return matchesSearch && matchesType && matchesStatus && matchesTechnician;
-  });
+  React.useEffect(() => {
+    let filtered = mockHistory;
 
-  const getStatusColor = (status: string) => {
+    if (searchTerm) {
+      filtered = filtered.filter(entry =>
+        entry.equipmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.action.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(entry => entry.status === statusFilter);
+    }
+
+    if (actionFilter) {
+      filtered = filtered.filter(entry => entry.action === actionFilter);
+    }
+
+    setFilteredHistory(filtered);
+  }, [searchTerm, statusFilter, actionFilter]);
+
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return <Clock className="w-4 h-4 text-yellow-600" />;
+      case 'failed':
+        return <AlertTriangle className="w-4 h-4 text-red-600" />;
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return <Activity className="w-4 h-4 text-gray-600" />;
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'Terminé';
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Terminé</Badge>;
       case 'pending':
-        return 'En attente';
-      case 'cancelled':
-        return 'Annulé';
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">En cours</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Échec</Badge>;
       default:
-        return status;
+        return <Badge variant="secondary">Inconnu</Badge>;
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'text-red-600';
-      case 'medium':
-        return 'text-yellow-600';
-      case 'low':
-        return 'text-green-600';
-      default:
-        return 'text-gray-600';
-    }
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('');
+    setActionFilter('');
   };
 
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return <AlertCircle className="w-4 h-4" />;
-      case 'medium':
-        return <Clock className="w-4 h-4" />;
-      case 'low':
-        return <Wrench className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  const clearFilter = (filterName: string) => {
-    switch (filterName) {
-      case 'type':
-        setFilterType('');
-        break;
-      case 'status':
-        setFilterStatus('');
-        break;
-      case 'technician':
-        setFilterTechnician('');
-        break;
-    }
-  };
+  const hasActiveFilters = searchTerm || statusFilter || actionFilter;
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Activity className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Historique des Équipements</h1>
+            <p className="text-gray-600">Suivi complet des interventions et maintenances</p>
+          </div>
+        </div>
+      </div>
+
       {/* Filtres */}
-      <Card className="bg-white border border-gray-100">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Search className="w-5 h-5 text-blue-600" />
-            Filtres de recherche
+            <Filter className="w-5 h-5" />
+            Filtres
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="ml-auto text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Effacer
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Rechercher équipement..."
+                placeholder="Rechercher équipement, technicien..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                className="pl-10"
               />
             </div>
-            <div className="relative">
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Type d'intervention" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Maintenance préventive">Maintenance préventive</SelectItem>
-                  <SelectItem value="Réparation urgente">Réparation urgente</SelectItem>
-                  <SelectItem value="Installation">Installation</SelectItem>
-                  <SelectItem value="Diagnostic">Diagnostic</SelectItem>
-                  <SelectItem value="Maintenance corrective">Maintenance corrective</SelectItem>
-                </SelectContent>
-              </Select>
-              {filterType && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => clearFilter('type')}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              )}
-            </div>
-            <div className="relative">
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="completed">Terminé</SelectItem>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="cancelled">Annulé</SelectItem>
-                </SelectContent>
-              </Select>
-              {filterStatus && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => clearFilter('status')}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              )}
-            </div>
-            <div className="relative">
-              <Select value={filterTechnician} onValueChange={setFilterTechnician}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Technicien" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CÉDRIC">CÉDRIC</SelectItem>
-                  <SelectItem value="VOUKENG">VOUKENG</SelectItem>
-                  <SelectItem value="NDJOKO IV">NDJOKO IV</SelectItem>
-                  <SelectItem value="MBAPBOU GRÉGOIRE">MBAPBOU GRÉGOIRE</SelectItem>
-                  <SelectItem value="TCHINDA CONSTANT">TCHINDA CONSTANT</SelectItem>
-                </SelectContent>
-              </Select>
-              {filterTechnician && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => clearFilter('technician')}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              )}
-            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="completed">Terminé</SelectItem>
+                <SelectItem value="pending">En cours</SelectItem>
+                <SelectItem value="failed">Échec</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={actionFilter} onValueChange={setActionFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrer par action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Maintenance préventive">Maintenance préventive</SelectItem>
+                <SelectItem value="Réparation">Réparation</SelectItem>
+                <SelectItem value="Installation">Installation</SelectItem>
+                <SelectItem value="Diagnostic">Diagnostic</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Timeline des événements */}
-      <Card className="bg-white border border-gray-100">
+      {/* Résultats */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="w-5 h-5 text-blue-600" />
-            Historique des interventions
-            <Badge variant="secondary" className="ml-auto">
-              {filteredHistory.length} événements
+          <CardTitle className="flex items-center justify-between">
+            <span>Historique des Interventions</span>
+            <Badge variant="secondary">
+              {filteredHistory.length} résultat{filteredHistory.length > 1 ? 's' : ''}
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredHistory.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <History className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>Aucun événement trouvé</p>
-              </div>
-            ) : (
-              filteredHistory.map((event, index) => (
-                <div key={event.id} className="relative">
-                  {/* Ligne de timeline */}
-                  {index < filteredHistory.length - 1 && (
-                    <div className="absolute left-6 top-12 w-0.5 h-16 bg-gray-200"></div>
-                  )}
-                  
-                  <div className="flex gap-4 p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                    {/* Icône de timeline */}
-                    <div className="flex-shrink-0">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getPriorityColor(event.priority)} bg-gray-50 border-2`}>
-                        {getPriorityIcon(event.priority)}
-                      </div>
-                    </div>
-                    
-                    {/* Contenu principal */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">{event.equipment}</h3>
-                          <p className="text-sm text-gray-600">{event.description}</p>
-                        </div>
-                        <Badge className={getStatusColor(event.status)}>
-                          {getStatusText(event.status)}
-                        </Badge>
+        <CardContent className="p-0">
+          {filteredHistory.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium mb-2">Aucun résultat trouvé</h3>
+              <p>Essayez de modifier vos critères de recherche</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {filteredHistory.map((entry, index) => (
+                <div key={entry.id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(entry.status)}
+                        <Wrench className="w-4 h-4 text-gray-400" />
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{event.date} à {event.time}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {entry.equipmentName}
+                          </h3>
+                          <Badge variant="outline" className="text-xs">
+                            {entry.equipmentId}
+                          </Badge>
+                          {getStatusBadge(entry.status)}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          <span>{event.technician}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{event.duration || 'N/A'}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-2 flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">
-                          {event.type}
-                        </Badge>
                         
-                        <PermissionCheck 
-                          allowedRoles={['admin']}
-                          fallback={null}
-                        >
-                          {event.cost !== undefined && (
-                            <div className="text-sm font-medium text-blue-600">
-                              Coût: {event.cost.toLocaleString()} FCFA
-                            </div>
-                          )}
-                        </PermissionCheck>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                          <div><strong>Action:</strong> {entry.action}</div>
+                          <div><strong>Technicien:</strong> {entry.technician}</div>
+                          <div><strong>Date:</strong> {new Date(entry.date).toLocaleDateString('fr-FR')}</div>
+                          <div><strong>Durée:</strong> {entry.duration}</div>
+                          <div><strong>Lieu:</strong> {entry.location}</div>
+                          <div><strong>Coût:</strong> <span className="font-medium text-blue-600">{entry.cost}</span></div>
+                        </div>
+                        
+                        <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg">
+                          {entry.details}
+                        </p>
                       </div>
                     </div>
                   </div>
+                  
+                  {index < filteredHistory.length - 1 && (
+                    <Separator className="mt-4" />
+                  )}
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
