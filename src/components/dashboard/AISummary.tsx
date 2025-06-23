@@ -4,13 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target, Download } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target } from "lucide-react";
 import { AIAnalysisModal } from './AIAnalysisModal';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const AISummary: React.FC = () => {
   const { toast: showToast } = useToast();
   const [showAIAnalysisModal, setShowAIAnalysisModal] = useState(false);
+  const navigate = useNavigate();
 
   const aiInsights = [
     {
@@ -19,7 +21,8 @@ const AISummary: React.FC = () => {
       title: "Prédiction de panne",
       content: "3 équipements à risque élevé dans les 48h",
       confidence: 89,
-      priority: "high"
+      priority: "high",
+      details: "Analyse basée sur les données de température, vibrations et historique de maintenance. Équipements concernés: FR-2024-089, FR-2024-156, FR-2024-203"
     },
     {
       type: "optimization",
@@ -27,7 +30,8 @@ const AISummary: React.FC = () => {
       title: "Optimisation des tournées",
       content: "Économie possible de 23% sur les déplacements",
       confidence: 76,
-      priority: "medium"
+      priority: "medium",
+      details: "Regroupement intelligent des interventions par secteur géographique et optimisation des trajets basée sur l'algorithme de Dijkstra"
     },
     {
       type: "recommendation",
@@ -35,7 +39,8 @@ const AISummary: React.FC = () => {
       title: "Recommandation maintenance",
       content: "Programmer maintenance préventive pour 8 équipements",
       confidence: 94,
-      priority: "high"
+      priority: "high",
+      details: "Maintenance préventive recommandée basée sur l'analyse prédictive des pannes et l'optimisation des coûts de maintenance"
     }
   ];
 
@@ -48,37 +53,20 @@ const AISummary: React.FC = () => {
         error: 'Erreur lors de l\'application de la recommandation'
       }
     );
+    
+    // Rediriger vers la page Supervision après application
+    setTimeout(() => {
+      navigate('/supervision');
+      toast.success('Redirection vers la section Prédiction');
+    }, 2500);
   };
 
-  const handleViewDetails = (type: string, title: string) => {
-    toast.success(`Ouverture des détails : ${title}`);
-    // Ici on pourrait ouvrir un modal spécifique pour chaque type
-  };
-
-  const handleExportAISummary = () => {
-    const exportData = {
-      date: new Date().toISOString(),
-      insights: aiInsights.map(insight => ({
-        type: insight.type,
-        title: insight.title,
-        content: insight.content,
-        confidence: insight.confidence,
-        priority: insight.priority
-      }))
-    };
-
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `resume-ia-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    toast.success('Résumé IA exporté avec succès !');
+  const handleViewDetails = (insight: any) => {
+    showToast({
+      title: `📊 Détails - ${insight.title}`,
+      description: insight.details,
+      duration: 5000,
+    });
   };
 
   return (
@@ -93,14 +81,6 @@ const AISummary: React.FC = () => {
                 <CardDescription>Insights et recommandations intelligentes</CardDescription>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportAISummary}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Exporter
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -143,7 +123,7 @@ const AISummary: React.FC = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleViewDetails(insight.type, insight.title)}
+                        onClick={() => handleViewDetails(insight)}
                         className="text-xs"
                       >
                         Détails

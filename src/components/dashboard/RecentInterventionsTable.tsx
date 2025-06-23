@@ -2,11 +2,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, User, Wrench, Download } from "lucide-react";
+import { Clock, MapPin, User, Wrench } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { InterventionActions } from './InterventionActions';
-import { toast } from 'sonner';
 
 interface Intervention {
   id: string;
@@ -50,26 +48,6 @@ export function RecentInterventionsTable({ interventions, isLoading }: RecentInt
     }
   };
 
-  const handleExportInterventions = () => {
-    const exportData = {
-      date: new Date().toISOString(),
-      interventions: interventions
-    };
-
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `interventions-recentes-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    toast.success('Interventions exportées avec succès !');
-  };
-
   if (isLoading) {
     return (
       <Card>
@@ -93,20 +71,10 @@ export function RecentInterventionsTable({ interventions, isLoading }: RecentInt
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Wrench className="w-5 h-5 text-blue-600" />
-            Interventions récentes par secteur
-          </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportInterventions}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Exporter
-          </Button>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Wrench className="w-5 h-5 text-blue-600" />
+          Interventions récentes par secteur
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {interventions.length === 0 ? (

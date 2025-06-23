@@ -6,12 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, Clock, MapPin, Wrench } from "lucide-react";
 import { AlertDetails } from './AlertDetails';
+import { TechnicianAssignmentModal } from './TechnicianAssignmentModal';
 
 const UrgentAlerts: React.FC = () => {
   const { toast } = useToast();
   const [selectedAlert, setSelectedAlert] = useState<string | null>(null);
-
-  const alerts = [
+  const [showTechnicianModal, setShowTechnicianModal] = useState<string | null>(null);
+  const [alerts, setAlerts] = useState([
     {
       id: "ALT-001",
       equipment: "FR-2024-089",
@@ -19,7 +20,8 @@ const UrgentAlerts: React.FC = () => {
       priority: "critical",
       description: "Panne électrique majeure",
       time: "Il y a 15 min",
-      technician: "Non assigné"
+      technician: "Non assigné",
+      status: "unassigned"
     },
     {
       id: "ALT-002", 
@@ -28,7 +30,8 @@ const UrgentAlerts: React.FC = () => {
       priority: "high",
       description: "Surchauffe système",
       time: "Il y a 1h",
-      technician: "MBAPBOU GRÉGOIRE"
+      technician: "MBAPBOU GRÉGOIRE",
+      status: "assigned"
     },
     {
       id: "ALT-003",
@@ -37,19 +40,129 @@ const UrgentAlerts: React.FC = () => {
       priority: "medium",
       description: "Maintenance préventive",
       time: "Il y a 3h",
-      technician: "VOUKENG"
+      technician: "VOUKENG",
+      status: "assigned"
+    }
+  ]);
+
+  // Données des techniciens disponibles avec leurs compétences et positions
+  const availableTechnicians = [
+    {
+      id: "tech-001",
+      name: "CÉDRIC",
+      specialization: ["Électricité", "Réfrigération"],
+      location: "Douala - Japoma",
+      distance: 2.5, // km
+      availability: "available",
+      experience: 5,
+      successRate: 92
+    },
+    {
+      id: "tech-002",
+      name: "MBAPBOU GRÉGOIRE",
+      specialization: ["Climatisation", "Électronique"],
+      location: "Yaoundé - Akwa",
+      distance: 1.8,
+      availability: "busy",
+      experience: 7,
+      successRate: 95
+    },
+    {
+      id: "tech-003",
+      name: "VOUKENG",
+      specialization: ["Mécanique", "Réparation"],
+      location: "Bamenda - Centre",
+      distance: 0.5,
+      availability: "available",
+      experience: 3,
+      successRate: 88
+    },
+    {
+      id: "tech-004",
+      name: "TCHINDA CONSTANT",
+      specialization: ["Électronique", "Diagnostic"],
+      location: "Douala - Ange Raphael",
+      distance: 3.2,
+      availability: "available",
+      experience: 4,
+      successRate: 90
     }
   ];
 
+  const findBestTechnician = (alertId: string) => {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return null;
+
+    // Algorithme de scoring pour trouver le meilleur technicien
+    const candidates = availableTechnicians
+      .filter(tech => tech.availability === "available")
+      .map(tech => {
+        let score = 0;
+        
+        // Score basé sur la spécialisation (40% du score)
+        const isSpecialist = tech.specialization.some(spec => 
+          alert.description.toLowerCase().includes(spec.toLowerCase()) ||
+          (alert.description.includes("électrique") && spec === "Électricité") ||
+          (alert.description.includes("surchauffe") && spec === "Climatisation")
+        );
+        score += isSpecialist ? 40 : 10;
+        
+        // Score basé sur la proximité (30% du score)
+        const proximityScore = Math.max(0, 30 - (tech.distance * 3));
+        score += proximityScore;
+        
+        // Score basé sur l'expérience (20% du score)
+        score += Math.min(20, tech.experience * 3);
+        
+        // Score basé sur le taux de succès (10% du score)
+        score += (tech.successRate - 80) / 2;
+        
+        return { ...tech, score: Math.round(score) };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    return candidates[0] || null;
+  };
+
   const handleAssignTechnician = (alertId: string) => {
+    const bestTechnician = findBestTechnician(alertId);
+    
+    if (!bestTechnician) {
+      toast({
+        title: "❌ Aucun technicien disponible",
+        description: "Tous les techniciens sont actuellement occupés",
+      });
+      return;
+    }
+
+    // Mettre à jour l'alerte avec le technicien assigné
+    setAlerts(prevAlerts => 
+      prevAlerts.map(alert => 
+        alert.id === alertId 
+          ? { 
+              ...alert, 
+              technician: bestTechnician.name,
+              status: "assigned"
+            }
+          : alert
+      )
+    );
+
     toast({
-      title: "Assignation",
-      description: `Technicien assigné à l'alerte ${alertId}`,
+      title: "✅ Assignation automatique réussie",
+      description: `${bestTechnician.name} assigné à l'alerte ${alertId} (Score: ${bestTechnician.score}%)`,
     });
   };
 
   const handleViewDetails = (alertId: string) => {
     setSelectedAlert(alertId);
+  };
+
+  const getStatusBadge = (status: string, technician: string) => {
+    if (status === "assigned" || technician !== "Non assigné") {
+      return <Badge className="bg-green-100 text-green-800">Assigné</Badge>;
+    }
+    return <Badge className="bg-gray-100 text-gray-800">Non assigné</Badge>;
   };
 
   return (
@@ -60,7 +173,7 @@ const UrgentAlerts: React.FC = () => {
             <AlertTriangle className="w-5 h-5 text-red-500" />
             Alertes urgentes
           </CardTitle>
-          <CardDescription>Interventions prioritaires</CardDescription>
+          <CardDescription>Interventions prioritaires avec assignation intelligente</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -80,6 +193,7 @@ const UrgentAlerts: React.FC = () => {
                         {alert.priority === 'critical' ? 'Critique' :
                          alert.priority === 'high' ? 'Élevée' : 'Moyenne'}
                       </Badge>
+                      {getStatusBadge(alert.status, alert.technician)}
                     </div>
                     <p className="font-medium text-sm">{alert.description}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -112,13 +226,13 @@ const UrgentAlerts: React.FC = () => {
                     >
                       Détails
                     </Button>
-                    {alert.technician === "Non assigné" && (
+                    {(alert.status === "unassigned" || alert.technician === "Non assigné") && (
                       <Button 
                         size="sm" 
                         onClick={() => handleAssignTechnician(alert.id)}
                         className="text-xs"
                       >
-                        Assigner
+                        Assigner (IA)
                       </Button>
                     )}
                   </div>
@@ -134,6 +248,13 @@ const UrgentAlerts: React.FC = () => {
           alertId={selectedAlert}
           isOpen={!!selectedAlert}
           onClose={() => setSelectedAlert(null)}
+        />
+      )}
+
+      {showTechnicianModal && (
+        <TechnicianAssignmentModal
+          isOpen={!!showTechnicianModal}
+          onClose={() => setShowTechnicianModal(null)}
         />
       )}
     </>
