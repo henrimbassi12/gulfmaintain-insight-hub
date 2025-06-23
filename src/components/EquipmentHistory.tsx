@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -203,11 +204,11 @@ export function EquipmentHistory() {
                   <SelectValue placeholder="Type d'intervention" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="maintenance-preventive">Maintenance préventive</SelectItem>
-                  <SelectItem value="reparation-urgente">Réparation urgente</SelectItem>
-                  <SelectItem value="installation">Installation</SelectItem>
-                  <SelectItem value="diagnostic">Diagnostic</SelectItem>
-                  <SelectItem value="maintenance-corrective">Maintenance corrective</SelectItem>
+                  <SelectItem value="Maintenance préventive">Maintenance préventive</SelectItem>
+                  <SelectItem value="Réparation urgente">Réparation urgente</SelectItem>
+                  <SelectItem value="Installation">Installation</SelectItem>
+                  <SelectItem value="Diagnostic">Diagnostic</SelectItem>
+                  <SelectItem value="Maintenance corrective">Maintenance corrective</SelectItem>
                 </SelectContent>
               </Select>
               {filterType && (

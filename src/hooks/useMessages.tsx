@@ -34,6 +34,7 @@ export interface ConversationWithParticipant extends Conversation {
   participant?: ConversationParticipant;
   lastMessage?: Message;
   unreadCount: number;
+  is_archived?: boolean;
 }
 
 // Noms des membres de l'équipe - UNIQUEMENT ceux-ci sont autorisés
@@ -61,16 +62,20 @@ const SAMPLE_MESSAGES = [
 export function useMessages() {
   const { user, userProfile } = useAuth();
   const [conversations, setConversations] = useState<ConversationWithParticipant[]>([]);
+  const [archivedConversations, setArchivedConversations] = useState<ConversationWithParticipant[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [deletedConversationIds, setDeletedConversationIds] = useState<Set<string>>(new Set());
-  const [archivedConversationIds, setArchivedConversationIds] = useState<Set<string>>(new Set());
+  const [showArchived, setShowArchived] = useState(false);
 
-  // Fonction pour générer des conversations stables (pas de duplication)
+  // Fonction pour générer des conversations stables
   const generateStableConversations = (): ConversationWithParticipant[] => {
     const userEmail = user?.email || 'unknown';
     const storageKey = `conversations_${userEmail}`;
+    const archivedKey = `archived_conversations_${userEmail}`;
+    
+    // Récupérer les conversations archivées
+    const archivedIds = JSON.parse(localStorage.getItem(archivedKey) || '[]');
     
     // Vérifier si on a déjà des conversations en cache
     const cachedConversations = localStorage.getItem(storageKey);
@@ -78,18 +83,16 @@ export function useMessages() {
       try {
         const parsed = JSON.parse(cachedConversations);
         console.log('📱 Conversations récupérées du cache');
-        return parsed.filter((conv: ConversationWithParticipant) => 
-          !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id)
-        );
+        return parsed.filter((conv: ConversationWithParticipant) => !archivedIds.includes(conv.id));
       } catch (error) {
         console.error('Erreur parsing cache conversations:', error);
       }
     }
 
-    // Générer des conversations stables uniquement si pas en cache
+    // Générer des conversations stables
     const stableConversations = AUTHORIZED_TEAM_MEMBERS.map((member, index) => {
       const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}`;
-      const lastMessageTime = new Date(Date.now() - (index + 1) * 86400000 * 2).toISOString(); // Échelonner dans le temps
+      const lastMessageTime = new Date(Date.now() - (index + 1) * 86400000 * 2).toISOString();
       
       return {
         id: conversationId,
@@ -121,13 +124,11 @@ export function useMessages() {
     localStorage.setItem(storageKey, JSON.stringify(stableConversations));
     console.log('💾 Conversations sauvegardées en cache');
     
-    return stableConversations.filter(conv => 
-      !deletedConversationIds.has(conv.id) && !archivedConversationIds.has(conv.id)
-    );
+    return stableConversations.filter(conv => !archivedIds.includes(conv.id));
   };
 
   const generateSampleMessages = (conversationId: string): Message[] => {
-    const conversation = conversations.find(c => c.id === conversationId);
+    const conversation = [...conversations, ...archivedConversations].find(c => c.id === conversationId);
     if (!conversation) return [];
 
     const messageCount = Math.floor(Math.random() * 8) + 3; // 3-10 messages
@@ -163,7 +164,56 @@ export function useMessages() {
       
       // Utiliser des conversations stables
       const stableConversations = generateStableConversations();
-      setConversations(stableConversations);
+      
+      // Trier par date de dernier message (plus récent en premier)
+      const sortedConversations = stableConversations.sort((a, b) => {
+        const timeA = new Date(a.lastMessage?.created_at || a.updated_at).getTime();
+        const timeB = new Date(b.lastMessage?.created_at || b.updated_at).getTime();
+        return timeB - timeA;
+      });
+      
+      setConversations(sortedConversations);
+      
+      // Charger les conversations archivées
+      const userEmail = user.email || 'unknown';
+      const archivedKey = `archived_conversations_${userEmail}`;
+      const archivedIds = JSON.parse(localStorage.getItem(archivedKey) || '[]');
+      
+      if (archivedIds.length > 0) {
+        const allConversations = AUTHORIZED_TEAM_MEMBERS.map((member, index) => {
+          const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}`;
+          const lastMessageTime = new Date(Date.now() - (index + 1) * 86400000 * 2).toISOString();
+          
+          return {
+            id: conversationId,
+            name: `Conversation avec ${member.name}`,
+            created_at: new Date(Date.now() - Math.random() * 86400000 * 30).toISOString(),
+            updated_at: lastMessageTime,
+            participant: {
+              id: `participant-${member.name.toLowerCase().replace(/\s+/g, '-')}`,
+              conversation_id: conversationId,
+              user_name: member.name,
+              user_role: member.role,
+              avatar_url: null,
+              is_online: Math.random() > 0.4,
+              created_at: new Date().toISOString()
+            },
+            lastMessage: {
+              id: `msg-last-${conversationId}`,
+              conversation_id: conversationId,
+              sender_name: member.name,
+              content: SAMPLE_MESSAGES[index % SAMPLE_MESSAGES.length],
+              is_me: false,
+              created_at: lastMessageTime
+            },
+            unreadCount: 0,
+            is_archived: true
+          };
+        });
+        
+        const archived = allConversations.filter(conv => archivedIds.includes(conv.id));
+        setArchivedConversations(archived);
+      }
       
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des conversations:', error);
@@ -205,6 +255,28 @@ export function useMessages() {
 
       // Ajouter le message localement
       setMessages(prev => [...prev, newMessage]);
+      
+      // Mettre à jour la conversation pour la remonter en haut
+      setConversations(prev => {
+        const updated = prev.map(conv => {
+          if (conv.id === conversationId) {
+            return {
+              ...conv,
+              lastMessage: newMessage,
+              updated_at: new Date().toISOString()
+            };
+          }
+          return conv;
+        });
+        
+        // Trier à nouveau par date de dernier message
+        return updated.sort((a, b) => {
+          const timeA = new Date(a.lastMessage?.created_at || a.updated_at).getTime();
+          const timeB = new Date(b.lastMessage?.created_at || b.updated_at).getTime();
+          return timeB - timeA;
+        });
+      });
+      
       toast.success('Message envoyé');
     } catch (error) {
       console.error('❌ Erreur lors de l\'envoi du message:', error);
@@ -212,23 +284,47 @@ export function useMessages() {
     }
   };
 
+  const createNewConversation = async (memberName: string) => {
+    try {
+      const member = AUTHORIZED_TEAM_MEMBERS.find(m => m.name === memberName);
+      if (!member) {
+        toast.error('Membre de l\'équipe non trouvé');
+        return;
+      }
+
+      const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}-new-${Date.now()}`;
+      
+      const newConversation: ConversationWithParticipant = {
+        id: conversationId,
+        name: `Conversation avec ${member.name}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        participant: {
+          id: `participant-${member.name.toLowerCase().replace(/\s+/g, '-')}`,
+          conversation_id: conversationId,
+          user_name: member.name,
+          user_role: member.role,
+          avatar_url: null,
+          is_online: Math.random() > 0.4,
+          created_at: new Date().toISOString()
+        },
+        unreadCount: 0
+      };
+
+      setConversations(prev => [newConversation, ...prev]);
+      setSelectedConversationId(conversationId);
+      
+      toast.success(`Nouvelle conversation créée avec ${member.name}`);
+    } catch (error) {
+      console.error('❌ Erreur lors de la création de la conversation:', error);
+      toast.error('Erreur lors de la création de la conversation');
+    }
+  };
+
   const deleteConversation = async (conversationId: string) => {
     try {
       console.log('🗑️ Suppression de la conversation:', conversationId);
       
-      // Marquer comme supprimée de manière persistante
-      const newDeletedIds = new Set(deletedConversationIds).add(conversationId);
-      setDeletedConversationIds(newDeletedIds);
-      
-      // Supprimer du cache également
-      const userEmail = user?.email || 'unknown';
-      const storageKey = `conversations_${userEmail}`;
-      const deletedKey = `deleted_conversations_${userEmail}`;
-      
-      localStorage.setItem(deletedKey, JSON.stringify(Array.from(newDeletedIds)));
-      localStorage.removeItem(storageKey); // Forcer la régénération
-      
-      // Supprimer de l'état local
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       
       if (selectedConversationId === conversationId) {
@@ -245,20 +341,23 @@ export function useMessages() {
     try {
       console.log('📦 Archivage de la conversation:', conversationId);
       
-      // Marquer comme archivée de manière persistante
-      const newArchivedIds = new Set(archivedConversationIds).add(conversationId);
-      setArchivedConversationIds(newArchivedIds);
+      const conversationToArchive = conversations.find(conv => conv.id === conversationId);
+      if (!conversationToArchive) return;
       
-      // Supprimer du cache également
-      const userEmail = user?.email || 'unknown';
-      const storageKey = `conversations_${userEmail}`;
-      const archivedKey = `archived_conversations_${userEmail}`;
+      // Marquer comme archivée
+      const archivedConversation = { ...conversationToArchive, is_archived: true };
       
-      localStorage.setItem(archivedKey, JSON.stringify(Array.from(newArchivedIds)));
-      localStorage.removeItem(storageKey); // Forcer la régénération
+      // Ajouter aux conversations archivées
+      setArchivedConversations(prev => [archivedConversation, ...prev]);
       
-      // Supprimer de l'état local
+      // Supprimer des conversations actives
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+      
+      // Sauvegarder en local
+      const userEmail = user?.email || 'unknown';
+      const archivedKey = `archived_conversations_${userEmail}`;
+      const currentArchived = JSON.parse(localStorage.getItem(archivedKey) || '[]');
+      localStorage.setItem(archivedKey, JSON.stringify([...currentArchived, conversationId]));
       
       if (selectedConversationId === conversationId) {
         setSelectedConversationId(null);
@@ -275,38 +374,19 @@ export function useMessages() {
     setSelectedConversationId(conversationId);
   };
 
-  // Initialiser les conversations supprimées/archivées depuis le stockage local
-  useEffect(() => {
-    if (user?.email) {
-      const deletedKey = `deleted_conversations_${user.email}`;
-      const archivedKey = `archived_conversations_${user.email}`;
-      
-      const deletedIds = localStorage.getItem(deletedKey);
-      const archivedIds = localStorage.getItem(archivedKey);
-      
-      if (deletedIds) {
-        try {
-          setDeletedConversationIds(new Set(JSON.parse(deletedIds)));
-        } catch (error) {
-          console.error('Erreur parsing deleted conversations:', error);
-        }
-      }
-      
-      if (archivedIds) {
-        try {
-          setArchivedConversationIds(new Set(JSON.parse(archivedIds)));
-        } catch (error) {
-          console.error('Erreur parsing archived conversations:', error);
-        }
-      }
+  const refreshMessages = async () => {
+    console.log('🔄 Actualisation des messages');
+    await fetchConversations();
+    if (selectedConversationId) {
+      await fetchMessages(selectedConversationId);
     }
-  }, [user?.email]);
+  };
 
   useEffect(() => {
     if (user) {
       fetchConversations();
     }
-  }, [user, deletedConversationIds, archivedConversationIds]);
+  }, [user]);
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -315,8 +395,10 @@ export function useMessages() {
     }
   }, [selectedConversationId]);
 
+  const displayedConversations = showArchived ? archivedConversations : conversations;
+
   return {
-    conversations,
+    conversations: displayedConversations,
     messages,
     selectedConversationId,
     setSelectedConversationId: selectConversation,
@@ -324,6 +406,11 @@ export function useMessages() {
     sendMessage,
     deleteConversation,
     archiveConversation,
+    createNewConversation,
+    refreshMessages,
     refetch: fetchConversations,
+    showArchived,
+    setShowArchived,
+    archivedCount: archivedConversations.length,
   };
 }

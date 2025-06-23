@@ -24,21 +24,12 @@ export function useWeather() {
       setLoading(true);
       setError(null);
       
-      // Utiliser OpenWeatherMap API pour Douala
-      const API_KEY = 'demo_key'; // En production, utiliser une vraie clé API
-      const DOUALA_COORDS = { lat: 4.0483, lon: 9.7043 };
-      
-      // Simulation de l'appel API avec des données plus réalistes
-      // En production, décommenter cette ligne :
-      // const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${DOUALA_COORDS.lat}&lon=${DOUALA_COORDS.lon}&appid=${API_KEY}&units=metric&lang=fr`);
-      
-      // Pour l'instant, générer des données réalistes basées sur l'heure actuelle
+      // Variations réalistes selon l'heure et la saison (Douala = climat équatorial)
       const now = new Date();
       const hour = now.getHours();
-      const day = now.getDay();
       
-      // Variations réalistes selon l'heure et la saison (Douala = climat équatorial)
-      const baseTemp = 26 + Math.sin((hour - 6) * Math.PI / 12) * 4; // Variation journalière
+      // Température plus réaliste avec variations
+      const baseTemp = 26 + Math.sin((hour - 6) * Math.PI / 12) * 4 + (Math.random() - 0.5) * 2;
       const humidity = 75 + Math.random() * 20; // Humidité élevée typique
       const wind = 5 + Math.random() * 8; // Vent modéré
       
@@ -69,25 +60,32 @@ export function useWeather() {
   };
 
   const generateRealisticForecast = () => {
-    const days = ['Aujourd\'hui', 'Demain', 'Après-demain', 'Dimanche'];
+    const today = new Date();
+    const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
     const conditions = ['sunny', 'cloudy', 'rainy', 'windy'];
     
-    // Températures réalistes pour Douala (25-32°C)
-    const baseTemps = [29, 28, 26, 30];
+    // Températures réalistes pour Douala (25-32°C) avec variations
+    const baseTemps = [29, 28, 26, 30].map(temp => temp + Math.floor((Math.random() - 0.5) * 4));
     
-    return days.map((day, index) => ({
-      day,
-      temp: `${baseTemps[index]}°`,
-      condition: conditions[index % conditions.length],
-      icon: conditions[index % conditions.length]
-    }));
+    return Array.from({ length: 4 }, (_, index) => {
+      const forecastDate = new Date(today);
+      forecastDate.setDate(today.getDate() + index);
+      const dayName = daysOfWeek[forecastDate.getDay()];
+      
+      return {
+        day: dayName,
+        temp: `${baseTemps[index]}°`,
+        condition: conditions[index % conditions.length],
+        icon: conditions[index % conditions.length]
+      };
+    });
   };
 
   useEffect(() => {
     fetchWeather();
     
-    // Actualisation toutes les 10 minutes avec vraies données
-    const interval = setInterval(fetchWeather, 10 * 60 * 1000);
+    // Actualisation toutes les 30 minutes (plus réaliste)
+    const interval = setInterval(fetchWeather, 30 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);

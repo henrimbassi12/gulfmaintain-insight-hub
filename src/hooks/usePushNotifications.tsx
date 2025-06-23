@@ -12,6 +12,7 @@ export function usePushNotifications() {
     permission: 'default',
     isSupported: false
   });
+  const [lastNotificationTime, setLastNotificationTime] = useState<number>(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,6 +82,14 @@ export function usePushNotifications() {
       return;
     }
 
+    // Éviter le spam de notifications - minimum 5 minutes entre chaque notification
+    const now = Date.now();
+    const minInterval = 5 * 60 * 1000; // 5 minutes
+    if (now - lastNotificationTime < minInterval) {
+      console.log('Notification ignorée - trop récente');
+      return;
+    }
+
     try {
       const notification = new Notification(title, {
         body: options?.body,
@@ -90,6 +99,8 @@ export function usePushNotifications() {
         requireInteraction: options?.requireInteraction || false,
         ...options
       });
+
+      setLastNotificationTime(now);
 
       // Auto-fermer après 5 secondes si pas d'interaction requise
       if (!options?.requireInteraction) {

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, RefreshCw, Activity } from 'lucide-react';
+import { MessageCircle, RefreshCw, Activity, Archive, Plus } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -24,13 +24,18 @@ export default function Messages() {
     setSelectedConversationId,
     isLoading,
     sendMessage,
-    refetch,
+    refreshMessages,
     deleteConversation,
-    archiveConversation
+    archiveConversation,
+    createNewConversation,
+    showArchived,
+    setShowArchived,
+    archivedCount
   } = useMessages();
 
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showNewConversationModal, setShowNewConversationModal] = useState(false);
 
   // Rediriger vers la connexion si l'utilisateur n'est pas connecté
   if (!user) {
@@ -58,7 +63,7 @@ export default function Messages() {
 
   const handleRefresh = () => {
     toast.promise(
-      refetch(),
+      refreshMessages(),
       {
         loading: 'Actualisation des messages...',
         success: 'Messages actualisés avec succès',
@@ -71,13 +76,9 @@ export default function Messages() {
     try {
       await deleteConversation(conversationId);
       
-      // Déselectionner la conversation si elle était sélectionnée
       if (selectedConversationId === conversationId) {
         setSelectedConversationId(null);
       }
-      
-      // Actualiser la liste des conversations
-      await refetch();
       
       toast.success('Conversation supprimée avec succès');
     } catch (error) {
@@ -90,13 +91,9 @@ export default function Messages() {
     try {
       await archiveConversation(conversationId);
       
-      // Déselectionner la conversation si elle était sélectionnée
       if (selectedConversationId === conversationId) {
         setSelectedConversationId(null);
       }
-      
-      // Actualiser la liste des conversations
-      await refetch();
       
       toast.success('Conversation archivée avec succès');
     } catch (error) {
@@ -114,15 +111,24 @@ export default function Messages() {
         subtitle="Communication temps réel avec l'équipe"
         icon={MessageCircle}
       >
-        <ModernButton 
-          variant="outline" 
-          onClick={handleRefresh}
-          disabled={isLoading}
-          icon={RefreshCw}
-          className={isLoading ? 'animate-spin' : ''}
-        >
-          Actualiser
-        </ModernButton>
+        <div className="flex items-center gap-2">
+          <ModernButton 
+            variant="outline" 
+            onClick={() => setShowArchived(!showArchived)}
+            icon={Archive}
+          >
+            {showArchived ? 'Conversations actives' : `Archivées (${archivedCount})`}
+          </ModernButton>
+          <ModernButton 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={isLoading}
+            icon={RefreshCw}
+            className={isLoading ? 'animate-spin' : ''}
+          >
+            Actualiser
+          </ModernButton>
+        </div>
       </AirbnbHeader>
 
       {/* Statistiques des messages */}
@@ -142,7 +148,7 @@ export default function Messages() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
               <p className="text-2xl font-bold text-blue-600 mb-1">{conversations.length}</p>
-              <p className="text-sm text-gray-600">Conversations totales</p>
+              <p className="text-sm text-gray-600">{showArchived ? 'Conversations archivées' : 'Conversations actives'}</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
               <p className="text-2xl font-bold text-red-600 mb-1">{conversations.reduce((acc, conv) => acc + conv.unreadCount, 0)}</p>
@@ -166,9 +172,19 @@ export default function Messages() {
           <div className="flex h-[700px]">
             {/* Sidebar avec conversations */}
             <div className="w-1/3 min-w-[320px] border-r border-gray-200 flex flex-col">
-              {/* Header avec bouton nouvelle conversation */}
+              {/* Header avec boutons d'action */}
               <div className="p-4 border-b border-gray-100 bg-white">
-                <NewConversationModal onConversationCreated={refetch} />
+                <div className="flex items-center gap-2">
+                  {!showArchived && (
+                    <Button 
+                      onClick={() => setShowNewConversationModal(true)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Nouvelle conversation
+                    </Button>
+                  )}
+                </div>
               </div>
               
               {/* Liste des conversations */}
@@ -201,6 +217,13 @@ export default function Messages() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de nouvelle conversation */}
+      <NewConversationModal 
+        isOpen={showNewConversationModal}
+        onClose={() => setShowNewConversationModal(false)}
+        onCreateConversation={createNewConversation}
+      />
     </AirbnbContainer>
   );
 }
