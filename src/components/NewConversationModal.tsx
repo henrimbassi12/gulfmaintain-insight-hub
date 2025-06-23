@@ -1,20 +1,20 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface NewConversationModalProps {
-  onConversationCreated?: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onCreateConversation: (memberName: string) => Promise<void>;
 }
 
-export function NewConversationModal({ onConversationCreated }: NewConversationModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function NewConversationModal({ isOpen, onClose, onCreateConversation }: NewConversationModalProps) {
   const [participantName, setParticipantName] = useState('');
   const [participantRole, setParticipantRole] = useState('technician');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,38 +27,11 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
 
     setIsLoading(true);
     try {
-      // Créer une nouvelle conversation
-      const { data: conversation, error: convError } = await supabase
-        .from('conversations')
-        .insert([
-          {
-            name: `Conversation avec ${participantName}`,
-          }
-        ])
-        .select()
-        .single();
-
-      if (convError) throw convError;
-
-      // Ajouter le participant à la conversation
-      const { error: partError } = await supabase
-        .from('conversation_participants')
-        .insert([
-          {
-            conversation_id: conversation.id,
-            user_name: participantName,
-            user_role: participantRole,
-            is_online: Math.random() > 0.5, // Simuler le statut en ligne
-          }
-        ]);
-
-      if (partError) throw partError;
-
+      await onCreateConversation(participantName);
       toast.success('Conversation créée avec succès');
-      setIsOpen(false);
+      onClose();
       setParticipantName('');
       setParticipantRole('technician');
-      onConversationCreated?.();
     } catch (error) {
       console.error('Erreur lors de la création de la conversation:', error);
       toast.error('Erreur lors de la création de la conversation');
@@ -73,13 +46,7 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full mb-4">
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvelle conversation
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -128,7 +95,7 @@ export function NewConversationModal({ onConversationCreated }: NewConversationM
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => setIsOpen(false)}
+              onClick={onClose}
             >
               Annuler
             </Button>
