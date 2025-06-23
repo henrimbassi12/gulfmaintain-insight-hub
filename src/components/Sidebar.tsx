@@ -17,7 +17,7 @@ import { NotificationSystem } from "@/components/NotificationSystem";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
-  HardDrive,
+  Package,
   Wrench,
   MessageCircle,
   Settings,
@@ -25,9 +25,9 @@ import {
   Users,
   Calendar,
   MapPin,
-  Activity,
+  History,
   Menu,
-  Package
+  Shield
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 
@@ -54,14 +54,14 @@ export function AppSidebar() {
     shouldShowUserManagement: userProfile?.role === 'admin' && userProfile?.account_status === 'approved'
   });
 
-  // Menu items de base avec icônes cohérentes (mêmes que dans les pages)
+  // Menu items avec icônes harmonisées
   const baseMenuItems = [
     { icon: LayoutDashboard, label: "Tableau de bord", href: "/dashboard" },
-    { icon: HardDrive, label: "Équipements", href: "/equipments" },
+    { icon: Package, label: "Équipements", href: "/equipments" },
     { icon: Wrench, label: "Maintenance", href: "/maintenance" },
     { icon: Calendar, label: "Planning", href: "/planning" },
     { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-    { icon: Activity, label: "Historique", href: "/equipment-history" },
+    { icon: History, label: "Historique", href: "/equipment-history" },
     { icon: MessageCircle, label: "Messages", href: "/messages" },
     { icon: LayoutDashboard, label: "Supervision", href: "/supervision" },
     { icon: FileText, label: "Rapports", href: "/reports" },
@@ -93,7 +93,7 @@ export function AppSidebar() {
           </SidebarTrigger>
           
           <div className="flex items-center gap-2">
-            <Package className="w-6 h-6 text-blue-600" />
+            <Shield className="w-6 h-6 text-blue-600" />
             <h1 className="text-lg font-semibold text-gray-900">
               GulfMaintain
             </h1>
@@ -105,7 +105,7 @@ export function AppSidebar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Package className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+          <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
           <div>
             <h1 className="text-base md:text-lg font-semibold text-gray-900">
               GulfMaintain
