@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { MaintenanceCalendar } from '@/components/MaintenanceCalendar';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Calendar, RefreshCw, Activity } from 'lucide-react';
+import { FileText, Calendar, RefreshCw, Activity, Plus } from 'lucide-react';
 import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
+import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -12,6 +14,7 @@ import { toast } from 'sonner';
 
 export default function MaintenanceCalendarPage() {
   const [isDepotFormOpen, setIsDepotFormOpen] = useState(false);
+  const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const handleSaveDepotForm = (data: any) => {
@@ -50,6 +53,14 @@ export default function MaintenanceCalendarPage() {
         </ModernButton>
         
         <ModernButton 
+          onClick={() => setIsInterventionModalOpen(true)}
+          icon={Plus}
+        >
+          Nouvelle intervention
+        </ModernButton>
+        
+        <ModernButton 
+          variant="outline"
           onClick={() => setIsDepotFormOpen(true)}
           icon={FileText}
         >
@@ -103,6 +114,14 @@ export default function MaintenanceCalendarPage() {
         isOpen={isDepotFormOpen}
         onClose={() => setIsDepotFormOpen(false)}
         onSave={handleSaveDepotForm}
+      />
+
+      <CreateInterventionModal
+        isOpen={isInterventionModalOpen}
+        onClose={() => setIsInterventionModalOpen(false)}
+        onSuccess={() => {
+          toast.success('Intervention ajoutée au planning');
+        }}
       />
     </AirbnbContainer>
   );

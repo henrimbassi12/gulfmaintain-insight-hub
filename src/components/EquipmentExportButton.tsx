@@ -3,21 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from 'sonner';
-
-interface Equipment {
-  equipment_id: string;
-  type: string;
-  brand: string;
-  model: string;
-  serial_number: string;
-  location: string;
-  agency: string;
-  technician: string;
-  status: string;
-  temperature?: string;
-  last_maintenance?: Date;
-  next_maintenance?: Date;
-}
+import { Equipment } from '@/hooks/useEquipments';
 
 interface EquipmentExportButtonProps {
   equipments: Equipment[];
@@ -76,8 +62,8 @@ export function EquipmentExportButton({ equipments, className }: EquipmentExport
       eq.technician || '',
       eq.status,
       eq.temperature || '',
-      eq.last_maintenance?.toLocaleDateString('fr-FR') || '',
-      eq.next_maintenance?.toLocaleDateString('fr-FR') || ''
+      eq.last_maintenance ? new Date(eq.last_maintenance).toLocaleDateString('fr-FR') : '',
+      eq.next_maintenance ? new Date(eq.next_maintenance).toLocaleDateString('fr-FR') : ''
     ]);
     
     const csvContent = [

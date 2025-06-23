@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,67 +8,65 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-interface CreateInterventionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface MaintenanceFormModalProps {
   onSuccess?: () => void;
 }
 
-export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateInterventionModalProps) {
-  const [interventionDate, setInterventionDate] = useState<Date>();
+export function MaintenanceFormModal({ onSuccess }: MaintenanceFormModalProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState<Date>();
   const [formData, setFormData] = useState({
     equipmentId: '',
     type: '',
     technician: '',
     priority: 'medium',
-    location: '',
     description: '',
-    estimatedDuration: '',
-    timeSlot: ''
+    estimatedDuration: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.equipmentId || !formData.type || !formData.technician || !interventionDate) {
+    if (!formData.equipmentId || !formData.type || !formData.technician || !scheduledDate) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    console.log('Nouvelle intervention:', {
+    console.log('Nouvelle maintenance:', {
       ...formData,
-      interventionDate
+      scheduledDate
     });
 
-    toast.success('Intervention programmée avec succès');
-    onClose();
+    toast.success('Maintenance programmée avec succès');
+    setIsOpen(false);
     setFormData({
       equipmentId: '',
       type: '',
       technician: '',
       priority: 'medium',
-      location: '',
       description: '',
-      estimatedDuration: '',
-      timeSlot: ''
+      estimatedDuration: ''
     });
-    setInterventionDate(undefined);
+    setScheduledDate(undefined);
     onSuccess?.();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          Nouvelle Maintenance
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
-            Nouvelle intervention
-          </DialogTitle>
+          <DialogTitle>Programmer une nouvelle maintenance</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -85,18 +83,17 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="type">Type d'intervention *</Label>
+              <Label htmlFor="type">Type de maintenance *</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner le type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="reparation">Réparation</SelectItem>
-                  <SelectItem value="installation">Installation</SelectItem>
-                  <SelectItem value="deplacement">Déplacement</SelectItem>
+                  <SelectItem value="preventive">Maintenance préventive</SelectItem>
+                  <SelectItem value="corrective">Maintenance corrective</SelectItem>
                   <SelectItem value="inspection">Inspection</SelectItem>
-                  <SelectItem value="urgence">Intervention d'urgence</SelectItem>
+                  <SelectItem value="cleaning">Nettoyage</SelectItem>
+                  <SelectItem value="calibration">Calibrage</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -110,12 +107,12 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                   <SelectValue placeholder="Sélectionner un technicien" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CÉDRIC">CÉDRIC - JAPOMA, VILLAGE, NGODI BAKOKO</SelectItem>
-                  <SelectItem value="MBAPBOU GRÉGOIRE">MBAPBOU GRÉGOIRE - AKWA, MBOPPI</SelectItem>
-                  <SelectItem value="VOUKENG">VOUKENG - BONABERI</SelectItem>
-                  <SelectItem value="TCHINDA CONSTANT">TCHINDA CONSTANT - ANGE RAPHAEL</SelectItem>
-                  <SelectItem value="NDJOKO IV">NDJOKO IV - DEÏDO, MAKEPE</SelectItem>
-                  <SelectItem value="NDOUMBE ETIA">NDOUMBE ETIA - AKWA, BALI</SelectItem>
+                  <SelectItem value="CÉDRIC">CÉDRIC</SelectItem>
+                  <SelectItem value="MBAPBOU GRÉGOIRE">MBAPBOU GRÉGOIRE</SelectItem>
+                  <SelectItem value="VOUKENG">VOUKENG</SelectItem>
+                  <SelectItem value="TCHINDA CONSTANT">TCHINDA CONSTANT</SelectItem>
+                  <SelectItem value="NDJOKO IV">NDJOKO IV</SelectItem>
+                  <SelectItem value="NDOUMBE ETIA">NDOUMBE ETIA</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -136,9 +133,9 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Date d'intervention *</Label>
+              <Label>Date programmée *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -146,8 +143,8 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {interventionDate ? (
-                      format(interventionDate, "PPP", { locale: fr })
+                    {scheduledDate ? (
+                      format(scheduledDate, "PPP", { locale: fr })
                     ) : (
                       <span>Sélectionner une date</span>
                     )}
@@ -156,28 +153,12 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={interventionDate}
-                    onSelect={setInterventionDate}
+                    selected={scheduledDate}
+                    onSelect={setScheduledDate}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="timeSlot">Créneau horaire</Label>
-              <Select value={formData.timeSlot} onValueChange={(value) => setFormData({...formData, timeSlot: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir un créneau" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="08:00-10:00">08:00 - 10:00</SelectItem>
-                  <SelectItem value="10:00-12:00">10:00 - 12:00</SelectItem>
-                  <SelectItem value="14:00-16:00">14:00 - 16:00</SelectItem>
-                  <SelectItem value="16:00-18:00">16:00 - 18:00</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="space-y-2">
@@ -192,32 +173,22 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Localisation</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData({...formData, location: e.target.value})}
-              placeholder="Adresse ou point de vente spécifique"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description détaillée</Label>
+            <Label htmlFor="description">Description / Instructions</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
-              placeholder="Détails de l'intervention, problème signalé, instructions spéciales..."
-              rows={4}
+              placeholder="Détails de la maintenance à effectuer..."
+              rows={3}
             />
           </div>
 
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Annuler
             </Button>
             <Button type="submit">
-              Programmer l'intervention
+              Programmer la maintenance
             </Button>
           </div>
         </form>
