@@ -8,7 +8,6 @@ import { EquipmentStats } from '@/components/EquipmentStats';
 import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
 import { EquipmentFormModal } from '@/components/EquipmentFormModal';
-import { EquipmentExportButton } from '@/components/EquipmentExportButton';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -98,8 +97,6 @@ const Equipments = () => {
         subtitle={`Gestion et suivi de ${equipments.length} équipement${equipments.length > 1 ? 's' : ''}${filteredEquipments.length !== equipments.length ? ` (${filteredEquipments.length} affiché${filteredEquipments.length > 1 ? 's' : ''})` : ''}`}
         icon={Wrench}
       >
-        <EquipmentExportButton equipments={filteredEquipments} />
-        
         <ModernButton 
           variant="outline" 
           onClick={handleRefresh}

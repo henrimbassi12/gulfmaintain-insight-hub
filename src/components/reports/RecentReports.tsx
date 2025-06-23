@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Eye } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import { useReportGeneration } from "@/hooks/useReportGeneration";
 import { toast } from 'sonner';
 
@@ -45,16 +45,6 @@ export function RecentReports({ reports }: RecentReportsProps) {
       }, 1500);
     } else {
       toast.error('Ce rapport n\'est pas encore disponible au téléchargement');
-    }
-  };
-
-  const handleView = (report: Report) => {
-    if (report.status === 'Terminé') {
-      toast.success(`Ouverture de "${report.title}"`);
-      // Logique pour ouvrir/prévisualiser le rapport
-      console.log('Ouverture du rapport:', report);
-    } else {
-      toast.info('Ce rapport est encore en cours de génération');
     }
   };
 
@@ -111,15 +101,6 @@ export function RecentReports({ reports }: RecentReportsProps) {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => handleView(report)}
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        Voir
-                      </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 

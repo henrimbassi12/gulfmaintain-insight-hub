@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { ModernWeatherWidget } from '@/components/dashboard/ModernWeatherWidget';
 import { ModernStatsGrid } from '@/components/dashboard/ModernStatsGrid';
@@ -115,7 +116,7 @@ export default function Dashboard() {
     { label: "Temps moyen", value: "2.3h", change: "-12%", isPositive: true },
     { label: "Satisfaction", value: "94%", change: "+5%", isPositive: true },
     { label: "Première fois", value: "87%", change: "+8%", isPositive: true },
-    { label: "Coût moyen", value: "450€", change: "-3%", isPositive: true }
+    { label: "Coût moyen", value: "450 000 FCFA", change: "-3%", isPositive: true }
   ];
 
   return (

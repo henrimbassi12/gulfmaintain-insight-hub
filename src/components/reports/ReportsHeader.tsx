@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, RefreshCw, Filter, Eye, Download } from 'lucide-react';
+import { FileText, RefreshCw, Filter, Download } from 'lucide-react';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
@@ -17,11 +17,6 @@ export function ReportsHeader({ refreshing, onRefresh, onGenerateReport }: Repor
 
   const handleFilterReports = () => {
     setIsFilterModalOpen(true);
-  };
-
-  const handleViewReport = () => {
-    toast.success('Ouverture de la vue des rapports');
-    // Logique pour afficher les rapports
   };
 
   const handleDownloadReports = () => {
@@ -50,14 +45,6 @@ export function ReportsHeader({ refreshing, onRefresh, onGenerateReport }: Repor
           className={refreshing ? 'animate-spin' : ''}
         >
           Actualiser
-        </ModernButton>
-
-        <ModernButton
-          variant="outline"
-          onClick={handleViewReport}
-          icon={Eye}
-        >
-          Voir
         </ModernButton>
 
         <ModernButton

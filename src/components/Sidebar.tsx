@@ -16,8 +16,7 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard,
-  Package,
+  Activity,
   Wrench,
   MessageCircle,
   Settings,
@@ -54,16 +53,16 @@ export function AppSidebar() {
     shouldShowUserManagement: userProfile?.role === 'admin' && userProfile?.account_status === 'approved'
   });
 
-  // Menu items avec icônes harmonisées
+  // Menu items avec icônes exactement identiques aux pages
   const baseMenuItems = [
-    { icon: LayoutDashboard, label: "Tableau de bord", href: "/dashboard" },
-    { icon: Package, label: "Équipements", href: "/equipments" },
+    { icon: Activity, label: "Tableau de bord", href: "/dashboard" },
+    { icon: Wrench, label: "Équipements", href: "/equipments" },
     { icon: Wrench, label: "Maintenance", href: "/maintenance" },
     { icon: Calendar, label: "Planning", href: "/planning" },
     { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
     { icon: History, label: "Historique", href: "/equipment-history" },
     { icon: MessageCircle, label: "Messages", href: "/messages" },
-    { icon: LayoutDashboard, label: "Supervision", href: "/supervision" },
+    { icon: Activity, label: "Supervision", href: "/supervision" },
     { icon: FileText, label: "Rapports", href: "/reports" },
     { icon: Settings, label: "Paramètres", href: "/settings" },
   ];
