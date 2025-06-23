@@ -20,6 +20,8 @@ interface Report {
   date: string;
   status: string;
   size: string;
+  technician?: string;
+  zone?: string;
 }
 
 export default function Reports() {
@@ -70,27 +72,43 @@ export default function Reports() {
   const reports: Report[] = [
     {
       id: 1,
-      title: 'Rapport mensuel - Janvier 2024',
+      title: 'Fiche de maintenance - Frigo Commercial',
       type: 'Maintenance',
       date: '31/01/2024',
       status: 'Terminé',
-      size: '2.4 MB'
+      size: '2.4 MB',
+      technician: 'CÉDRIC',
+      zone: 'Douala Centre'
     },
     {
       id: 2,
-      title: 'Analyse des pannes - Q4 2023',
-      type: 'Analyse',
-      date: '15/01/2024',
+      title: 'Rapport de réparation - Climatiseur',
+      type: 'Réparation',
+      date: '29/01/2024',
       status: 'Terminé',
-      size: '1.8 MB'
+      size: '1.8 MB',
+      technician: 'VOUKENG',
+      zone: 'Bonapriso'
     },
     {
       id: 3,
-      title: 'Performance techniciens - Décembre',
-      type: 'RH',
-      date: '05/01/2024',
+      title: 'Fiche de déplacement - Installation',
+      type: 'Déplacement',
+      date: '28/01/2024',
+      status: 'Terminé',
+      size: '1.2 MB',
+      technician: 'NDJOKO IV',
+      zone: 'Akwa'
+    },
+    {
+      id: 4,
+      title: 'Rapport mensuel - Janvier 2024',
+      type: 'Synthèse',
+      date: '15/01/2024',
       status: 'En cours',
-      size: '-'
+      size: '-',
+      technician: 'TCHINDA CONSTANT',
+      zone: 'Toutes zones'
     }
   ];
 

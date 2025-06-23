@@ -3,8 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, Eye } from 'lucide-react';
 import { useReportGeneration } from "@/hooks/useReportGeneration";
+import { toast } from 'sonner';
 
 interface Report {
   id: number;
@@ -13,6 +14,8 @@ interface Report {
   date: string;
   status: string;
   size: string;
+  technician?: string;
+  zone?: string;
 }
 
 interface RecentReportsProps {
@@ -23,7 +26,15 @@ export function RecentReports({ reports }: RecentReportsProps) {
   const { downloadExistingReport } = useReportGeneration();
 
   const handleDownload = (report: Report) => {
-    downloadExistingReport(report);
+    if (report.status === 'Terminé') {
+      downloadExistingReport(report);
+      toast.success(`Téléchargement de "${report.title}" démarré`);
+    }
+  };
+
+  const handleView = (report: Report) => {
+    toast.info(`Ouverture de "${report.title}"`);
+    // Logique pour ouvrir/prévisualiser le rapport
   };
 
   return (
@@ -34,6 +45,9 @@ export function RecentReports({ reports }: RecentReportsProps) {
             <FileText className="w-5 h-5 text-white" />
           </div>
           Rapports récents
+          <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
+            {reports.filter(r => r.status === 'Terminé').length} disponibles
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -43,9 +57,10 @@ export function RecentReports({ reports }: RecentReportsProps) {
               <tr className="border-b bg-gray-50 text-left text-sm text-gray-600">
                 <th className="py-4 px-6 font-semibold">Titre</th>
                 <th className="py-4 px-6 font-semibold">Type</th>
+                <th className="py-4 px-6 font-semibold">Technicien</th>
+                <th className="py-4 px-6 font-semibold">Zone</th>
                 <th className="py-4 px-6 font-semibold">Date</th>
                 <th className="py-4 px-6 font-semibold">Statut</th>
-                <th className="py-4 px-6 font-semibold">Taille</th>
                 <th className="py-4 px-6 font-semibold">Actions</th>
               </tr>
             </thead>
@@ -58,6 +73,12 @@ export function RecentReports({ reports }: RecentReportsProps) {
                   <td className="py-4 px-6">
                     <Badge variant="outline" className="text-xs">{report.type}</Badge>
                   </td>
+                  <td className="py-4 px-6 text-sm text-gray-600">
+                    {report.technician || 'Non assigné'}
+                  </td>
+                  <td className="py-4 px-6 text-sm text-gray-600">
+                    {report.zone || 'Non spécifiée'}
+                  </td>
                   <td className="py-4 px-6 text-sm text-gray-600">{report.date}</td>
                   <td className="py-4 px-6">
                     <Badge className={`text-xs ${
@@ -67,19 +88,31 @@ export function RecentReports({ reports }: RecentReportsProps) {
                       {report.status}
                     </Badge>
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{report.size}</td>
                   <td className="py-4 px-6">
-                    {report.status === 'Terminé' && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-blue-600 hover:text-blue-700"
-                        onClick={() => handleDownload(report)}
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        Télécharger
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {report.status === 'Terminé' && (
+                        <>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-blue-600 hover:text-blue-700"
+                            onClick={() => handleView(report)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Voir
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-green-600 hover:text-green-700"
+                            onClick={() => handleDownload(report)}
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            Télécharger
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

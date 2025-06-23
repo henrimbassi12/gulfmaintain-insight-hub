@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { EquipmentHistory } from '@/components/EquipmentHistory';
-import { EquipmentHistoryExport } from '@/components/EquipmentHistoryExport';
 import { History, RefreshCw } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -34,8 +33,6 @@ export default function EquipmentHistoryPage() {
         >
           Actualiser
         </ModernButton>
-        
-        <EquipmentHistoryExport />
       </AirbnbHeader>
 
       <EquipmentHistory />
