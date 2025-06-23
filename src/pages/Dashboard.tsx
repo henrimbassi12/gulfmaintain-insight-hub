@@ -1,12 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ModernStatsGrid } from '@/components/dashboard/ModernStatsGrid';
 import TrendsChart from '@/components/dashboard/TrendsChart';
 import { RecentInterventionsTable } from '@/components/dashboard/RecentInterventionsTable';
 import UrgentAlerts from '@/components/dashboard/UrgentAlerts';
-import { QuickActions } from '@/components/dashboard/QuickActions';
 import AISummary from '@/components/dashboard/AISummary';
 import TechnicianPerformance from '@/components/dashboard/TechnicianPerformance';
 import EquipmentTypeBreakdown from '@/components/dashboard/EquipmentTypeBreakdown';
@@ -18,7 +16,11 @@ import ManagerQuickActions from '@/components/dashboard/ManagerQuickActions';
 import TechnicianQuickActions from '@/components/dashboard/TechnicianQuickActions';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
-import { BarChart3 } from 'lucide-react';
+import { ModernButton } from '@/components/ui/modern-button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { NotificationSystem } from '@/components/NotificationSystem';
+import { BarChart3, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Dashboard() {
@@ -110,15 +112,35 @@ export default function Dashboard() {
         title="Tableau de bord"
         subtitle="Vue d'ensemble de votre activité par secteur - Douala"
         icon={BarChart3}
-      />
-      
-      <DashboardHeader
-        timeRange={timeRange}
-        setTimeRange={setTimeRange}
-        handleRefreshData={handleRefreshData}
-        refreshing={refreshing}
-        isLoading={isLoading}
-      />
+      >
+        <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
+          <ConnectionStatus />
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-full sm:w-32 border-gray-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Aujourd'hui</SelectItem>
+              <SelectItem value="week">Cette semaine</SelectItem>
+              <SelectItem value="month">Ce mois</SelectItem>
+              <SelectItem value="quarter">Ce trimestre</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <ModernButton 
+            variant="outline" 
+            onClick={handleRefreshData}
+            disabled={refreshing || isLoading}
+            icon={RefreshCw}
+            className={refreshing || isLoading ? 'animate-spin' : ''}
+          >
+            <span className="hidden sm:inline">Actualiser</span>
+            <span className="sm:hidden">Sync</span>
+          </ModernButton>
+          
+          <NotificationSystem />
+        </div>
+      </AirbnbHeader>
 
       <ModernStatsGrid title="Statistiques générales" stats={statsData} />
 

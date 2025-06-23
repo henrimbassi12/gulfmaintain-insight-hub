@@ -140,24 +140,14 @@ export function EquipmentHistory() {
   const hasActiveFilters = searchTerm || statusFilter || actionFilter;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Activity className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Historique des Équipements</h1>
-            <p className="text-gray-600">Suivi complet des interventions et maintenances</p>
-          </div>
-        </div>
-      </div>
-
+    <div className="space-y-6">
       {/* Filtres */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100 pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+              <Filter className="w-4 h-4 text-white" />
+            </div>
             Filtres
             {hasActiveFilters && (
               <Button
@@ -172,7 +162,7 @@ export function EquipmentHistory() {
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -211,11 +201,16 @@ export function EquipmentHistory() {
       </Card>
 
       {/* Résultats */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Historique des Interventions</span>
-            <Badge variant="secondary">
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="bg-gray-50 border-b border-gray-100 pb-4">
+          <CardTitle className="flex items-center justify-between text-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-600 rounded-xl flex items-center justify-center">
+                <Activity className="w-4 h-4 text-white" />
+              </div>
+              <span>Historique des Interventions</span>
+            </div>
+            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
               {filteredHistory.length} résultat{filteredHistory.length > 1 ? 's' : ''}
             </Badge>
           </CardTitle>
@@ -230,26 +225,28 @@ export function EquipmentHistory() {
           ) : (
             <div className="divide-y">
               {filteredHistory.map((entry, index) => (
-                <div key={entry.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={entry.id} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-start gap-3 md:gap-4 flex-1">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         {getStatusIcon(entry.status)}
                         <Wrench className="w-4 h-4 text-gray-400" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-gray-900 truncate">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+                          <h3 className="font-semibold text-gray-900 truncate text-sm md:text-base">
                             {entry.equipmentName}
                           </h3>
-                          <Badge variant="outline" className="text-xs">
-                            {entry.equipmentId}
-                          </Badge>
-                          {getStatusBadge(entry.status)}
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {entry.equipmentId}
+                            </Badge>
+                            {getStatusBadge(entry.status)}
+                          </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs md:text-sm text-gray-600 mb-3">
                           <div><strong>Action:</strong> {entry.action}</div>
                           <div><strong>Technicien:</strong> {entry.technician}</div>
                           <div><strong>Date:</strong> {new Date(entry.date).toLocaleDateString('fr-FR')}</div>
@@ -258,7 +255,7 @@ export function EquipmentHistory() {
                           <div><strong>Coût:</strong> <span className="font-medium text-blue-600">{entry.cost}</span></div>
                         </div>
                         
-                        <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg">
+                        <p className="text-gray-700 text-xs md:text-sm bg-gray-50 p-3 rounded-lg">
                           {entry.details}
                         </p>
                       </div>
