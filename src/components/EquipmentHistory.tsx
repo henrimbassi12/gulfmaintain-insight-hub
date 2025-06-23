@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { History, Search, Calendar, User, MapPin, Wrench, Clock, AlertCircle } from 'lucide-react';
+import { History, Search, Calendar, User, MapPin, Wrench, Clock, AlertCircle, X } from 'lucide-react';
 import { PermissionCheck } from '@/components/auth/PermissionCheck';
 
 interface HistoryEvent {
@@ -164,6 +163,20 @@ export function EquipmentHistory() {
     }
   };
 
+  const clearFilter = (filterName: string) => {
+    switch (filterName) {
+      case 'type':
+        setFilterType('');
+        break;
+      case 'status':
+        setFilterStatus('');
+        break;
+      case 'technician':
+        setFilterTechnician('');
+        break;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Filtres */}
@@ -184,41 +197,58 @@ export function EquipmentHistory() {
                 className="w-full"
               />
             </div>
-            <div>
+            <div className="relative">
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Type d'intervention" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les types</SelectItem>
-                  <SelectItem value="Maintenance préventive">Maintenance préventive</SelectItem>
-                  <SelectItem value="Réparation urgente">Réparation urgente</SelectItem>
-                  <SelectItem value="Installation">Installation</SelectItem>
-                  <SelectItem value="Diagnostic">Diagnostic</SelectItem>
-                  <SelectItem value="Maintenance corrective">Maintenance corrective</SelectItem>
+                  <SelectItem value="maintenance-preventive">Maintenance préventive</SelectItem>
+                  <SelectItem value="reparation-urgente">Réparation urgente</SelectItem>
+                  <SelectItem value="installation">Installation</SelectItem>
+                  <SelectItem value="diagnostic">Diagnostic</SelectItem>
+                  <SelectItem value="maintenance-corrective">Maintenance corrective</SelectItem>
                 </SelectContent>
               </Select>
+              {filterType && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  onClick={() => clearFilter('type')}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              )}
             </div>
-            <div>
+            <div className="relative">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger>
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
                   <SelectItem value="completed">Terminé</SelectItem>
                   <SelectItem value="pending">En attente</SelectItem>
                   <SelectItem value="cancelled">Annulé</SelectItem>
                 </SelectContent>
               </Select>
+              {filterStatus && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  onClick={() => clearFilter('status')}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              )}
             </div>
-            <div>
+            <div className="relative">
               <Select value={filterTechnician} onValueChange={setFilterTechnician}>
                 <SelectTrigger>
                   <SelectValue placeholder="Technicien" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les techniciens</SelectItem>
                   <SelectItem value="CÉDRIC">CÉDRIC</SelectItem>
                   <SelectItem value="VOUKENG">VOUKENG</SelectItem>
                   <SelectItem value="NDJOKO IV">NDJOKO IV</SelectItem>
@@ -226,6 +256,16 @@ export function EquipmentHistory() {
                   <SelectItem value="TCHINDA CONSTANT">TCHINDA CONSTANT</SelectItem>
                 </SelectContent>
               </Select>
+              {filterTechnician && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  onClick={() => clearFilter('technician')}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
