@@ -5,7 +5,8 @@ import MaintenanceFilters from '@/components/maintenance/MaintenanceFilters';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FileText, ClipboardList, Truck, Wrench, Snowflake, Settings, RefreshCw, Activity } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, FileText, ClipboardList, Truck, Wrench, Snowflake, Settings, RefreshCw, Activity, TrendingUp } from 'lucide-react';
 import { RepairForm } from '@/components/forms/RepairForm';
 import { MovementForm } from '@/components/forms/MovementForm';
 import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
@@ -57,6 +58,95 @@ export default function Maintenance() {
       toast.success("Données mises à jour avec succès");
     }, 1500);
   };
+
+  const quickActions = [
+    {
+      id: 'repair',
+      title: 'Réparation',
+      tooltip: 'Nouvelle intervention de réparation',
+      icon: Wrench,
+      color: 'text-green-600',
+      bgHover: 'hover:bg-green-50',
+      borderHover: 'hover:border-green-200',
+      action: () => {
+        setIsRepairFormOpen(true);
+        toast.success("Fiche de réparation ouverte");
+      },
+      isOpen: isRepairFormOpen
+    },
+    {
+      id: 'movement',
+      title: 'Mouvement',
+      tooltip: 'Déplacement de frigo ou remplacement',
+      icon: Truck,
+      color: 'text-orange-600',
+      bgHover: 'hover:bg-orange-50',
+      borderHover: 'hover:border-orange-200',
+      action: () => {
+        setIsMovementFormOpen(true);
+        toast.success("Fiche de mouvement ouverte");
+      },
+      isOpen: isMovementFormOpen
+    },
+    {
+      id: 'tracking',
+      title: 'Suivi',
+      tooltip: 'Suivi d\'un équipement déjà réparé',
+      icon: ClipboardList,
+      color: 'text-purple-600',
+      bgHover: 'hover:bg-purple-50',
+      borderHover: 'hover:border-purple-200',
+      action: () => {
+        setIsTrackingFormOpen(true);
+        toast.success("Fiche de suivi ouverte");
+      },
+      isOpen: isTrackingFormOpen
+    },
+    {
+      id: 'refrigerator',
+      title: 'Frigo',
+      tooltip: 'Ajouter un nouveau frigo',
+      icon: Snowflake,
+      color: 'text-blue-600',
+      bgHover: 'hover:bg-blue-50',
+      borderHover: 'hover:border-blue-200',
+      action: () => {
+        setIsRefrigeratorFormOpen(true);
+        toast.success("Fiche frigo ouverte");
+      },
+      isOpen: isRefrigeratorFormOpen
+    },
+    {
+      id: 'report',
+      title: 'Rapport',
+      tooltip: 'Nouvelle fiche de rapport technique',
+      icon: FileText,
+      color: 'text-gray-600',
+      bgHover: 'hover:bg-gray-50',
+      borderHover: 'hover:border-gray-300',
+      action: () => {
+        toast.success("Création de rapport technique", {
+          description: "Redirection vers la création de rapport..."
+        });
+      },
+      isOpen: false
+    },
+    {
+      id: 'analysis',
+      title: 'Analyse',
+      tooltip: 'Afficher les données d\'un équipement',
+      icon: TrendingUp,
+      color: 'text-indigo-600',
+      bgHover: 'hover:bg-indigo-50',
+      borderHover: 'hover:border-indigo-200',
+      action: () => {
+        toast.success("Analyse d'équipement", {
+          description: "Sélectionnez un équipement pour l'analyser..."
+        });
+      },
+      isOpen: false
+    }
+  ];
 
   // Filter equipments based on maintenance filters
   const filteredEquipments = useMemo(() => {
@@ -125,79 +215,61 @@ export default function Maintenance() {
         </ModernButton>
       </AirbnbHeader>
 
-      {/* Actions rapides - design épuré */}
+      {/* Section Actions rapides améliorée */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
           <CardTitle className="flex items-center gap-3 text-lg">
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Settings className="w-5 h-5 text-white" />
             </div>
-            Actions rapides
+            Créer une fiche d'intervention
             <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
               6 actions
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <ModernButton 
-              onClick={() => setIsRepairFormOpen(true)}
-              variant="outline"
-              size="sm"
-              icon={Wrench}
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-green-50 hover:border-green-200"
-            >
-              Réparation
-            </ModernButton>
-            
-            <ModernButton 
-              onClick={() => setIsMovementFormOpen(true)}
-              variant="outline"
-              size="sm"
-              icon={Truck}
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-orange-50 hover:border-orange-200"
-            >
-              Mouvement
-            </ModernButton>
-            
-            <ModernButton 
-              onClick={() => setIsTrackingFormOpen(true)}
-              variant="outline"
-              size="sm"
-              icon={ClipboardList}
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-purple-50 hover:border-purple-200"
-            >
-              Suivi
-            </ModernButton>
-            
-            <ModernButton 
-              onClick={() => setIsRefrigeratorFormOpen(true)}
-              variant="outline"
-              size="sm"
-              icon={Snowflake}
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
-            >
-              Frigo
-            </ModernButton>
-            
-            <ModernButton 
-              variant="outline"
-              size="sm"
-              icon={FileText}
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-gray-50 hover:border-gray-300"
-            >
-              Rapport
-            </ModernButton>
-            
-            <ModernButton 
-              variant="outline"
-              size="sm"
-              icon={Activity}
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-indigo-50 hover:border-indigo-200"
-            >
-              Analyse
-            </ModernButton>
-          </div>
+          <TooltipProvider>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {quickActions.map((action) => {
+                const IconComponent = action.icon;
+                return (
+                  <Tooltip key={action.id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={action.action}
+                        disabled={action.isOpen}
+                        variant="outline"
+                        className={`
+                          h-auto p-4 flex flex-col items-center gap-3 
+                          border-2 border-gray-200 bg-white 
+                          ${action.bgHover} ${action.borderHover}
+                          transition-all duration-200 hover:shadow-lg
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          ${action.isOpen ? 'ring-2 ring-blue-500 bg-blue-50' : ''}
+                        `}
+                      >
+                        <IconComponent className={`w-6 h-6 ${action.color}`} />
+                        <div className="text-center">
+                          <div className="font-semibold text-sm text-gray-800">
+                            {action.title}
+                          </div>
+                          {action.isOpen && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              Ouvert
+                            </div>
+                          )}
+                        </div>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{action.tooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
         </CardContent>
       </Card>
       
