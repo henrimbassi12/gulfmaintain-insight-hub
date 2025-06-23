@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { EquipmentHistory } from '@/components/EquipmentHistory';
-import { History, RefreshCw } from 'lucide-react';
+import { Clock, RefreshCw } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -24,7 +24,7 @@ export default function EquipmentHistoryPage() {
       <AirbnbHeader
         title="Historique des équipements"
         subtitle="Timeline complète des interventions et maintenances"
-        icon={History}
+        icon={Clock}
       >
         <ModernButton 
           variant="outline" 

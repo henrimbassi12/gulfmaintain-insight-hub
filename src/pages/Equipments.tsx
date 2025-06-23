@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Wrench, Plus, RefreshCw, Activity } from "lucide-react";
+import { Package, Plus, RefreshCw, Activity } from "lucide-react";
 import { EquipmentStats } from '@/components/EquipmentStats';
 import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
@@ -95,7 +94,7 @@ const Equipments = () => {
       <AirbnbHeader
         title="Équipements"
         subtitle={`Gestion et suivi de ${equipments.length} équipement${equipments.length > 1 ? 's' : ''}${filteredEquipments.length !== equipments.length ? ` (${filteredEquipments.length} affiché${filteredEquipments.length > 1 ? 's' : ''})` : ''}`}
-        icon={Wrench}
+        icon={Package}
       >
         <ModernButton 
           variant="outline" 
