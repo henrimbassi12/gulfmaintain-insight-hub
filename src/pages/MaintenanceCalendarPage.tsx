@@ -4,8 +4,7 @@ import { MaintenanceCalendar } from '@/components/MaintenanceCalendar';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Calendar, RefreshCw, Activity, Plus } from 'lucide-react';
-import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
+import { Calendar, RefreshCw, Activity, Plus } from 'lucide-react';
 import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -13,14 +12,8 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
 
 export default function MaintenanceCalendarPage() {
-  const [isDepotFormOpen, setIsDepotFormOpen] = useState(false);
   const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
-  const handleSaveDepotForm = (data: any) => {
-    console.log('Saving depot schedule:', data);
-    toast.success("Fiche passage dépôt enregistrée avec succès");
-  };
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -38,8 +31,8 @@ export default function MaintenanceCalendarPage() {
   return (
     <AirbnbContainer>
       <AirbnbHeader
-        title="Planning & Calendrier"
-        subtitle="Gestion des plannings et calendriers de maintenance"
+        title="Planning"
+        subtitle="Gestion du calendrier de maintenance"
         icon={Calendar}
       >
         <ModernButton 
@@ -56,15 +49,7 @@ export default function MaintenanceCalendarPage() {
           onClick={() => setIsInterventionModalOpen(true)}
           icon={Plus}
         >
-          Nouvelle intervention
-        </ModernButton>
-        
-        <ModernButton 
-          variant="outline"
-          onClick={() => setIsDepotFormOpen(true)}
-          icon={FileText}
-        >
-          Fiche Passage Dépôt
+          Nouvelle Tâche
         </ModernButton>
       </AirbnbHeader>
 
@@ -85,11 +70,11 @@ export default function MaintenanceCalendarPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
               <p className="text-2xl font-bold text-blue-600 mb-1">12</p>
-              <p className="text-sm text-gray-600">Maintenances programmées</p>
+              <p className="text-sm text-gray-600">Tâches programmées</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
               <p className="text-2xl font-bold text-green-600 mb-1">8</p>
-              <p className="text-sm text-gray-600">Interventions terminées</p>
+              <p className="text-sm text-gray-600">Tâches terminées</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-100">
               <p className="text-2xl font-bold text-orange-600 mb-1">3</p>
@@ -110,17 +95,11 @@ export default function MaintenanceCalendarPage() {
         </CardContent>
       </Card>
 
-      <DepotScheduleForm 
-        isOpen={isDepotFormOpen}
-        onClose={() => setIsDepotFormOpen(false)}
-        onSave={handleSaveDepotForm}
-      />
-
       <CreateInterventionModal
         isOpen={isInterventionModalOpen}
         onClose={() => setIsInterventionModalOpen(false)}
         onSuccess={() => {
-          toast.success('Intervention ajoutée au planning');
+          toast.success('Tâche ajoutée au planning');
         }}
       />
     </AirbnbContainer>
