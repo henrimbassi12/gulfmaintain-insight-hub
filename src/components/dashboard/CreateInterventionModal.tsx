@@ -20,72 +20,102 @@ interface CreateInterventionModalProps {
 }
 
 export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateInterventionModalProps) {
-  const [interventionDate, setInterventionDate] = useState<Date>();
+  const [taskDate, setTaskDate] = useState<Date>();
   const [formData, setFormData] = useState({
-    equipmentId: '',
+    serialNumber: '',
+    tagNumber: '',
     type: '',
     technician: '',
     priority: 'medium',
     location: '',
     description: '',
     estimatedDuration: '',
-    timeSlot: ''
+    timeSlot: '',
+    names: '',
+    barmanNumber: '',
+    division: '',
+    sector: '',
+    partner: '',
+    city: '',
+    afnf: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.equipmentId || !formData.type || !formData.technician || !interventionDate) {
+    if (!formData.serialNumber || !formData.type || !formData.technician || !taskDate) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    console.log('Nouvelle intervention:', {
+    console.log('Nouvelle tâche:', {
       ...formData,
-      interventionDate
+      taskDate
     });
 
-    toast.success('Intervention programmée avec succès');
+    toast.success('Tâche programmée avec succès');
     onClose();
     setFormData({
-      equipmentId: '',
+      serialNumber: '',
+      tagNumber: '',
       type: '',
       technician: '',
       priority: 'medium',
       location: '',
       description: '',
       estimatedDuration: '',
-      timeSlot: ''
+      timeSlot: '',
+      names: '',
+      barmanNumber: '',
+      division: '',
+      sector: '',
+      partner: '',
+      city: '',
+      afnf: ''
     });
-    setInterventionDate(undefined);
+    setTaskDate(undefined);
     onSuccess?.();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            Nouvelle intervention
+            Nouvelle tâche
           </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Première ligne - Identification équipement */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="equipmentId">ID Équipement *</Label>
+              <Label htmlFor="serialNumber">SERIAL NUMBER *</Label>
               <Input
-                id="equipmentId"
-                value={formData.equipmentId}
-                onChange={(e) => setFormData({...formData, equipmentId: e.target.value})}
-                placeholder="Ex: FR-2024-089"
+                id="serialNumber"
+                value={formData.serialNumber}
+                onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                placeholder="Ex: SN-2024-089"
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="type">Type d'intervention *</Label>
+              <Label htmlFor="tagNumber">TAG NUMBER</Label>
+              <Input
+                id="tagNumber"
+                value={formData.tagNumber}
+                onChange={(e) => setFormData({...formData, tagNumber: e.target.value})}
+                placeholder="Ex: TAG-089"
+              />
+            </div>
+          </div>
+
+          {/* Deuxième ligne - Type et technicien */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="type">Type *</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner le type" />
@@ -95,14 +125,10 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                   <SelectItem value="reparation">Réparation</SelectItem>
                   <SelectItem value="installation">Installation</SelectItem>
                   <SelectItem value="deplacement">Déplacement</SelectItem>
-                  <SelectItem value="inspection">Inspection</SelectItem>
-                  <SelectItem value="urgence">Intervention d'urgence</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="technician">Technicien assigné *</Label>
               <Select value={formData.technician} onValueChange={(value) => setFormData({...formData, technician: value})}>
@@ -119,6 +145,29 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Troisième ligne - Informations personnelles */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="names">Noms</Label>
+              <Input
+                id="names"
+                value={formData.names}
+                onChange={(e) => setFormData({...formData, names: e.target.value})}
+                placeholder="Nom du responsable"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="barmanNumber">Numéro Barman</Label>
+              <Input
+                id="barmanNumber"
+                value={formData.barmanNumber}
+                onChange={(e) => setFormData({...formData, barmanNumber: e.target.value})}
+                placeholder="Ex: BM-001"
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="priority">Priorité</Label>
@@ -129,16 +178,59 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                 <SelectContent>
                   <SelectItem value="low">Faible</SelectItem>
                   <SelectItem value="medium">Moyenne</SelectItem>
-                  <SelectItem value="high">Élevée</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
+                  <SelectItem value="high">Critique</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Quatrième ligne - Localisation */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label>Date d'intervention *</Label>
+              <Label htmlFor="division">Division</Label>
+              <Input
+                id="division"
+                value={formData.division}
+                onChange={(e) => setFormData({...formData, division: e.target.value})}
+                placeholder="Ex: Division Centre"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sector">Secteur</Label>
+              <Input
+                id="sector"
+                value={formData.sector}
+                onChange={(e) => setFormData({...formData, sector: e.target.value})}
+                placeholder="Ex: Akwa"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="partner">Partenaire</Label>
+              <Input
+                id="partner"
+                value={formData.partner}
+                onChange={(e) => setFormData({...formData, partner: e.target.value})}
+                placeholder="Ex: Partner XYZ"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">Ville</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => setFormData({...formData, city: e.target.value})}
+                placeholder="Ex: Douala"
+              />
+            </div>
+          </div>
+
+          {/* Cinquième ligne - Date et détails */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label>Date *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -146,8 +238,8 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {interventionDate ? (
-                      format(interventionDate, "PPP", { locale: fr })
+                    {taskDate ? (
+                      format(taskDate, "PPP", { locale: fr })
                     ) : (
                       <span>Sélectionner une date</span>
                     )}
@@ -156,8 +248,8 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={interventionDate}
-                    onSelect={setInterventionDate}
+                    selected={taskDate}
+                    onSelect={setTaskDate}
                     initialFocus
                   />
                 </PopoverContent>
@@ -189,6 +281,19 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                 placeholder="Ex: 2h 30min"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="afnf">AF/NF</Label>
+              <Select value={formData.afnf} onValueChange={(value) => setFormData({...formData, afnf: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AF">AF (Ancien Fonctionnel)</SelectItem>
+                  <SelectItem value="NF">NF (Non Fonctionnel)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -207,7 +312,7 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
-              placeholder="Détails de l'intervention, problème signalé, instructions spéciales..."
+              placeholder="Détails de la tâche, problème signalé, instructions spéciales..."
               rows={4}
             />
           </div>
@@ -217,7 +322,7 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
               Annuler
             </Button>
             <Button type="submit">
-              Programmer l'intervention
+              Programmer la tâche
             </Button>
           </div>
         </form>

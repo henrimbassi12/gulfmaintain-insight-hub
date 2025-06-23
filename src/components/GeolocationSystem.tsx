@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, Route, Clock, AlertCircle } from 'lucide-react';
+import { MapPin, Navigation, Route, Clock, AlertCircle, MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,8 @@ export function GeolocationSystem() {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [userLocationDetails, setUserLocationDetails] = useState<string | null>(null);
+  const [routeOptimizations, setRouteOptimizations] = useState<any[]>([]);
   
   const [technicians] = useState<TechnicianLocation[]>([
     { id: '1', name: 'CÉDRIC', lat: 4.0511, lng: 9.7679, status: 'available', sectors: 'JAPOMA, VILLAGE, NGODI BAKOKO' },
@@ -68,17 +70,42 @@ export function GeolocationSystem() {
   // Position par défaut (Douala, Cameroun)
   const defaultLocation = { lat: 4.0511, lng: 9.7679 };
 
-  const getCurrentLocation = () => {
+  // Fonction pour obtenir les détails d'une localisation à partir des coordonnées
+  const getLocationDetails = async (lat: number, lng: number) => {
+    try {
+      // Simulation d'un appel à une API de géolocalisation inverse
+      // Dans un vrai projet, vous utiliseriez une API comme OpenStreetMap Nominatim ou Google Maps
+      const simulatedLocation = `Douala, Région du Littoral, Cameroun (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      
+      if (lat >= 4.0300 && lat <= 4.0600 && lng >= 9.7500 && lng <= 9.7800) {
+        if (lat > 4.0450) {
+          return `Akwa, Douala, Région du Littoral, Cameroun`;
+        } else if (lng < 9.7600) {
+          return `Bonabéri, Douala, Région du Littoral, Cameroun`;
+        } else {
+          return `Bonanjo, Douala, Région du Littoral, Cameroun`;
+        }
+      }
+      
+      return simulatedLocation;
+    } catch (error) {
+      return `Position: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    }
+  };
+
+  const getCurrentLocation = async () => {
     setIsLoadingLocation(true);
     setLocationError(null);
 
     if (!navigator.geolocation) {
       setLocationError("La géolocalisation n'est pas supportée par ce navigateur");
       setUserLocation(defaultLocation);
+      const details = await getLocationDetails(defaultLocation.lat, defaultLocation.lng);
+      setUserLocationDetails(details);
       setIsLoadingLocation(false);
       toast({
-        title: "Géolocalisation non supportée",
-        description: "Utilisation de la position par défaut (Douala)",
+        title: "Position par défaut",
+        description: details,
         variant: "destructive"
       });
       return;
@@ -91,20 +118,25 @@ export function GeolocationSystem() {
     };
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         console.log('Position obtenue:', position.coords);
-        setUserLocation({
+        const location = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
-        });
+        };
+        setUserLocation(location);
+        
+        const details = await getLocationDetails(location.lat, location.lng);
+        setUserLocationDetails(details);
+        
         setLocationError(null);
         setIsLoadingLocation(false);
         toast({
           title: "Position obtenue",
-          description: "Votre position a été déterminée avec succès",
+          description: details,
         });
       },
-      (error) => {
+      async (error) => {
         console.error('Erreur de géolocalisation:', error);
         let errorMessage = "Erreur inconnue";
         
@@ -122,11 +154,13 @@ export function GeolocationSystem() {
         
         setLocationError(errorMessage);
         setUserLocation(defaultLocation);
+        const details = await getLocationDetails(defaultLocation.lat, defaultLocation.lng);
+        setUserLocationDetails(details);
         setIsLoadingLocation(false);
         
         toast({
           title: "Erreur de géolocalisation",
-          description: `${errorMessage} Position par défaut utilisée.`,
+          description: `${errorMessage} Position par défaut utilisée: ${details}`,
           variant: "destructive"
         });
       },
@@ -150,9 +184,38 @@ export function GeolocationSystem() {
   };
 
   const optimizeRoute = () => {
+    if (!userLocation) {
+      toast({
+        title: "Position requise",
+        description: "Veuillez d'abord obtenir votre position pour optimiser les trajets",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulation de l'optimisation de route
+    const optimizations = [
+      {
+        destination: "Agence AKWA Centre",
+        currentRoute: "Via Boulevard de la Liberté → Rue Joss → Akwa (25 min)",
+        suggestedRoute: "Via Rond-point Deïdo → Avenue Kennedy → Akwa (18 min)",
+        timeSaved: "7 minutes",
+        fuelSaved: "15%"
+      },
+      {
+        destination: "Agence BONABERI Port",
+        currentRoute: "Via Pont du Wouri → Route principale (30 min)",
+        suggestedRoute: "Via Ferry → Route côtière (22 min)",
+        timeSaved: "8 minutes", 
+        fuelSaved: "20%"
+      }
+    ];
+
+    setRouteOptimizations(optimizations);
+    
     toast({
-      title: "Optimisation de route",
-      description: "Calcul de l'itinéraire optimal en cours...",
+      title: "Optimisation terminée",
+      description: `${optimizations.length} raccourcis trouvés. Consultez les suggestions ci-dessous.`,
     });
   };
 
@@ -192,7 +255,7 @@ export function GeolocationSystem() {
         <div className="flex gap-2">
           <Button onClick={optimizeRoute} className="flex items-center gap-2">
             <Route className="w-4 h-4" />
-            Optimiser les routes
+            Optimiser trajets
           </Button>
           <Button 
             variant="outline" 
@@ -216,19 +279,59 @@ export function GeolocationSystem() {
         </Alert>
       )}
 
-      {userLocation && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-green-800 text-sm">
-            Position actuelle: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-            {userLocation.lat === defaultLocation.lat && userLocation.lng === defaultLocation.lng && 
-              " (Position par défaut - Douala)"
-            }
-          </p>
+      {userLocationDetails && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <MapIcon className="w-5 h-5 text-green-600 mt-0.5" />
+            <div>
+              <p className="font-medium text-green-800">Votre position actuelle</p>
+              <p className="text-green-700 text-sm mt-1">{userLocationDetails}</p>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Suggestions d'optimisation de route */}
+      {routeOptimizations.length > 0 && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <Route className="w-5 h-5" />
+              Suggestions de raccourcis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {routeOptimizations.map((opt, index) => (
+                <div key={index} className="bg-white p-4 rounded-lg border">
+                  <h4 className="font-medium text-gray-800 mb-2">📍 {opt.destination}</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Route actuelle:</span>
+                      <p className="text-gray-800">{opt.currentRoute}</p>
+                    </div>
+                    <div>
+                      <span className="text-green-600 font-medium">✅ Route suggérée:</span>
+                      <p className="text-green-800">{opt.suggestedRoute}</p>
+                    </div>
+                    <div className="flex gap-4 mt-2">
+                      <Badge variant="outline" className="text-green-700 border-green-300">
+                        ⏱️ Économie: {opt.timeSaved}
+                      </Badge>
+                      <Badge variant="outline" className="text-blue-700 border-blue-300">
+                        ⛽ Carburant: -{opt.fuelSaved}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Technicians List */}
+        {/* Technicians List - Synchronisé avec Dashboard */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -241,7 +344,10 @@ export function GeolocationSystem() {
               {technicians.map((tech) => (
                 <div key={tech.id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className={`w-3 h-3 rounded-full ${
+                      tech.status === 'available' ? 'bg-green-500' :
+                      tech.status === 'busy' ? 'bg-orange-500' : 'bg-gray-500'
+                    }`}></div>
                     <div>
                       <p className="font-medium">{tech.name}</p>
                       <p className="text-sm text-gray-600">
@@ -251,7 +357,7 @@ export function GeolocationSystem() {
                         {userLocation && calculateDistance(
                           userLocation.lat, userLocation.lng,
                           tech.lat, tech.lng
-                        )} km
+                        )} km de votre position
                       </p>
                     </div>
                   </div>
@@ -270,12 +376,12 @@ export function GeolocationSystem() {
           </CardContent>
         </Card>
 
-        {/* Maintenance Points */}
+        {/* Points de maintenance - Résumé des déplacements */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5" />
-              Points de maintenance
+              Résumé des déplacements
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -286,6 +392,14 @@ export function GeolocationSystem() {
                     <div>
                       <p className="font-medium">{point.equipment}</p>
                       <p className="text-sm text-gray-600">{point.address}</p>
+                      {userLocation && (
+                        <p className="text-xs text-blue-600">
+                          📍 Distance: {calculateDistance(
+                            userLocation.lat, userLocation.lng,
+                            point.lat, point.lng
+                          )} km
+                        </p>
+                      )}
                     </div>
                     <Badge className={getPriorityColor(point.priority)}>
                       {point.priority === 'high' ? 'Urgent' :
@@ -308,7 +422,7 @@ export function GeolocationSystem() {
                         .filter(t => t.status === 'available')
                         .map(tech => (
                           <option key={tech.id} value={tech.id}>
-                            {tech.name} ({tech.sectors}) - {userLocation && calculateDistance(
+                            {tech.name} - {userLocation && calculateDistance(
                               userLocation.lat, userLocation.lng,
                               tech.lat, tech.lng
                             )} km
