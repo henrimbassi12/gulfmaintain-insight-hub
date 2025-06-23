@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, RefreshCw, User, Bell, Shield, Save } from 'lucide-react';
+import { Settings as SettingsIcon, RefreshCw, User, Bell, Shield, Save, Eye, EyeOff } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -16,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { NotificationSettings } from '@/components/NotificationSettings';
 
 export default function Settings() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, refreshProfile } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   
@@ -34,6 +35,9 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loadingPassword, setLoadingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Vérifier si l'utilisateur est admin
   const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
@@ -53,7 +57,6 @@ export default function Settings() {
 
     // Charger les préférences de notifications depuis localStorage
     const savedEmailNotifications = localStorage.getItem('emailNotifications');
-    
     if (savedEmailNotifications !== null) {
       setEmailNotifications(JSON.parse(savedEmailNotifications));
     }
@@ -62,24 +65,10 @@ export default function Settings() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // Recharger le profil utilisateur
-      if (user) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        
-        if (error) {
-          console.error('Erreur lors du rechargement du profil:', error);
-          toast.error('Erreur lors de l\'actualisation');
-        } else {
-          toast.success('Paramètres actualisés avec succès');
-          // Les données seront automatiquement mises à jour via AuthContext
-        }
-      }
+      await refreshProfile();
+      toast.success('Paramètres actualisés avec succès');
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur lors du rechargement du profil:', error);
       toast.error('Erreur lors de l\'actualisation');
     } finally {
       setRefreshing(false);
@@ -87,14 +76,22 @@ export default function Settings() {
   };
 
   const handleSaveSettings = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error('Utilisateur non connecté');
+      return;
+    }
+    
+    if (!fullName.trim()) {
+      toast.error('Le nom complet est requis');
+      return;
+    }
     
     setLoading(true);
     try {
       const agencyValue = agency === 'non-assigne' ? null : agency;
       
       const updateData: any = {
-        full_name: fullName,
+        full_name: fullName.trim(),
         agency: agencyValue
       };
 
@@ -110,68 +107,93 @@ export default function Settings() {
 
       if (error) {
         console.error('Erreur lors de la sauvegarde:', error);
-        toast.error('Erreur lors de la sauvegarde');
-      } else {
-        // Sauvegarder les préférences de notifications dans localStorage
-        localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
-        
-        toast.success('Paramètres sauvegardés avec succès');
+        toast.error('Erreur lors de la sauvegarde: ' + error.message);
+        return;
       }
+
+      // Sauvegarder les préférences de notifications dans localStorage
+      localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
+      
+      // Recharger le profil pour s'assurer que les données sont à jour
+      await refreshProfile();
+      
+      toast.success('Paramètres sauvegardés avec succès');
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error('Erreur lors de la sauvegarde');
+      toast.error('Erreur inattendue lors de la sauvegarde');
     } finally {
       setLoading(false);
     }
   };
 
   const handleChangePassword = async () => {
-    if (!user || !user.email) return;
+    if (!user || !user.email) {
+      toast.error('Utilisateur non connecté');
+      return;
+    }
 
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Veuillez remplir tous les champs de mot de passe.");
+    // Validation des champs
+    if (!currentPassword.trim()) {
+      toast.error("Le mot de passe actuel est requis");
       return;
     }
+    
+    if (!newPassword.trim()) {
+      toast.error("Le nouveau mot de passe est requis");
+      return;
+    }
+    
+    if (!confirmPassword.trim()) {
+      toast.error("La confirmation du mot de passe est requise");
+      return;
+    }
+    
     if (newPassword !== confirmPassword) {
-      toast.error("Le nouveau mot de passe et la confirmation ne correspondent pas.");
+      toast.error("Le nouveau mot de passe et la confirmation ne correspondent pas");
       return;
     }
+    
     if (newPassword.length < 6) {
-      toast.error("Le nouveau mot de passe doit contenir au moins 6 caractères.");
+      toast.error("Le nouveau mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      toast.error("Le nouveau mot de passe doit être différent de l'ancien");
       return;
     }
 
     setLoadingPassword(true);
     try {
-      // 1. Vérifier le mot de passe actuel en tentant une connexion.
-      // C'est une mesure de sécurité pour s'assurer que l'utilisateur est bien celui qu'il prétend être.
+      // 1. Vérifier le mot de passe actuel en tentant une connexion temporaire
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
       });
 
       if (signInError) {
-        toast.error("Le mot de passe actuel est incorrect.");
+        toast.error("Le mot de passe actuel est incorrect");
         return;
       }
       
-      // 2. Si le mot de passe actuel est correct, mettre à jour avec le nouveau.
+      // 2. Si le mot de passe actuel est correct, mettre à jour avec le nouveau
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
       if (updateError) {
         console.error('Erreur lors du changement de mot de passe:', updateError);
-        toast.error("Erreur lors du changement de mot de passe : " + updateError.message);
+        toast.error("Erreur lors du changement de mot de passe: " + updateError.message);
       } else {
         toast.success("Mot de passe modifié avec succès !");
+        // Réinitialiser les champs
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       }
     } catch (error: any) {
       console.error('Erreur:', error);
-      toast.error("Une erreur inattendue s'est produite : " + error.message);
+      toast.error("Une erreur inattendue s'est produite: " + error.message);
     } finally {
       setLoadingPassword(false);
     }
@@ -248,12 +270,13 @@ export default function Settings() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Nom complet</Label>
+                <Label htmlFor="name">Nom complet *</Label>
                 <Input 
                   id="name" 
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="mt-1" 
+                  className="mt-1"
+                  placeholder="Entrez votre nom complet" 
                 />
               </div>
               <div>
@@ -331,7 +354,9 @@ export default function Settings() {
         <CardContent className="p-6">
           <div className="space-y-6">
             {/* Composant pour les notifications push */}
-            <NotificationSettings />
+            <NotificationSettings onTogglePush={(enabled) => {
+              console.log('Notifications push:', enabled ? 'activées' : 'désactivées');
+            }} />
             
             <div className="border-t pt-6">
               <div className="flex items-center justify-between">
@@ -349,7 +374,7 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Sécurité */}
+      {/* Sécurité - Changement de mot de passe */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100">
           <CardTitle className="flex items-center gap-3 text-lg">
@@ -362,41 +387,98 @@ export default function Settings() {
         <CardContent className="p-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="current-password">Mot de passe actuel</Label>
-              <Input 
-                id="current-password" 
-                type="password" 
-                className="mt-1" 
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                disabled={loadingPassword}
-              />
+              <Label htmlFor="current-password">Mot de passe actuel *</Label>
+              <div className="relative mt-1">
+                <Input 
+                  id="current-password" 
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  disabled={loadingPassword}
+                  placeholder="Entrez votre mot de passe actuel"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div>
-              <Label htmlFor="new-password">Nouveau mot de passe</Label>
-              <Input 
-                id="new-password" 
-                type="password" 
-                className="mt-1" 
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                disabled={loadingPassword}
-              />
+              <Label htmlFor="new-password">Nouveau mot de passe *</Label>
+              <div className="relative mt-1">
+                <Input 
+                  id="new-password" 
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={loadingPassword}
+                  placeholder="Entrez votre nouveau mot de passe (min. 6 caractères)"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div>
-              <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-              <Input 
-                id="confirm-password" 
-                type="password" 
-                className="mt-1" 
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loadingPassword}
-              />
+              <Label htmlFor="confirm-password">Confirmer le mot de passe *</Label>
+              <div className="relative mt-1">
+                <Input 
+                  id="confirm-password" 
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loadingPassword}
+                  placeholder="Confirmez votre nouveau mot de passe"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
-            <ModernButton onClick={handleChangePassword} disabled={loadingPassword}>
-              {loadingPassword ? 'Changement en cours...' : 'Changer le mot de passe'}
-            </ModernButton>
+            <div className="pt-2">
+              <ModernButton 
+                onClick={handleChangePassword} 
+                disabled={loadingPassword || !currentPassword || !newPassword || !confirmPassword}
+                className="w-full md:w-auto"
+              >
+                {loadingPassword ? 'Changement en cours...' : 'Changer le mot de passe'}
+              </ModernButton>
+            </div>
+            {newPassword && newPassword.length < 6 && (
+              <p className="text-sm text-orange-600">Le mot de passe doit contenir au moins 6 caractères</p>
+            )}
+            {newPassword && confirmPassword && newPassword !== confirmPassword && (
+              <p className="text-sm text-red-600">Les mots de passe ne correspondent pas</p>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -16,15 +16,17 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Activity,
+  BarChart3,
+  Package,
   Wrench,
-  MessageCircle,
-  Settings,
-  FileText,
-  Users,
   Calendar,
   MapPin,
-  History,
+  Clock,
+  MessageCircle,
+  Bot,
+  FileText,
+  Settings,
+  Users,
   Menu,
   Shield
 } from "lucide-react";
@@ -53,16 +55,16 @@ export function AppSidebar() {
     shouldShowUserManagement: userProfile?.role === 'admin' && userProfile?.account_status === 'approved'
   });
 
-  // Menu items avec icônes exactement identiques aux pages
+  // Menu items avec icônes exactement identiques à l'image
   const baseMenuItems = [
-    { icon: Activity, label: "Tableau de bord", href: "/dashboard" },
-    { icon: Wrench, label: "Équipements", href: "/equipments" },
+    { icon: BarChart3, label: "Tableau de bord", href: "/dashboard" },
+    { icon: Package, label: "Équipements", href: "/equipments" },
     { icon: Wrench, label: "Maintenance", href: "/maintenance" },
     { icon: Calendar, label: "Planning", href: "/planning" },
     { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-    { icon: History, label: "Historique", href: "/equipment-history" },
+    { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: MessageCircle, label: "Messages", href: "/messages" },
-    { icon: Activity, label: "Supervision", href: "/supervision" },
+    { icon: Bot, label: "Supervision", href: "/supervision" },
     { icon: FileText, label: "Rapports", href: "/reports" },
     { icon: Settings, label: "Paramètres", href: "/settings" },
   ];
