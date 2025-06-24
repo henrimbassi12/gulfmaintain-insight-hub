@@ -4,7 +4,8 @@ import { MaintenanceCalendar } from '@/components/MaintenanceCalendar';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, RefreshCw, Activity, Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, RefreshCw, Activity, Plus, List } from 'lucide-react';
 import { CreateInterventionModal } from '@/components/dashboard/CreateInterventionModal';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -31,8 +32,8 @@ export default function MaintenanceCalendarPage() {
   return (
     <AirbnbContainer>
       <AirbnbHeader
-        title="Planning"
-        subtitle="Gestion du calendrier de maintenance"
+        title="Maintenance & Planning"
+        subtitle="Gestion des tâches et planification"
         icon={Calendar}
       >
         <ModernButton 
@@ -60,7 +61,7 @@ export default function MaintenanceCalendarPage() {
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Activity className="w-5 h-5 text-white" />
             </div>
-            Vue d'ensemble du planning
+            Vue d'ensemble
             <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
               Cette semaine
             </Badge>
@@ -88,10 +89,55 @@ export default function MaintenanceCalendarPage() {
         </CardContent>
       </Card>
 
-      {/* Calendrier principal */}
+      {/* Onglets Maintenance / Planning */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardContent className="p-6">
-          <MaintenanceCalendar />
+          <Tabs defaultValue="planning" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="tasks" className="flex items-center gap-2">
+                <List className="w-4 h-4" />
+                Tâches en cours
+              </TabsTrigger>
+              <TabsTrigger value="planning" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Vue Planning
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="tasks" className="space-y-4">
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-800">Interventions en cours</h3>
+                <div className="space-y-2">
+                  {[
+                    { id: 'TAG145', type: 'Préventive', technicien: 'D. Ngangue', status: 'En cours', priority: 'Haute' },
+                    { id: 'TAG211', type: 'Corrective', technicien: 'M. Diko', status: 'Planifiée', priority: 'Normale' },
+                    { id: 'TAG078', type: 'Préventive', technicien: 'J. Tamo', status: 'En attente', priority: 'Basse' }
+                  ].map((task, i) => (
+                    <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium text-gray-800">{task.id}</h4>
+                          <p className="text-sm text-gray-600">{task.type} • {task.technicien}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant={task.priority === 'Haute' ? 'destructive' : task.priority === 'Normale' ? 'default' : 'secondary'}>
+                            {task.priority}
+                          </Badge>
+                          <Badge variant="outline">
+                            {task.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="planning" className="space-y-4">
+              <MaintenanceCalendar />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

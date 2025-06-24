@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { 
   Sidebar, 
@@ -28,13 +28,18 @@ import {
   Settings,
   Users,
   Menu,
-  Shield
+  Shield,
+  MoreHorizontal,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function AppSidebar() {
   const location = useLocation();
   const { user, userProfile } = useAuth();
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
   console.log('🔍 Sidebar Debug - État complet:', {
     user: user ? {
@@ -55,17 +60,22 @@ export function AppSidebar() {
     shouldShowUserManagement: userProfile?.role === 'admin' && userProfile?.account_status === 'approved'
   });
 
-  // Menu items avec icônes exactement identiques à l'image
-  const baseMenuItems = [
+  // Menu principal (navigation rapide)
+  const primaryMenuItems = [
     { icon: BarChart3, label: "Tableau de bord", href: "/dashboard" },
     { icon: Package, label: "Équipements", href: "/equipments" },
-    { icon: Wrench, label: "Maintenance", href: "/maintenance" },
-    { icon: Calendar, label: "Planning", href: "/planning" },
-    { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-    { icon: Clock, label: "Historique", href: "/equipment-history" },
+    { icon: Wrench, label: "Maintenance", href: "/maintenance", subItems: [
+      { icon: Calendar, label: "Planning", href: "/planning" }
+    ]},
     { icon: MessageCircle, label: "Messages", href: "/messages" },
-    { icon: Bot, label: "Supervision", href: "/supervision" },
+  ];
+
+  // Menu secondaire (dans "Plus")
+  const secondaryMenuItems = [
+    { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: FileText, label: "Rapports", href: "/reports" },
+    { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
+    { icon: Bot, label: "Supervision", href: "/supervision" },
     { icon: Settings, label: "Paramètres", href: "/settings" },
   ];
 
@@ -78,11 +88,17 @@ export function AppSidebar() {
     isAdmin
   });
   
-  const menuItems = isAdmin 
-    ? [...baseMenuItems, { icon: Users, label: "Gestion des utilisateurs", href: "/user-management" }]
-    : baseMenuItems;
+  if (isAdmin) {
+    secondaryMenuItems.push({ icon: Users, label: "Gestion des utilisateurs", href: "/user-management" });
+  }
 
-  console.log('📋 Menu Items Final:', menuItems.map(item => ({ label: item.label, href: item.href })));
+  console.log('📋 Menu Items Final:', {
+    primary: primaryMenuItems.map(item => ({ label: item.label, href: item.href })),
+    secondary: secondaryMenuItems.map(item => ({ label: item.label, href: item.href }))
+  });
+
+  const isPathActive = (href: string) => location.pathname === href;
+  const isMaintenanceActive = location.pathname === '/maintenance' || location.pathname === '/planning';
 
   return (
     <Sidebar collapsible="icon">
@@ -120,8 +136,66 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.href;
+          {/* Menu principal */}
+          {primaryMenuItems.map((item) => {
+            const isActive = isPathActive(item.href) || (item.label === "Maintenance" && isMaintenanceActive);
+            
+            if (item.subItems) {
+              return (
+                <SidebarMenuItem key={item.href}>
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton isActive={isActive} size="lg" className="w-full">
+                        <div className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent w-full">
+                          <item.icon className={cn(
+                            "w-5 h-5 md:w-4 md:h-4",
+                            isActive ? "text-blue-600" : "text-gray-500"
+                          )} />
+                          <span className={cn(
+                            "font-medium text-sm md:text-sm flex-1 text-left",
+                            isActive ? "text-blue-600" : "text-gray-700"
+                          )}>
+                            {item.label}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                        </div>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="ml-6 mt-1">
+                      <div className="flex flex-col gap-1">
+                        <Link 
+                          to={item.href}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+                            isPathActive(item.href) 
+                              ? "bg-blue-50 text-blue-600" 
+                              : "text-gray-600 hover:bg-gray-50"
+                          )}
+                        >
+                          Liste des tâches
+                        </Link>
+                        {item.subItems.map((subItem) => (
+                          <Link 
+                            key={subItem.href}
+                            to={subItem.href}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+                              isPathActive(subItem.href) 
+                                ? "bg-blue-50 text-blue-600" 
+                                : "text-gray-600 hover:bg-gray-50"
+                            )}
+                          >
+                            <subItem.icon className="w-4 h-4" />
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
+              );
+            }
+
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={isActive} size="lg">
@@ -141,6 +215,49 @@ export function AppSidebar() {
               </SidebarMenuItem>
             );
           })}
+
+          {/* Menu "Plus" */}
+          <SidebarMenuItem>
+            <Collapsible open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton size="lg" className="w-full">
+                  <div className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent w-full">
+                    <MoreHorizontal className="w-5 h-5 md:w-4 md:h-4 text-gray-500" />
+                    <span className="font-medium text-sm md:text-sm text-gray-700 flex-1 text-left">
+                      Plus
+                    </span>
+                    {isMoreMenuOpen ? (
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="ml-6 mt-1">
+                <div className="flex flex-col gap-1">
+                  {secondaryMenuItems.map((item) => {
+                    const isActive = isPathActive(item.href);
+                    return (
+                      <Link 
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+                          isActive 
+                            ? "bg-blue-50 text-blue-600" 
+                            : "text-gray-600 hover:bg-gray-50"
+                        )}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       
