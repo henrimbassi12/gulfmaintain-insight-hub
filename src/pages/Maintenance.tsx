@@ -4,9 +4,9 @@ import { Wrench, RefreshCw, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MaintenanceFilters } from '@/components/maintenance/MaintenanceFilters';
+import MaintenanceFilters from '@/components/maintenance/MaintenanceFilters';
 import { MaintenanceFormModal } from '@/components/maintenance/MaintenanceFormModal';
-import { MaintenanceDetails } from '@/components/maintenance/MaintenanceDetails';
+import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -166,10 +166,10 @@ export default function Maintenance() {
       </div>
 
       <MaintenanceFormModal
-        isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         onSuccess={() => {
           toast.success('Maintenance créée avec succès');
+          setIsFormModalOpen(false);
         }}
       />
 

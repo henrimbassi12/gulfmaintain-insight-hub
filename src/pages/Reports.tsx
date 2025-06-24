@@ -28,6 +28,39 @@ export default function Reports() {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
+  // Données d'exemple pour les rapports
+  const sampleReports = [
+    {
+      id: 'RPT-001',
+      title: 'Rapport de maintenance préventive',
+      type: 'maintenance',
+      date: '2024-06-24',
+      status: 'completed'
+    },
+    {
+      id: 'RPT-002',
+      title: 'Rapport d\'intervention corrective',
+      type: 'intervention',
+      date: '2024-06-23',
+      status: 'pending'
+    }
+  ];
+
+  const sampleReportForms = [
+    {
+      id: 'form-1',
+      name: 'Maintenance préventive',
+      description: 'Formulaire pour les maintenances programmées',
+      fields: ['equipment', 'technician', 'date', 'duration']
+    },
+    {
+      id: 'form-2',
+      name: 'Intervention corrective',
+      description: 'Formulaire pour les réparations',
+      fields: ['equipment', 'issue', 'solution', 'parts']
+    }
+  ];
+
   return (
     <AirbnbContainer>
       <AirbnbHeader
@@ -56,9 +89,12 @@ export default function Reports() {
       </AirbnbHeader>
 
       <div className="space-y-8">
-        <ReportsStats />
-        <AvailableForms />
-        <RecentReports />
+        <ReportsStats reports={sampleReports} />
+        <AvailableForms 
+          reportForms={sampleReportForms} 
+          onCreateForm={() => console.log('Create form')}
+        />
+        <RecentReports reports={sampleReports} />
       </div>
 
       <ReportFilterModal
