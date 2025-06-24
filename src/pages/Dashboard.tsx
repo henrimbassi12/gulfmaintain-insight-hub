@@ -1,8 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { KPISection } from '@/components/dashboard/KPISection';
 import { InterventionTrendChart } from '@/components/dashboard/InterventionTrendChart';
+import { UpcomingInterventions } from '@/components/dashboard/UpcomingInterventions';
+import { ActiveAlerts } from '@/components/dashboard/ActiveAlerts';
+import { AIPredictionBlock } from '@/components/dashboard/AIPredictionBlock';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -76,18 +78,14 @@ export default function Dashboard() {
       {/* Graphique de tendances des interventions */}
       <InterventionTrendChart />
 
-      {/* Placeholder pour les prochaines sections */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Prochaine étape</h3>
-        <p className="text-gray-600">
-          Une fois cette base validée, nous ajouterons :
-        </p>
-        <ul className="list-disc list-inside text-gray-600 mt-2 space-y-1">
-          <li>Le graphique camembert (répartition par type d'équipement)</li>
-          <li>Les widgets contextuels (liste d'interventions, alertes)</li>
-          <li>Le bloc prédiction IA</li>
-        </ul>
+      {/* Widgets opérationnels */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <UpcomingInterventions />
+        <ActiveAlerts />
       </div>
+
+      {/* Bloc IA prédictif */}
+      <AIPredictionBlock />
     </AirbnbContainer>
   );
 }
