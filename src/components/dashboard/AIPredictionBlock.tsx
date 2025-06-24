@@ -1,19 +1,50 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Brain, Zap, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAIPredictions } from '@/hooks/useAIPredictions';
+import { useNavigate } from 'react-router-dom';
 
 export function AIPredictionBlock() {
+  const [lastPrediction, setLastPrediction] = useState<any>(null);
+  const { testConnection, isLoading } = useAIPredictions();
+  const navigate = useNavigate();
+
   const predictions = [
-    { icon: '📌', label: 'Panne probable', value: 'Oui', color: 'text-red-600' },
+    { icon: '📌', label: 'Panne probable', value: lastPrediction ? 'Analysé par IA' : 'En attente', color: 'text-red-600' },
     { icon: '🧊', label: 'Équipements à risque', value: 'TAG123, TAG087, TAG201', color: 'text-orange-600' },
     { icon: '🧰', label: 'Technicien recommandé', value: 'D. Ngangue', color: 'text-blue-600' },
-    { icon: '📉', label: 'Estimation panne', value: '75%', color: 'text-red-600' },
+    { icon: '📉', label: 'Estimation panne', value: lastPrediction ? `${lastPrediction.confidence_score}%` : '75%', color: 'text-red-600' },
   ];
+
+  const handleTestAPI = async () => {
+    const success = await testConnection();
+    if (success) {
+      navigate('/supervision');
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-1">Supervision IA</h2>
-        <p className="text-sm text-gray-500">Analyse prédictive en temps réel</p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-1">Supervision IA</h2>
+          <p className="text-sm text-gray-500">Analyse prédictive en temps réel</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleTestAPI}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          {isLoading ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Brain className="w-4 h-4" />
+          )}
+          Test IA
+        </Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -32,6 +63,26 @@ export function AIPredictionBlock() {
         <p className="text-sm text-blue-700">
           <span className="font-medium">Recommandation :</span> Programmer une maintenance préventive pour les équipements à risque dans les 48h.
         </p>
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <Button
+          size="sm"
+          onClick={() => navigate('/supervision')}
+          className="flex items-center gap-2"
+        >
+          <Zap className="w-4 h-4" />
+          Voir détails IA
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => navigate('/maintenance')}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Maintenances
+        </Button>
       </div>
     </div>
   );
