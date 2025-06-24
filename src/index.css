@@ -89,6 +89,14 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     /* Amélioration pour mobile */
@@ -105,7 +113,7 @@
     }
     
     .main-content {
-      @apply px-3 py-4;
+      @apply px-0 py-0 w-full;
     }
     
     .card-grid {
@@ -113,17 +121,17 @@
     }
     
     .dialog-content {
-      @apply m-4 max-w-[calc(100vw-2rem)];
+      @apply m-3 max-w-[calc(100vw-1.5rem)];
     }
 
-    /* Amélioration de l'espacement mobile */
+    /* Amélioration de l'espacement mobile - suppression des marges excessives */
     .container {
-      @apply px-3;
+      @apply px-0 w-full max-w-none;
     }
 
     /* Optimisation des cards mobiles */
     .card {
-      @apply shadow-sm;
+      @apply shadow-sm mx-0;
     }
 
     /* Amélioration des boutons mobiles */
@@ -144,6 +152,11 @@
     /* Amélioration des formulaires mobiles */
     input, textarea, select {
       @apply text-base; /* Prévient le zoom sur iOS */
+    }
+
+    /* Suppression des marges sur les conteneurs principaux */
+    .max-w-7xl {
+      @apply max-w-none;
     }
   }
 
@@ -168,9 +181,9 @@
     }
   }
 
-  /* Prévention des problèmes de scroll mobile */
+  /* Prévention des problèmes de scroll mobile - utilisation complète de l'écran */
   html {
-    @apply overflow-x-hidden;
+    @apply overflow-x-hidden w-full;
   }
 
   /* Amélioration des transitions mobiles */
@@ -180,7 +193,7 @@
 }
 
 @layer components {
-  /* Classes utilitaires pour le responsive */
+  /* Classes utilitaires pour le responsive - utilisation complète de l'écran */
   .mobile-hidden {
     @apply hidden md:block;
   }
@@ -201,19 +214,19 @@
     @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t md:relative md:border-0;
   }
 
-  /* Amélioration de la navigation mobile */
+  /* Amélioration de la navigation mobile - pleine largeur */
   .mobile-nav {
-    @apply flex items-center justify-between p-3 bg-background border-b sticky top-0 z-40;
+    @apply flex items-center justify-between p-3 bg-background border-b sticky top-0 z-40 w-full;
   }
 
-  /* Amélioration des conteneurs mobiles */
+  /* Amélioration des conteneurs mobiles - pleine largeur */
   .mobile-container {
-    @apply px-3 py-4 space-y-4;
+    @apply px-3 py-4 space-y-4 w-full;
   }
 
-  /* Amélioration des cards mobiles */
+  /* Amélioration des cards mobiles - pleine largeur */
   .mobile-card {
-    @apply p-3 space-y-3 rounded-lg border bg-card;
+    @apply p-3 space-y-3 rounded-lg border bg-card w-full;
   }
 
   /* Amélioration des boutons mobiles */
@@ -221,15 +234,26 @@
     @apply px-4 py-3 text-sm font-medium rounded-lg touch-action-manipulation;
   }
 
-  /* Grille responsive améliorée */
+  /* Grille responsive améliorée - pleine largeur */
   .responsive-grid-auto {
-    @apply grid gap-3 md:gap-4;
+    @apply grid gap-3 md:gap-4 w-full;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
   @media (max-width: 640px) {
     .responsive-grid-auto {
       grid-template-columns: 1fr;
+    }
+  }
+
+  /* Nouvelle classe pour conteneurs pleine largeur */
+  .full-width-mobile {
+    @apply w-full;
+  }
+
+  @media (max-width: 768px) {
+    .full-width-mobile {
+      @apply mx-0 px-0 max-w-none;
     }
   }
 }
@@ -284,12 +308,22 @@
   .active-mobile {
     @apply active:scale-95 active:bg-accent;
   }
+
+  /* Nouvelles utilities pour pleine largeur */
+  .w-screen-safe {
+    width: 100vw;
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height pour mobile */
+  }
 }
 
-/* Optimisations spécifiques pour les très petits écrans */
+/* Optimisations spécifiques pour les très petits écrans - pleine largeur */
 @media (max-width: 375px) {
   .container {
-    @apply px-2;
+    @apply px-2 w-full max-w-none;
   }
 
   h1 {
@@ -305,10 +339,26 @@
   }
 
   .card {
-    @apply p-3;
+    @apply p-3 w-full;
   }
 
   button {
     @apply text-xs px-3 py-2;
+  }
+}
+
+/* Corrections spécifiques pour l'affichage mobile pleine largeur */
+@media (max-width: 768px) {
+  .sidebar-provider {
+    @apply w-full;
+  }
+
+  main {
+    @apply w-full min-w-0;
+  }
+
+  /* Assurer que tous les conteneurs utilisent la pleine largeur */
+  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+    @apply max-w-none w-full;
   }
 }
