@@ -36,22 +36,24 @@ export default function MaintenanceCalendarPage() {
         subtitle="Gestion des tâches et planification"
         icon={Calendar}
       >
-        <ModernButton 
-          variant="outline" 
-          onClick={handleRefresh}
-          disabled={refreshing}
-          icon={RefreshCw}
-          className={refreshing ? 'animate-spin' : ''}
-        >
-          Actualiser
-        </ModernButton>
-        
-        <ModernButton 
-          onClick={() => setIsInterventionModalOpen(true)}
-          icon={Plus}
-        >
-          Nouvelle Tâche
-        </ModernButton>
+        <div className="flex flex-col gap-2 w-full">
+          <ModernButton 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            icon={RefreshCw}
+            className={refreshing ? 'animate-spin' : ''}
+          >
+            Actualiser
+          </ModernButton>
+          
+          <ModernButton 
+            onClick={() => setIsInterventionModalOpen(true)}
+            icon={Plus}
+          >
+            Nouvelle Tâche
+          </ModernButton>
+        </div>
       </AirbnbHeader>
 
       {/* Statistiques du planning */}
@@ -91,7 +93,7 @@ export default function MaintenanceCalendarPage() {
 
       {/* Onglets Maintenance / Planning */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardContent className="p-6">
+        <CardContent className="p-3 sm:p-6">
           <Tabs defaultValue="planning" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="tasks" className="flex items-center gap-2">
@@ -135,7 +137,9 @@ export default function MaintenanceCalendarPage() {
             </TabsContent>
             
             <TabsContent value="planning" className="space-y-4">
-              <MaintenanceCalendar />
+              <div className="w-full overflow-hidden">
+                <MaintenanceCalendar />
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -1,36 +1,19 @@
 
 import React, { useState } from 'react';
-import { toast } from 'sonner';
+import { FileText, RefreshCw, Filter } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
+import { AirbnbHeader } from '@/components/ui/airbnb-header';
+import { ModernButton } from '@/components/ui/modern-button';
 import { ReportsHeader } from '@/components/reports/ReportsHeader';
 import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
 import { RecentReports } from '@/components/reports/RecentReports';
-import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
-import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
-import { MovementForm } from '@/components/forms/MovementForm';
-import { RepairForm } from '@/components/forms/RepairForm';
-import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
-
-// We can move these interfaces to a types file later if needed
-interface Report {
-  id: number;
-  title: string;
-  type: string;
-  date: string;
-  status: string;
-  size: string;
-  technician?: string;
-  zone?: string;
-}
+import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
+import { toast } from 'sonner';
 
 export default function Reports() {
   const [refreshing, setRefreshing] = useState(false);
-  const [isTrackingFormOpen, setTrackingFormOpen] = useState(false);
-  const [isMaintenanceFormOpen, setMaintenanceFormOpen] = useState(false);
-  const [isMovementFormOpen, setMovementFormOpen] = useState(false);
-  const [isRepairFormOpen, setRepairFormOpen] = useState(false);
-  const [isDepotFormOpen, setDepotFormOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -45,123 +28,42 @@ export default function Reports() {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleGenerateReport = () => {
-    // Cette fonction sera gérée par le modal de filtrage dans ReportsHeader
-  };
-
-  const handleCreateForm = (formId: string) => {
-    switch (formId) {
-      case 'tracking':
-        setTrackingFormOpen(true);
-        break;
-      case 'maintenance':
-        setMaintenanceFormOpen(true);
-        break;
-      case 'movement':
-        setMovementFormOpen(true);
-        break;
-      case 'repair':
-        setRepairFormOpen(true);
-        break;
-      case 'depot':
-        setDepotFormOpen(true);
-        break;
-    }
-  };
-
-  const reports: Report[] = [
-    {
-      id: 1,
-      title: 'Fiche de maintenance - Frigo Commercial',
-      type: 'Maintenance',
-      date: '31/01/2024',
-      status: 'Terminé',
-      size: '2.4 MB',
-      technician: 'CÉDRIC',
-      zone: 'Douala Centre'
-    },
-    {
-      id: 2,
-      title: 'Rapport de réparation - Climatiseur',
-      type: 'Réparation',
-      date: '29/01/2024',
-      status: 'Terminé',
-      size: '1.8 MB',
-      technician: 'VOUKENG',
-      zone: 'Bonapriso'
-    },
-    {
-      id: 3,
-      title: 'Fiche de déplacement - Installation',
-      type: 'Déplacement',
-      date: '28/01/2024',
-      status: 'Terminé',
-      size: '1.2 MB',
-      technician: 'NDJOKO IV',
-      zone: 'Akwa'
-    },
-    {
-      id: 4,
-      title: 'Rapport mensuel - Janvier 2024',
-      type: 'Synthèse',
-      date: '15/01/2024',
-      status: 'En cours',
-      size: '-',
-      technician: 'TCHINDA CONSTANT',
-      zone: 'Toutes zones'
-    }
-  ];
-
-  const handleSaveForm = (data: any) => {
-    console.log('Form data saved:', data);
-    toast.success('Fiche enregistrée avec succès !');
-  };
-
   return (
     <AirbnbContainer>
-      <ReportsHeader
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        onGenerateReport={handleGenerateReport}
-      />
-      
-      <ReportsStats reports={reports} />
-      
-      <AvailableForms 
-        reportForms={[]} 
-        onCreateForm={handleCreateForm}
-      />
-      
-      <RecentReports reports={reports} />
-      
-      <MaintenanceTrackingForm
-        isOpen={isTrackingFormOpen}
-        onClose={() => setTrackingFormOpen(false)}
-        onSave={handleSaveForm}
-      />
+      <AirbnbHeader
+        title="Rapports"
+        subtitle="Génération et consultation des rapports d'activité"
+        icon={FileText}
+      >
+        <div className="flex flex-col gap-2 w-full">
+          <ModernButton 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            icon={RefreshCw}
+            className={refreshing ? 'animate-spin' : ''}
+          >
+            Actualiser
+          </ModernButton>
+          
+          <ModernButton 
+            onClick={() => setIsFilterModalOpen(true)}
+            icon={Filter}
+          >
+            Filtrer et télécharger
+          </ModernButton>
+        </div>
+      </AirbnbHeader>
 
-      <RefrigeratorMaintenanceForm
-        isOpen={isMaintenanceFormOpen}
-        onClose={() => setMaintenanceFormOpen(false)}
-        onSave={handleSaveForm}
-      />
+      <div className="space-y-8">
+        <ReportsStats />
+        <AvailableForms />
+        <RecentReports />
+      </div>
 
-      <MovementForm
-        isOpen={isMovementFormOpen}
-        onClose={() => setMovementFormOpen(false)}
-        onSave={handleSaveForm}
-      />
-
-      <RepairForm
-        isOpen={isRepairFormOpen}
-        onClose={() => setRepairFormOpen(false)}
-        onSave={handleSaveForm}
-      />
-
-      <DepotScheduleForm
-        isOpen={isDepotFormOpen}
-        onClose={() => setDepotFormOpen(false)}
-        onSave={handleSaveForm}
+      <ReportFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
       />
     </AirbnbContainer>
   );

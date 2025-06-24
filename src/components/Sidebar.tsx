@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { 
@@ -103,27 +102,9 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        {/* Mobile Header avec trigger de sidebar */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b p-3 flex items-center justify-between">
-          <SidebarTrigger className="p-2">
-            <Menu className="w-5 h-5" />
-          </SidebarTrigger>
-          
-          <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-blue-600" />
-            <h1 className="text-lg font-semibold text-gray-900">
-              GulfMaintain
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            <NotificationSystem />
-          </div>
-        </div>
-
         <div className="flex items-center gap-2">
           <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-          <div>
+          <div className="group-data-[collapsible=icon]:hidden">
             <h1 className="text-base md:text-lg font-semibold text-gray-900">
               GulfMaintain
             </h1>
@@ -146,22 +127,22 @@ export function AppSidebar() {
                   <Collapsible>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton isActive={isActive} size="lg" className="w-full">
-                        <div className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent w-full">
+                        <div className="flex items-center gap-3 w-full">
                           <item.icon className={cn(
                             "w-5 h-5 md:w-4 md:h-4",
                             isActive ? "text-blue-600" : "text-gray-500"
                           )} />
                           <span className={cn(
-                            "font-medium text-sm md:text-sm flex-1 text-left",
+                            "font-medium text-sm md:text-sm flex-1 text-left group-data-[collapsible=icon]:hidden",
                             isActive ? "text-blue-600" : "text-gray-700"
                           )}>
                             {item.label}
                           </span>
-                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                          <ChevronRight className="w-4 h-4 text-gray-400 group-data-[collapsible=icon]:hidden" />
                         </div>
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="ml-6 mt-1">
+                    <CollapsibleContent className="ml-6 mt-1 group-data-[collapsible=icon]:hidden">
                       <div className="flex flex-col gap-1">
                         <Link 
                           to={item.href}
@@ -199,13 +180,13 @@ export function AppSidebar() {
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={isActive} size="lg">
-                  <Link to={item.href} className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent">
+                  <Link to={item.href} className="flex items-center gap-3 w-full">
                     <item.icon className={cn(
                       "w-5 h-5 md:w-4 md:h-4",
                       isActive ? "text-blue-600" : "text-gray-500"
                     )} />
                     <span className={cn(
-                      "font-medium text-sm md:text-sm",
+                      "font-medium text-sm md:text-sm group-data-[collapsible=icon]:hidden",
                       isActive ? "text-blue-600" : "text-gray-700"
                     )}>
                       {item.label}
@@ -221,20 +202,22 @@ export function AppSidebar() {
             <Collapsible open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton size="lg" className="w-full">
-                  <div className="flex items-center gap-3 px-3 py-3 md:py-2 rounded-lg transition-colors touch-action-manipulation tap-highlight-transparent w-full">
+                  <div className="flex items-center gap-3 w-full">
                     <MoreHorizontal className="w-5 h-5 md:w-4 md:h-4 text-gray-500" />
-                    <span className="font-medium text-sm md:text-sm text-gray-700 flex-1 text-left">
+                    <span className="font-medium text-sm md:text-sm text-gray-700 flex-1 text-left group-data-[collapsible=icon]:hidden">
                       Plus
                     </span>
-                    {isMoreMenuOpen ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
-                    )}
+                    <div className="group-data-[collapsible=icon]:hidden">
+                      {isMoreMenuOpen ? (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
                   </div>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
-              <CollapsibleContent className="ml-6 mt-1">
+              <CollapsibleContent className="ml-6 mt-1 group-data-[collapsible=icon]:hidden">
                 <div className="flex flex-col gap-1">
                   {secondaryMenuItems.map((item) => {
                     const isActive = isPathActive(item.href);
