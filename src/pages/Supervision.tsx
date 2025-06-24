@@ -12,6 +12,7 @@ import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision
 import { useSupervision } from '@/hooks/useSupervision';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
+import { APITestPanel } from '@/components/ai/APITestPanel';
 
 export default function Supervision() {
   const [selectedPrediction, setSelectedPrediction] = useState<FailurePrediction | null>(null);
@@ -40,6 +41,8 @@ export default function Supervision() {
           </>
         ) : (
           <>
+            {/* Panel de test API - Ajouté en premier pour tester la connexion */}
+            <APITestPanel />
             <AIPredictionPanel />
             <IntelligentFailurePredictionPanel 
               predictions={highRiskPredictions} 

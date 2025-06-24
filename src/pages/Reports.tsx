@@ -10,6 +10,7 @@ import { AvailableForms } from '@/components/reports/AvailableForms';
 import { RecentReports } from '@/components/reports/RecentReports';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
 import { toast } from 'sonner';
+import { Wrench, Settings } from 'lucide-react';
 
 export default function Reports() {
   const [refreshing, setRefreshing] = useState(false);
@@ -28,10 +29,10 @@ export default function Reports() {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
-  // Données d'exemple pour les rapports
+  // Données d'exemple pour les rapports - types corrigés
   const sampleReports = [
     {
-      id: 'RPT-001',
+      id: 1, // Changé en number
       title: 'Rapport de maintenance préventive',
       type: 'maintenance',
       date: '2024-06-24',
@@ -39,7 +40,7 @@ export default function Reports() {
       size: '2.5 MB'
     },
     {
-      id: 'RPT-002',
+      id: 2, // Changé en number
       title: 'Rapport d\'intervention corrective',
       type: 'intervention',
       date: '2024-06-23',
@@ -55,7 +56,7 @@ export default function Reports() {
       title: 'Maintenance préventive',
       description: 'Formulaire pour les maintenances programmées',
       fields: ['equipment', 'technician', 'date', 'duration'],
-      icon: 'wrench',
+      icon: Wrench, // Changé en composant React
       action: () => console.log('Create maintenance form')
     },
     {
@@ -64,7 +65,7 @@ export default function Reports() {
       title: 'Intervention corrective',
       description: 'Formulaire pour les réparations',
       fields: ['equipment', 'issue', 'solution', 'parts'],
-      icon: 'settings',
+      icon: Settings, // Changé en composant React
       action: () => console.log('Create intervention form')
     }
   ];
