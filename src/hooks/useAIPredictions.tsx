@@ -36,25 +36,68 @@ interface UseAIPredictionsReturn {
   error: string | null;
   getPrediction: (input: MaintenancePredictionInput) => Promise<MaintenancePrediction | null>;
   getBatchPredictions: (inputs: MaintenancePredictionInput[]) => Promise<MaintenancePrediction[]>;
+  testConnection: () => Promise<boolean>;
 }
 
 export function useAIPredictions(): UseAIPredictionsReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // URL de votre API - à configurer selon votre déploiement
-  const API_BASE_URL = import.meta.env.VITE_AI_API_URL || 'http://localhost:8000';
+  // URL de votre API Railway
+  const API_BASE_URL = 'https://web-production-c2b6a.up.railway.app';
+
+  const testConnection = useCallback(async (): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('🔍 Test de connexion à l\'API IA...');
+      
+      const response = await fetch(`${API_BASE_URL}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.text();
+      console.log('✅ Connexion API réussie:', result);
+      
+      toast.success('Connexion à l\'API IA réussie', {
+        description: 'L\'API de prédiction de maintenance est opérationnelle'
+      });
+
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue lors du test de connexion';
+      console.error('❌ Erreur connexion API:', errorMessage);
+      setError(errorMessage);
+      
+      toast.error('Erreur de connexion à l\'API IA', {
+        description: errorMessage
+      });
+      
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const getPrediction = useCallback(async (input: MaintenancePredictionInput): Promise<MaintenancePrediction | null> => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/predict/maintenance-status`, {
+      console.log('🤖 Demande de prédiction IA:', input);
+
+      const response = await fetch(`${API_BASE_URL}/predict/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_AI_API_KEY || ''}`,
         },
         body: JSON.stringify(input),
       });
@@ -85,27 +128,24 @@ export function useAIPredictions(): UseAIPredictionsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [API_BASE_URL]);
+  }, []);
 
   const getBatchPredictions = useCallback(async (inputs: MaintenancePredictionInput[]): Promise<MaintenancePrediction[]> => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/predict/batch-maintenance-status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_AI_API_KEY || ''}`,
-        },
-        body: JSON.stringify({ predictions: inputs }),
-      });
+      console.log(`🤖 Demande de ${inputs.length} prédictions IA en lot`);
 
-      if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
+      // Pour les prédictions en lot, on fait plusieurs appels individuels
+      const predictions: MaintenancePrediction[] = [];
+      
+      for (const input of inputs) {
+        const prediction = await getPrediction(input);
+        if (prediction) {
+          predictions.push(prediction);
+        }
       }
-
-      const predictions = await response.json();
       
       console.log(`✅ ${predictions.length} prédictions IA reçues en lot`);
       
@@ -125,12 +165,13 @@ export function useAIPredictions(): UseAIPredictionsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [API_BASE_URL]);
+  }, [getPrediction]);
 
   return {
     isLoading,
     error,
     getPrediction,
     getBatchPredictions,
+    testConnection,
   };
 }

@@ -35,14 +35,16 @@ export default function Reports() {
       title: 'Rapport de maintenance préventive',
       type: 'maintenance',
       date: '2024-06-24',
-      status: 'completed'
+      status: 'completed',
+      size: '2.5 MB'
     },
     {
       id: 'RPT-002',
       title: 'Rapport d\'intervention corrective',
       type: 'intervention',
       date: '2024-06-23',
-      status: 'pending'
+      status: 'pending',
+      size: '1.8 MB'
     }
   ];
 
@@ -50,14 +52,20 @@ export default function Reports() {
     {
       id: 'form-1',
       name: 'Maintenance préventive',
+      title: 'Maintenance préventive',
       description: 'Formulaire pour les maintenances programmées',
-      fields: ['equipment', 'technician', 'date', 'duration']
+      fields: ['equipment', 'technician', 'date', 'duration'],
+      icon: 'wrench',
+      action: () => console.log('Create maintenance form')
     },
     {
       id: 'form-2',
       name: 'Intervention corrective',
+      title: 'Intervention corrective',
       description: 'Formulaire pour les réparations',
-      fields: ['equipment', 'issue', 'solution', 'parts']
+      fields: ['equipment', 'issue', 'solution', 'parts'],
+      icon: 'settings',
+      action: () => console.log('Create intervention form')
     }
   ];
 

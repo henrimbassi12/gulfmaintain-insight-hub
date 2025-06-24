@@ -4,7 +4,6 @@ import { Wrench, RefreshCw, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import MaintenanceFilters from '@/components/maintenance/MaintenanceFilters';
 import { MaintenanceFormModal } from '@/components/maintenance/MaintenanceFormModal';
 import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
@@ -111,8 +110,6 @@ export default function Maintenance() {
       </AirbnbHeader>
 
       <div className="space-y-6">
-        <MaintenanceFilters />
-        
         {/* Liste des maintenances */}
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardHeader className="bg-gray-50 border-b border-gray-100">
@@ -166,7 +163,6 @@ export default function Maintenance() {
       </div>
 
       <MaintenanceFormModal
-        onClose={() => setIsFormModalOpen(false)}
         onSuccess={() => {
           toast.success('Maintenance créée avec succès');
           setIsFormModalOpen(false);
@@ -178,6 +174,8 @@ export default function Maintenance() {
           maintenance={selectedMaintenance}
           isOpen={!!selectedMaintenance}
           onClose={() => setSelectedMaintenance(null)}
+          onEdit={() => console.log('Edit maintenance')}
+          onUpdateStatus={() => console.log('Update status')}
         />
       )}
     </AirbnbContainer>
