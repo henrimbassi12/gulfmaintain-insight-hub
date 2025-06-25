@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
@@ -12,6 +13,7 @@ import { useSupervision } from '@/hooks/useSupervision';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AIPredictionPanel } from '@/components/supervision/AIPredictionPanel';
 import { APITestPanel } from '@/components/ai/APITestPanel';
+import { CORSDebugger } from '@/components/ai/CORSDebugger';
 import { AutomaticPredictions } from '@/components/maintenance/AutomaticPredictions';
 
 export default function Supervision() {
@@ -43,6 +45,9 @@ export default function Supervision() {
           <>
             {/* Panel de test API - Ajouté en premier pour tester la connexion */}
             <APITestPanel />
+            
+            {/* Diagnostic CORS avancé - Nouveau composant pour déboguer */}
+            <CORSDebugger />
             
             {/* Prédictions automatiques - Nouvelle fonctionnalité */}
             <AutomaticPredictions />
