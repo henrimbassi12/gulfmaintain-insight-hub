@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { BarChart3, Package, Wrench, AlertTriangle, Activity } from 'lucide-react';
+import { BarChart3, Package, Wrench, AlertTriangle, Activity, TrendingUp, Clock, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DashboardCard } from '@/components/DashboardCard';
+import { InterventionTrendChart } from '@/components/dashboard/InterventionTrendChart';
 
 export default function Dashboard() {
   const { userProfile } = useAuth();
@@ -18,8 +19,6 @@ export default function Dashboard() {
     maintenancesPlanned: 30,
     maintenancesOverdue: 5,
   };
-
-  const isLoading = false;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
@@ -46,6 +45,64 @@ export default function Dashboard() {
 
       {/* Contenu principal */}
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-8 space-y-4 md:space-y-8">
+        
+        {/* KPIs stylés - Nouvelles cartes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-100 text-blue-600 p-3 rounded-full flex-shrink-0">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Taux de réussite</p>
+                <p className="text-xl font-semibold text-gray-800">92%</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-4">
+              <div className="bg-red-100 text-red-600 p-3 rounded-full flex-shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Urgences en cours</p>
+                <p className="text-xl font-semibold text-gray-800">7</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-4">
+              <div className="bg-green-100 text-green-600 p-3 rounded-full flex-shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Technicien du mois</p>
+                <p className="text-xl font-semibold text-gray-800">J. Ekwalla</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-4">
+              <div className="bg-purple-100 text-purple-600 p-3 rounded-full flex-shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Durée moyenne</p>
+                <p className="text-xl font-semibold text-gray-800">42 min</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Graphique des tendances */}
+        <div className="mb-8">
+          <InterventionTrendChart />
+        </div>
+
+        {/* Cartes statistiques originales */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           <DashboardCard
             title="Total Équipements"
