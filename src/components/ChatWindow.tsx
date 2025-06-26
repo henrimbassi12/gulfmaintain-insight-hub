@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, MoreVertical, Phone, Video, Archive, Trash2 } from 'lucide-react';
+import { Send, User, MoreVertical, Phone, Video, Archive, Trash2, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -33,6 +32,7 @@ interface ChatWindowProps {
   onSendMessage: () => void;
   onDeleteConversation?: (conversationId: string) => void;
   onArchiveConversation?: (conversationId: string) => void;
+  onBack?: () => void;
 }
 
 export function ChatWindow({
@@ -42,7 +42,8 @@ export function ChatWindow({
   onNewMessageChange,
   onSendMessage,
   onDeleteConversation,
-  onArchiveConversation
+  onArchiveConversation,
+  onBack
 }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -110,6 +111,16 @@ export function ChatWindow({
         {/* Header de la conversation */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50">
           <div className="flex items-center gap-3">
+            {/* Bouton retour pour mobile */}
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
+            
             <div className="relative">
               <Avatar className="w-10 h-10">
                 <AvatarImage src={conversation.participant?.avatar_url || ''} />
