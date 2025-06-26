@@ -1,36 +1,9 @@
+
 import React from 'react';
-import { AirbnbContainer } from '@/components/ui/airbnb-container';
-import { AirbnbHeader } from '@/components/ui/airbnb-header';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Package, Wrench, AlertTriangle, Activity } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MobileHeader } from '@/components/MobileHeader';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-
-interface DashboardCardProps {
-  title: string;
-  value: string | number;
-  description?: string;
-  isLoading?: boolean;
-}
-
-function DashboardCard({ title, value, description, isLoading }: DashboardCardProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <Skeleton className="h-6 w-24" />
-        ) : (
-          <div className="text-2xl font-bold">{value}</div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+import { DashboardCard } from '@/components/DashboardCard';
 
 export default function Dashboard() {
   const { userProfile } = useAuth();
@@ -38,50 +11,126 @@ export default function Dashboard() {
   const isAdmin = userProfile?.role === 'admin';
   const isManager = userProfile?.role === 'manager';
 
-  // Exemple de données (à remplacer avec les vraies données)
-  const totalEquipments = 150;
-  const activeEquipments = 120;
-  const maintenancesPlanned = 30;
-  const maintenancesOverdue = 5;
+  // Données d'exemple
+  const dashboardData = {
+    totalEquipments: 150,
+    activeEquipments: 120,
+    maintenancesPlanned: 30,
+    maintenancesOverdue: 5,
+  };
 
-  const isLoading = false; // Simuler le chargement des données
+  const isLoading = false;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       <MobileHeader />
       
-      <AirbnbContainer>
-        <AirbnbHeader
-          title="Tableau de bord"
-          subtitle={`Vue d'ensemble des maintenances${userProfile?.role === 'admin' ? ' - Administration' : userProfile?.role === 'manager' ? ' - Gestion' : ' - Douala'}`}
-          icon={BarChart3}
-        />
+      {/* Header principal */}
+      <div className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-40 w-full">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 leading-tight">
+                Tableau de bord
+              </h1>
+              <p className="text-gray-500 text-xs md:text-sm leading-relaxed">
+                Vue d'ensemble des maintenances{userProfile?.role === 'admin' ? ' - Administration' : userProfile?.role === 'manager' ? ' - Gestion' : ' - Douala'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-6">
+      {/* Contenu principal */}
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-8 space-y-4 md:space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           <DashboardCard
             title="Total Équipements"
-            value={totalEquipments}
-            isLoading={isLoading}
+            value={dashboardData.totalEquipments}
+            subtitle="Équipements enregistrés"
+            icon={Package}
+            trend={{ value: 5, isPositive: true }}
+            className="hover:shadow-xl transition-all duration-300"
           />
+          
           <DashboardCard
             title="Équipements Actifs"
-            value={activeEquipments}
-            isLoading={isLoading}
+            value={dashboardData.activeEquipments}
+            subtitle="En fonctionnement"
+            icon={Activity}
+            trend={{ value: 2, isPositive: true }}
+            className="hover:shadow-xl transition-all duration-300"
           />
+          
           <DashboardCard
             title="Maintenances Planifiées"
-            value={maintenancesPlanned}
-            isLoading={isLoading}
+            value={dashboardData.maintenancesPlanned}
+            subtitle="À venir cette semaine"
+            icon={Wrench}
+            trend={{ value: 8, isPositive: false }}
+            className="hover:shadow-xl transition-all duration-300"
           />
-          {isManager || isAdmin ? (
+          
+          {(isManager || isAdmin) && (
             <DashboardCard
               title="Maintenances En Retard"
-              value={maintenancesOverdue}
-              isLoading={isLoading}
+              value={dashboardData.maintenancesOverdue}
+              subtitle="Nécessitent une attention"
+              icon={AlertTriangle}
+              trend={{ value: 12, isPositive: false }}
+              className="hover:shadow-xl transition-all duration-300 border-l-4 border-l-red-500"
             />
-          ) : null}
+          )}
         </div>
-      </AirbnbContainer>
+
+        {/* Section supplémentaire pour les statistiques */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Activité récente</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm text-gray-700">Maintenance terminée</span>
+                <span className="text-xs text-blue-600 font-medium">Il y a 2h</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm text-gray-700">Équipement ajouté</span>
+                <span className="text-xs text-green-600 font-medium">Il y a 4h</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <span className="text-sm text-gray-700">Maintenance planifiée</span>
+                <span className="text-xs text-yellow-600 font-medium">Il y a 6h</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistiques du mois</h3>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">Taux de disponibilité</span>
+                  <span className="text-sm font-semibold text-green-600">94%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '94%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">Maintenances réalisées</span>
+                  <span className="text-sm font-semibold text-blue-600">78%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '78%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
