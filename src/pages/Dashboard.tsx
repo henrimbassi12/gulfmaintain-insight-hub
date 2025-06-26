@@ -1,16 +1,45 @@
 
-import React from 'react';
-import { BarChart3, Package, Wrench, AlertTriangle, Activity, TrendingUp, Clock, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { BarChart3, Package, Wrench, AlertTriangle, Activity, TrendingUp, Clock, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DashboardCard } from '@/components/DashboardCard';
 import { InterventionTrendChart } from '@/components/dashboard/InterventionTrendChart';
+import { NotificationSystem } from '@/components/NotificationSystem';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const { userProfile } = useAuth();
+  const navigate = useNavigate();
+  const [timeRange, setTimeRange] = useState('month');
+  const [refreshing, setRefreshing] = useState(false);
 
   const isAdmin = userProfile?.role === 'admin';
   const isManager = userProfile?.role === 'manager';
+
+  const handleRefreshData = async () => {
+    setRefreshing(true);
+    // Simuler un rafraîchissement
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setRefreshing(false);
+  };
+
+  const handleProfileClick = () => {
+    navigate('/settings');
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    const nameParts = name.split(' ');
+    if (nameParts.length >= 2) {
+      return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   // Données d'exemple
   const dashboardData = {
@@ -24,20 +53,77 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       <MobileHeader />
       
-      {/* Header principal */}
-      <div className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-40 w-full">
+      {/* Header principal avec notifications et profil */}
+      <div className="hidden md:block bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-40 w-full">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 leading-tight">
+                  Tableau de bord
+                </h1>
+                <p className="text-gray-500 text-xs md:text-sm leading-relaxed">
+                  Vue d'ensemble des maintenances{isAdmin ? ' - Administration' : isManager ? ' - Gestion' : ' - Douala'}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 leading-tight">
-                Tableau de bord
-              </h1>
-              <p className="text-gray-500 text-xs md:text-sm leading-relaxed">
-                Vue d'ensemble des maintenances{userProfile?.role === 'admin' ? ' - Administration' : userProfile?.role === 'manager' ? ' - Gestion' : ' - Douala'}
-              </p>
+            
+            {/* Section notifications et profil */}
+            <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
+              <ConnectionStatus />
+              
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-full sm:w-32 border-gray-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Aujourd'hui</SelectItem>
+                  <SelectItem value="week">Cette semaine</SelectItem>
+                  <SelectItem value="month">Ce mois</SelectItem>
+                  <SelectItem value="quarter">Ce trimestre</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefreshData}
+                disabled={refreshing}
+                className="flex-1 sm:flex-none hover:bg-blue-50 border-gray-200"
+              >
+                <RefreshCw className={`w-4 h-4 mr-1 md:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Actualiser</span>
+                <span className="sm:hidden">Sync</span>
+              </Button>
+              
+              <NotificationSystem />
+              
+              {/* Profil utilisateur */}
+              {userProfile && (
+                <button
+                  onClick={handleProfileClick}
+                  className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={userProfile.avatar_url || ''} />
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-sm">
+                      {getInitials(userProfile.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden lg:block text-left">
+                    <p className="text-sm font-medium text-gray-900">
+                      {userProfile.full_name || 'Utilisateur'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {userProfile.role === 'admin' ? 'Administrateur' : 
+                       userProfile.role === 'manager' ? 'Gestionnaire' : 'Technicien'}
+                    </p>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
         </div>

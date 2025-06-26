@@ -26,7 +26,7 @@ interface AddEquipmentFormData {
   temperature?: string;
   serial_number: string;
   
-  // Nouveaux champs
+  // Nouveaux champs ajoutés
   date_installation?: string;
   division?: string;
   sector?: string;
@@ -112,22 +112,40 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
   const onSubmit = async (data: AddEquipmentFormData) => {
     setIsLoading(true);
     try {
+      // Créer un objet avec tous les champs, en gérant les valeurs nulles/vides
+      const equipmentData = {
+        equipment_id: data.equipment_id,
+        type: data.type || null,
+        brand: data.brand || null,
+        model: data.model || null,
+        location: data.location || null,
+        agency: data.agency || null,
+        status: data.status,
+        technician: data.technician || null,
+        last_maintenance: data.last_maintenance || null,
+        next_maintenance: data.next_maintenance || null,
+        temperature: data.temperature || null,
+        serial_number: data.serial_number,
+        // Nouveaux champs
+        date_installation: data.date_installation || null,
+        division: data.division || null,
+        sector: data.sector || null,
+        partner: data.partner || null,
+        city: data.city || null,
+        client_name: data.client_name || null,
+        pdv_name: data.pdv_name || null,
+        barman_phone: data.barman_phone || null,
+        neighborhood: data.neighborhood || null,
+        precise_location: data.precise_location || null,
+        fridge_type: data.fridge_type || null,
+        af_nf: data.af_nf || null,
+        branding: data.branding || null,
+        tag_number: data.tag_number || null,
+      };
+
       const { error } = await supabase
         .from('equipments')
-        .insert([{
-          equipment_id: data.equipment_id,
-          type: data.type,
-          brand: data.brand,
-          model: data.model,
-          location: data.location,
-          agency: data.agency,
-          status: data.status,
-          technician: data.technician || null,
-          last_maintenance: data.last_maintenance || null,
-          next_maintenance: data.next_maintenance || null,
-          temperature: data.temperature || null,
-          serial_number: data.serial_number,
-        }]);
+        .insert([equipmentData]);
 
       if (error) {
         throw error;
