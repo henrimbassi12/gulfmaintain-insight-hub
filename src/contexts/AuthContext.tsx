@@ -11,7 +11,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const { user, session, userProfile, loading, setUserProfile } = useAuthState();
-  const { signIn, signUp, signInWithOAuth, signOut } = createAuthService(toast);
+  const { signIn, signUp, signInWithOAuth, signOut, resetPassword, updatePassword } = createAuthService(toast);
 
   const refreshProfile = async () => {
     if (user) {
@@ -36,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signInWithOAuth,
     signOut,
+    resetPassword,
+    updatePassword,
     refreshProfile,
   };
 

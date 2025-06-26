@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Shield, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { PasswordResetModal } from '@/components/auth/PasswordResetModal';
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ const Welcome = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -121,13 +122,11 @@ const Welcome = () => {
         const { error: signUpError } = await signUp(email, password, fullName.trim(), role);
         
         if (!signUpError) {
-          // Réinitialiser le formulaire après inscription réussie
           setEmail('');
           setPassword('');
           setConfirmPassword('');
           setFullName('');
           setAcceptTerms(false);
-          // Basculer vers le mode connexion
           setMode('login');
         }
       } else {
@@ -135,7 +134,6 @@ const Welcome = () => {
         
         const { error: signInError } = await signIn(email, password);
         
-        // Afficher l'erreur directement dans l'interface si la connexion échoue
         if (signInError) {
           console.error('Erreur de connexion:', signInError);
           let errorMessage = "Email ou mot de passe incorrect";
@@ -185,15 +183,15 @@ const Welcome = () => {
         </svg>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md relative z-10">
+      <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative z-10 mx-4">
         {/* Logo et titre */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <div className="bg-blue-600 p-4 rounded-2xl">
-              <Shield className="w-10 h-10 text-white" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="bg-blue-600 p-3 sm:p-4 rounded-2xl">
+              <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
             GulfMaintain
           </h1>
           <p className="text-gray-600 text-sm leading-relaxed">
@@ -202,14 +200,14 @@ const Welcome = () => {
         </div>
 
         {/* Toggle entre connexion et inscription */}
-        <div className="flex mb-8 bg-gray-100 rounded-xl p-1">
+        <div className="flex mb-6 sm:mb-8 bg-gray-100 rounded-xl p-1">
           <button
             type="button"
             onClick={() => {
               setMode('login');
               setError('');
             }}
-            className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+            className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-sm transition-all ${
               mode === 'login'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-blue-600'
@@ -223,7 +221,7 @@ const Welcome = () => {
               setMode('signup');
               setError('');
             }}
-            className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+            className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-sm transition-all ${
               mode === 'signup'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-blue-600'
@@ -234,9 +232,9 @@ const Welcome = () => {
         </div>
 
         {/* Formulaire */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
+            <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
               {error}
             </div>
           )}
@@ -254,14 +252,14 @@ const Welcome = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => handleSocialAuth('google')}
                 disabled={authLoading}
-                className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -273,9 +271,9 @@ const Welcome = () => {
                 type="button"
                 onClick={() => handleSocialAuth('facebook')}
                 disabled={authLoading}
-                className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="#1877F2" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </button>
@@ -284,9 +282,9 @@ const Welcome = () => {
                 type="button"
                 onClick={() => handleSocialAuth('linkedin_oidc')}
                 disabled={authLoading}
-                className="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                <svg className="w-5 h-5" fill="#0A66C2" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="#0A66C2" viewBox="0 0 24 24">
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                 </svg>
               </button>
@@ -316,7 +314,7 @@ const Welcome = () => {
                   placeholder="Entrez votre nom complet"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
                   required={mode === 'signup'}
                 />
               </div>
@@ -335,7 +333,7 @@ const Welcome = () => {
                 placeholder="votre@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-11 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
                 required
               />
             </div>
@@ -353,7 +351,7 @@ const Welcome = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-11 pr-12 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
                 required
               />
               <button
@@ -380,7 +378,7 @@ const Welcome = () => {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-11 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full pl-11 pr-12 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
                     required={mode === 'signup'}
                   />
                   <button
@@ -401,7 +399,7 @@ const Welcome = () => {
                   id="role"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-sm sm:text-base"
                 >
                   <option value="technician">Technicien</option>
                   <option value="manager">Gestionnaire</option>
@@ -432,21 +430,25 @@ const Welcome = () => {
           )}
 
           {mode === 'login' && (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between text-sm">
               <label className="flex items-center">
                 <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span className="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
+                <span className="ml-2 text-gray-600">Se souvenir de moi</span>
               </label>
-              <a href="#" className="text-sm text-blue-600 hover:underline">
+              <button
+                type="button"
+                onClick={() => setShowPasswordReset(true)}
+                className="text-blue-600 hover:underline"
+              >
                 Mot de passe oublié ?
-              </a>
+              </button>
             </div>
           )}
 
           <button
             type="submit"
             disabled={authLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:transform-none"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:transform-none text-sm sm:text-base"
           >
             {authLoading 
               ? (mode === 'signup' ? 'Création...' : 'Connexion...') 
@@ -456,12 +458,18 @@ const Welcome = () => {
         </form>
 
         {/* Footer */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-6 sm:mt-8">
           <p className="text-xs text-gray-400">
             Plateforme sécurisée • Support 24/7
           </p>
         </div>
       </div>
+
+      {/* Modal de réinitialisation de mot de passe */}
+      <PasswordResetModal 
+        isOpen={showPasswordReset} 
+        onClose={() => setShowPasswordReset(false)} 
+      />
     </div>
   );
 };
