@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { 
@@ -74,7 +75,7 @@ export function AppSidebar() {
     { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: FileText, label: "Rapports", href: "/reports" },
     { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-    { icon: Bot, label: "Supervision", href: "/supervision" },
+    // { icon: Bot, label: "Supervision", href: "/supervision" }, // MASQUÉ - Fonctionnalité intégrée au Dashboard
     { icon: Settings, label: "Paramètres", href: "/settings" },
   ];
 

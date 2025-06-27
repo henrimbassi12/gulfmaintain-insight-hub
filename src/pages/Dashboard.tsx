@@ -7,6 +7,7 @@ import { DashboardCard } from '@/components/DashboardCard';
 import { InterventionTrendChart } from '@/components/dashboard/InterventionTrendChart';
 import { NotificationSystem } from '@/components/NotificationSystem';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { AIPredictionSection } from '@/components/dashboard/AIPredictionSection';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -273,6 +274,9 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Section Prédiction IA - Nouveau bloc repliable */}
+        <AIPredictionSection />
       </div>
     </div>
   );

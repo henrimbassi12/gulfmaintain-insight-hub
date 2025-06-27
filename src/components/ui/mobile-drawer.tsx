@@ -36,7 +36,7 @@ const menuItems = [
   { icon: Clock, label: "Historique", href: "/equipment-history" },
   { icon: FileText, label: "Rapports", href: "/reports" },
   { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-  { icon: Bot, label: "Supervision", href: "/supervision" },
+  // { icon: Bot, label: "Supervision", href: "/supervision" }, // MASQUÉ - Fonctionnalité intégrée au Dashboard
   { icon: Settings, label: "Paramètres", href: "/settings" },
 ];
 
