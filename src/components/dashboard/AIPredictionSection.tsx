@@ -70,6 +70,11 @@ export function AIPredictionSection() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleNumberInputChange = (field: keyof PredictionData, value: string) => {
+    const numericValue = value === '' ? 0 : Number(value);
+    setFormData(prev => ({ ...prev, [field]: numericValue }));
+  };
+
   const handlePredict = async () => {
     setIsLoading(true);
 
@@ -163,7 +168,7 @@ export function AIPredictionSection() {
                       type="number"
                       size="sm"
                       value={formData.taux_remplissage}
-                      onChange={(e) => handleInputChange('taux_remplissage', Number(e.target.value))}
+                      onChange={(e) => handleNumberInputChange('taux_remplissage', e.target.value)}
                       placeholder="85"
                     />
                   </div>
@@ -175,7 +180,7 @@ export function AIPredictionSection() {
                       step="0.1"
                       size="sm"
                       value={formData.temperature}
-                      onChange={(e) => handleInputChange('temperature', Number(e.target.value))}
+                      onChange={(e) => handleNumberInputChange('temperature', e.target.value)}
                       placeholder="6.5"
                     />
                   </div>
@@ -198,7 +203,7 @@ export function AIPredictionSection() {
                       type="number"
                       size="sm"
                       value={formData.tension}
-                      onChange={(e) => handleInputChange('tension', Number(e.target.value))}
+                      onChange={(e) => handleNumberInputChange('tension', e.target.value)}
                       placeholder="220"
                     />
                   </div>
@@ -210,7 +215,7 @@ export function AIPredictionSection() {
                       step="0.1"
                       size="sm"
                       value={formData.intensite_avant}
-                      onChange={(e) => handleInputChange('intensite_avant', Number(e.target.value))}
+                      onChange={(e) => handleNumberInputChange('intensite_avant', e.target.value)}
                       placeholder="2.5"
                     />
                   </div>
