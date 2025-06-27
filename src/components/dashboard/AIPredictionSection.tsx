@@ -30,6 +30,17 @@ interface PredictionData {
   purge_circuit: string;
   soufflage_parties: string;
   date: string;
+  puissance_electrique: number;
+  debit_fluide: number;
+  pression_condenseur: number;
+  humidite: number;
+  co2_niveau: number;
+  vibrations: number;
+  bruit: number;
+  consommation: number;
+  performance_globale: number;
+  temperature_ambiante: number;
+  poids_frigo: number;
 }
 
 interface PredictionResult {
@@ -60,7 +71,18 @@ export function AIPredictionSection() {
     eclairage: 'O',
     purge_circuit: 'O',
     soufflage_parties: 'O',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    puissance_electrique: 0,
+    debit_fluide: 0,
+    pression_condenseur: 0,
+    humidite: 0,
+    co2_niveau: 0,
+    vibrations: 0,
+    bruit: 0,
+    consommation: 0,
+    performance_globale: 0,
+    temperature_ambiante: 0,
+    poids_frigo: 0
   });
 
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
@@ -117,7 +139,18 @@ export function AIPredictionSection() {
       eclairage: 'O',
       purge_circuit: 'O',
       soufflage_parties: 'O',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      puissance_electrique: 0,
+      debit_fluide: 0,
+      pression_condenseur: 0,
+      humidite: 0,
+      co2_niveau: 0,
+      vibrations: 0,
+      bruit: 0,
+      consommation: 0,
+      performance_globale: 0,
+      temperature_ambiante: 0,
+      poids_frigo: 0
     });
     setPredictionResult(null);
   };
@@ -159,7 +192,7 @@ export function AIPredictionSection() {
             <div className="space-y-4">
               {/* Données techniques essentielles */}
               <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Données Techniques</h4>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Données Techniques Principales</h4>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div>
                     <Label htmlFor="taux_remplissage" className="text-xs">Taux remplissage (%)</Label>
@@ -208,7 +241,7 @@ export function AIPredictionSection() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="intensite_avant" className="text-xs">Intensité (A)</Label>
+                    <Label htmlFor="intensite_avant" className="text-xs">Intensité avant (A)</Label>
                     <Input
                       id="intensite_avant"
                       type="number"
@@ -216,6 +249,108 @@ export function AIPredictionSection() {
                       size="sm"
                       value={formData.intensite_avant.toString()}
                       onChange={(e) => handleNumberInputChange('intensite_avant', e.target.value)}
+                      placeholder="2.5"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Données techniques avancées */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Données Techniques Avancées</h4>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div>
+                    <Label htmlFor="puissance_electrique" className="text-xs">Puissance électrique (W)</Label>
+                    <Input
+                      id="puissance_electrique"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.puissance_electrique.toString()}
+                      onChange={(e) => handleNumberInputChange('puissance_electrique', e.target.value)}
+                      placeholder="1500"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="debit_fluide" className="text-xs">Débit fluide (L/min)</Label>
+                    <Input
+                      id="debit_fluide"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.debit_fluide.toString()}
+                      onChange={(e) => handleNumberInputChange('debit_fluide', e.target.value)}
+                      placeholder="8.5"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pression_condenseur" className="text-xs">Pression condenseur (bar)</Label>
+                    <Input
+                      id="pression_condenseur"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.pression_condenseur.toString()}
+                      onChange={(e) => handleNumberInputChange('pression_condenseur', e.target.value)}
+                      placeholder="12.5"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="humidite" className="text-xs">Humidité (%)</Label>
+                    <Input
+                      id="humidite"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.humidite.toString()}
+                      onChange={(e) => handleNumberInputChange('humidite', e.target.value)}
+                      placeholder="65"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="co2_niveau" className="text-xs">Niveau CO2 (ppm)</Label>
+                    <Input
+                      id="co2_niveau"
+                      type="number"
+                      size="sm"
+                      value={formData.co2_niveau.toString()}
+                      onChange={(e) => handleNumberInputChange('co2_niveau', e.target.value)}
+                      placeholder="400"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="vibrations" className="text-xs">Vibrations (Hz)</Label>
+                    <Input
+                      id="vibrations"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.vibrations.toString()}
+                      onChange={(e) => handleNumberInputChange('vibrations', e.target.value)}
+                      placeholder="50"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="bruit" className="text-xs">Niveau sonore (dB)</Label>
+                    <Input
+                      id="bruit"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.bruit.toString()}
+                      onChange={(e) => handleNumberInputChange('bruit', e.target.value)}
+                      placeholder="45"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="consommation" className="text-xs">Consommation (kWh)</Label>
+                    <Input
+                      id="consommation"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.consommation.toString()}
+                      onChange={(e) => handleNumberInputChange('consommation', e.target.value)}
                       placeholder="2.5"
                     />
                   </div>
@@ -340,6 +475,49 @@ export function AIPredictionSection() {
                       value={formData.branding}
                       onChange={(e) => handleInputChange('branding', e.target.value)}
                       placeholder="Coca-Cola"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Paramètres supplémentaires */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Paramètres Environnementaux</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor="performance_globale" className="text-xs">Performance globale (%)</Label>
+                    <Input
+                      id="performance_globale"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.performance_globale.toString()}
+                      onChange={(e) => handleNumberInputChange('performance_globale', e.target.value)}
+                      placeholder="85"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="temperature_ambiante" className="text-xs">Température ambiante (°C)</Label>
+                    <Input
+                      id="temperature_ambiante"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.temperature_ambiante.toString()}
+                      onChange={(e) => handleNumberInputChange('temperature_ambiante', e.target.value)}
+                      placeholder="25"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="poids_frigo" className="text-xs">Poids frigo (kg)</Label>
+                    <Input
+                      id="poids_frigo"
+                      type="number"
+                      step="0.1"
+                      size="sm"
+                      value={formData.poids_frigo.toString()}
+                      onChange={(e) => handleNumberInputChange('poids_frigo', e.target.value)}
+                      placeholder="120"
                     />
                   </div>
                 </div>
