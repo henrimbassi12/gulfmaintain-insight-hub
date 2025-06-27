@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Wrench, RefreshCw, Plus, Brain, AlertTriangle } from 'lucide-react';
+import { Wrench, RefreshCw, Plus, Filter, Clock, User, MapPin, FileText, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,13 +10,14 @@ import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
 import { toast } from 'sonner';
-import { useAIPredictions } from '@/hooks/useAIPredictions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Maintenance() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const { getPrediction, isLoading: aiLoading } = useAIPredictions();
+  const [filterBy, setFilterBy] = useState('all');
+  const [technicianFilter, setTechnicianFilter] = useState('all');
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -31,112 +32,97 @@ export default function Maintenance() {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleAIPrediction = async (equipment: any) => {
-    const predictionInput = {
-      equipment_id: equipment.id,
-      equipment_type: 'Réfrigérateur',
-      last_maintenance_date: '2024-05-15',
-      failure_history: ['Maintenance préventive standard'],
-      location: equipment.location,
-      usage_intensity: 'high' as const,
-      sensor_data: {
-        temperature: 6.5,
-        pressure: 2.1,
-        vibration: 0.5,
-        humidity: 70
-      }
-    };
-
-    const prediction = await getPrediction(predictionInput);
-    if (prediction) {
-      toast.success(`Prédiction IA générée pour ${equipment.equipment}`, {
-        description: `Statut prédit: ${prediction.predicted_status}`
-      });
-    }
+  const handleExportPDF = () => {
+    toast.success('Export PDF en cours...');
   };
 
-  // Données de maintenance d'exemple avec prédictions IA
+  // Données de maintenance avec les vrais techniciens
   const maintenances = [
     {
       id: 'MAINT-001',
-      equipment: 'TAG145 - Frigo Vestfrost',
+      equipment: 'TAG145 - Frigo Vestfrost INNOVA 1000',
       type: 'Préventive',
       status: 'En cours',
-      technician: 'D. Ngangue',
-      scheduledDate: '2024-06-24',
+      technician: 'VOUKENG',
+      scheduledDate: '2024-06-27',
+      timeSlot: '13h30 - 15h00',
       priority: 'Haute',
-      location: 'Douala',
-      aiPrediction: {
-        risk: 'Élevé',
-        confidence: 87,
-        recommendation: 'Maintenance renforcée recommandée'
-      }
+      location: 'Douala Centre',
+      client: 'Bar Le Central',
+      description: 'Maintenance préventive mensuelle'
     },
     {
       id: 'MAINT-002',
-      equipment: 'TAG211 - Frigo Haier',
+      equipment: 'TAG211 - Frigo Haier SANDEN 500',
       type: 'Corrective',
-      status: 'Planifiée',
-      technician: 'M. Diko',
-      scheduledDate: '2024-06-25',
-      priority: 'Normale',
-      location: 'Yaoundé',
-      aiPrediction: {
-        risk: 'Moyen',
-        confidence: 72,
-        recommendation: 'Surveillance renforcée'
-      }
+      status: 'Prévu',
+      technician: 'MBAPBOU Grégoire',
+      scheduledDate: '2024-06-28',
+      timeSlot: '09h00 - 11h00',
+      priority: 'Urgent',
+      location: 'Yaoundé Melen',
+      client: 'Restaurant Chez Marie',
+      description: 'Réparation compresseur défaillant'
     },
     {
       id: 'MAINT-003',
-      equipment: 'TAG078 - Frigo Samsung',
+      equipment: 'TAG078 - Frigo Samsung INNOVA 650',
       type: 'Préventive',
-      status: 'En attente',
-      technician: 'J. Tamo',
+      status: 'Terminé',
+      technician: 'TCHINDA Constant',
       scheduledDate: '2024-06-26',
-      priority: 'Basse',
-      location: 'Bafoussam',
-      aiPrediction: {
-        risk: 'Faible',
-        confidence: 94,
-        recommendation: 'Maintenance préventive standard'
-      }
+      timeSlot: '14h00 - 16h00',
+      priority: 'Normale',
+      location: 'Bafoussam Centre',
+      client: 'Bar du Marché',
+      description: 'Maintenance préventive standard'
+    },
+    {
+      id: 'MAINT-004',
+      equipment: 'TAG152 - Frigo LG SUPER-35',
+      type: 'Corrective',
+      status: 'Prévu',
+      technician: 'Cédric',
+      scheduledDate: '2024-06-29',
+      timeSlot: '10h30 - 12h30',
+      priority: 'Normale',
+      location: 'Kribi Plage',
+      client: 'Snack Bar Ocean',
+      description: 'Problème de thermostat'
     }
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'En cours': return 'bg-blue-100 text-blue-800';
-      case 'Planifiée': return 'bg-yellow-100 text-yellow-800';
-      case 'En attente': return 'bg-gray-100 text-gray-800';
-      case 'Terminée': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'En cours': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Prévu': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Terminé': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Urgent': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Haute': return 'bg-red-100 text-red-800';
-      case 'Normale': return 'bg-blue-100 text-blue-800';
-      case 'Basse': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Urgent': return 'bg-red-500 text-white';
+      case 'Haute': return 'bg-orange-500 text-white';
+      case 'Normale': return 'bg-blue-500 text-white';
+      case 'Basse': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
-  const getRiskColor = (risk: string) => {
-    switch (risk) {
-      case 'Élevé': return 'bg-red-100 text-red-800';
-      case 'Moyen': return 'bg-yellow-100 text-yellow-800';
-      case 'Faible': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const filteredMaintenances = maintenances.filter(maintenance => {
+    if (filterBy !== 'all' && maintenance.status !== filterBy) return false;
+    if (technicianFilter !== 'all' && maintenance.technician !== technicianFilter) return false;
+    return true;
+  });
 
   return (
     <AirbnbContainer>
       <AirbnbHeader
         title="Maintenance"
-        subtitle="Gestion et suivi des maintenances préventives et curatives"
+        subtitle="Gestion et suivi des interventions préventives et curatives"
         icon={Wrench}
       >
         <div className="flex flex-col gap-2 w-full">
@@ -156,131 +142,158 @@ export default function Maintenance() {
           >
             Nouvelle Maintenance
           </ModernButton>
+
+          <ModernButton 
+            variant="outline"
+            onClick={handleExportPDF}
+            icon={Download}
+          >
+            Exporter PDF
+          </ModernButton>
         </div>
       </AirbnbHeader>
 
       <div className="space-y-6">
-        {/* Prédictions IA Summary */}
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 shadow-sm">
-          <CardHeader>
+        {/* Filtres */}
+        <Card className="bg-white border border-gray-100 shadow-sm">
+          <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3 text-lg">
-              <div className="w-8 h-8 bg-purple-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
-              </div>
-              🤖 Analyse IA des Maintenances
+              <Filter className="w-5 h-5" />
+              Filtres
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
-                  <span className="font-semibold text-red-800">Risque Élevé</span>
-                </div>
-                <p className="text-2xl font-bold text-red-600">1</p>
-                <p className="text-sm text-gray-600">Maintenance renforcée recommandée</p>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Statut</label>
+                <Select value={filterBy} onValueChange={setFilterBy}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les statuts</SelectItem>
+                    <SelectItem value="Prévu">Prévu</SelectItem>
+                    <SelectItem value="En cours">En cours</SelectItem>
+                    <SelectItem value="Terminé">Terminé</SelectItem>
+                    <SelectItem value="Urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                  <span className="font-semibold text-yellow-800">Risque Moyen</span>
-                </div>
-                <p className="text-2xl font-bold text-yellow-600">1</p>
-                <p className="text-sm text-gray-600">Surveillance renforcée</p>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Technicien</label>
+                <Select value={technicianFilter} onValueChange={setTechnicianFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les techniciens</SelectItem>
+                    <SelectItem value="VOUKENG">VOUKENG</SelectItem>
+                    <SelectItem value="MBAPBOU Grégoire">MBAPBOU Grégoire</SelectItem>
+                    <SelectItem value="TCHINDA Constant">TCHINDA Constant</SelectItem>
+                    <SelectItem value="Cédric">Cédric</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold text-green-800">Risque Faible</span>
-                </div>
-                <p className="text-2xl font-bold text-green-600">1</p>
-                <p className="text-sm text-gray-600">Maintenance standard</p>
+
+              <div className="flex items-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setFilterBy('all');
+                    setTechnicianFilter('all');
+                  }}
+                  className="w-full"
+                >
+                  Réinitialiser
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Liste des maintenances */}
-        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <Card className="bg-white border border-gray-100 shadow-sm">
           <CardHeader className="bg-gray-50 border-b border-gray-100">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-white" />
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Wrench className="w-5 h-5" />
+                Maintenances ({filteredMaintenances.length})
               </div>
-              Maintenances en cours
+              <Badge variant="outline" className="text-xs">
+                {filteredMaintenances.filter(m => m.status === 'En cours').length} en cours
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {maintenances.map((maintenance) => (
-                <div
-                  key={maintenance.id}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedMaintenance(maintenance)}
-                >
-                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-2">{maintenance.equipment}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-gray-600">
-                        <div>
-                          <span className="font-medium">ID:</span> {maintenance.id}
-                        </div>
-                        <div>
-                          <span className="font-medium">Type:</span> {maintenance.type}
-                        </div>
-                        <div>
-                          <span className="font-medium">Technicien:</span> {maintenance.technician}
-                        </div>
-                        <div>
-                          <span className="font-medium">Date:</span> {new Date(maintenance.scheduledDate).toLocaleDateString('fr-FR')}
-                        </div>
-                      </div>
-
-                      {/* Prédiction IA */}
-                      <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Brain className="w-4 h-4 text-purple-600" />
-                            <span className="text-sm font-medium text-purple-800">Prédiction IA</span>
+              {filteredMaintenances.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Wrench className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>Aucune maintenance trouvée avec ces filtres</p>
+                </div>
+              ) : (
+                filteredMaintenances.map((maintenance) => (
+                  <div
+                    key={maintenance.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => setSelectedMaintenance(maintenance)}
+                  >
+                    <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                              {maintenance.equipment}
+                            </h3>
+                            <p className="text-sm text-gray-600">{maintenance.client}</p>
                           </div>
-                          <Badge variant="outline" className="text-xs">
-                            {maintenance.aiPrediction.confidence}% confiance
+                          <Badge className={getPriorityColor(maintenance.priority)}>
+                            {maintenance.priority}
                           </Badge>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <Badge className={getRiskColor(maintenance.aiPrediction.risk)}>
-                            Risque {maintenance.aiPrediction.risk}
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAIPrediction(maintenance);
-                            }}
-                            disabled={aiLoading}
-                            className="text-xs"
-                          >
-                            <Brain className="w-3 h-3 mr-1" />
-                            Nouvelle prédiction
-                          </Button>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-500" />
+                            <span className="font-medium">ID:</span> {maintenance.id}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-green-500" />
+                            <span className="font-medium">Horaire:</span> {maintenance.timeSlot}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-purple-500" />
+                            <span className="font-medium">Technicien:</span> {maintenance.technician}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-red-500" />
+                            <span className="font-medium">Lieu:</span> {maintenance.location}
+                          </div>
                         </div>
-                        <p className="text-xs text-purple-700 mt-2">
-                          {maintenance.aiPrediction.recommendation}
+
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {maintenance.type}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              {new Date(maintenance.scheduledDate).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+                          <Badge className={getStatusColor(maintenance.status)}>
+                            {maintenance.status}
+                          </Badge>
+                        </div>
+
+                        <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                          {maintenance.description}
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge className={getStatusColor(maintenance.status)}>
-                        {maintenance.status}
-                      </Badge>
-                      <Badge className={getPriorityColor(maintenance.priority)}>
-                        {maintenance.priority}
-                      </Badge>
-                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
