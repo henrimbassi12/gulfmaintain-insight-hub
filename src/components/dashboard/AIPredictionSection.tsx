@@ -11,11 +11,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { toast } from 'sonner';
 
 interface PredictionData {
-  taux_remplissage: string;
-  temperature: string;
+  taux_remplissage: number;
+  temperature: number;
   lineaire: string;
-  tension: string;
-  intensite_avant: string;
+  tension: number;
+  intensite_avant: number;
   technicien_gfi: string;
   division: string;
   secteur: string;
@@ -42,11 +42,11 @@ interface PredictionResult {
 export function AIPredictionSection() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [formData, setFormData] = useState<PredictionData>({
-    taux_remplissage: '',
-    temperature: '',
+    taux_remplissage: 0,
+    temperature: 0,
     lineaire: '1',
-    tension: '',
-    intensite_avant: '',
+    tension: 0,
+    intensite_avant: 0,
     technicien_gfi: '',
     division: '',
     secteur: '',
@@ -66,7 +66,7 @@ export function AIPredictionSection() {
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: keyof PredictionData, value: string) => {
+  const handleInputChange = (field: keyof PredictionData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -94,11 +94,11 @@ export function AIPredictionSection() {
 
   const resetForm = () => {
     setFormData({
-      taux_remplissage: '',
-      temperature: '',
+      taux_remplissage: 0,
+      temperature: 0,
       lineaire: '1',
-      tension: '',
-      intensite_avant: '',
+      tension: 0,
+      intensite_avant: 0,
       technicien_gfi: '',
       division: '',
       secteur: '',
@@ -163,7 +163,7 @@ export function AIPredictionSection() {
                       type="number"
                       size="sm"
                       value={formData.taux_remplissage}
-                      onChange={(e) => handleInputChange('taux_remplissage', e.target.value)}
+                      onChange={(e) => handleInputChange('taux_remplissage', Number(e.target.value))}
                       placeholder="85"
                     />
                   </div>
@@ -175,9 +175,21 @@ export function AIPredictionSection() {
                       step="0.1"
                       size="sm"
                       value={formData.temperature}
-                      onChange={(e) => handleInputChange('temperature', e.target.value)}
+                      onChange={(e) => handleInputChange('temperature', Number(e.target.value))}
                       placeholder="6.5"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="lineaire" className="text-xs">Linéaire</Label>
+                    <Select value={formData.lineaire} onValueChange={(value) => handleInputChange('lineaire', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="0">0</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="tension" className="text-xs">Tension (V)</Label>
@@ -186,7 +198,7 @@ export function AIPredictionSection() {
                       type="number"
                       size="sm"
                       value={formData.tension}
-                      onChange={(e) => handleInputChange('tension', e.target.value)}
+                      onChange={(e) => handleInputChange('tension', Number(e.target.value))}
                       placeholder="220"
                     />
                   </div>
@@ -198,8 +210,59 @@ export function AIPredictionSection() {
                       step="0.1"
                       size="sm"
                       value={formData.intensite_avant}
-                      onChange={(e) => handleInputChange('intensite_avant', e.target.value)}
+                      onChange={(e) => handleInputChange('intensite_avant', Number(e.target.value))}
                       placeholder="2.5"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Personnel & Organisation */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Personnel & Organisation</h4>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div>
+                    <Label htmlFor="technicien_gfi" className="text-xs">Technicien GFI</Label>
+                    <Select value={formData.technicien_gfi} onValueChange={(value) => handleInputChange('technicien_gfi', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="VOUKENG">VOUKENG</SelectItem>
+                        <SelectItem value="MBAPBOU Grégoire">MBAPBOU Grégoire</SelectItem>
+                        <SelectItem value="TCHINDA Constant">TCHINDA Constant</SelectItem>
+                        <SelectItem value="Cédric">Cédric</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="division" className="text-xs">Division</Label>
+                    <Input
+                      id="division"
+                      size="sm"
+                      value={formData.division}
+                      onChange={(e) => handleInputChange('division', e.target.value)}
+                      placeholder="Centre"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="secteur" className="text-xs">Secteur</Label>
+                    <Input
+                      id="secteur"
+                      size="sm"
+                      value={formData.secteur}
+                      onChange={(e) => handleInputChange('secteur', e.target.value)}
+                      placeholder="Commercial"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="partenaire" className="text-xs">Partenaire</Label>
+                    <Input
+                      id="partenaire"
+                      size="sm"
+                      value={formData.partenaire}
+                      onChange={(e) => handleInputChange('partenaire', e.target.value)}
+                      placeholder="SABC"
                     />
                   </div>
                 </div>
@@ -208,7 +271,7 @@ export function AIPredictionSection() {
               {/* Localisation */}
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-3">Localisation</h4>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="ville" className="text-xs">Ville</Label>
                     <Input
@@ -229,20 +292,13 @@ export function AIPredictionSection() {
                       placeholder="Akwa"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="technicien_gfi" className="text-xs">Technicien</Label>
-                    <Select value={formData.technicien_gfi} onValueChange={(value) => handleInputChange('technicien_gfi', value)}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="VOUKENG">VOUKENG</SelectItem>
-                        <SelectItem value="MBAPBOU Grégoire">MBAPBOU Grégoire</SelectItem>
-                        <SelectItem value="TCHINDA Constant">TCHINDA Constant</SelectItem>
-                        <SelectItem value="Cédric">Cédric</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                </div>
+              </div>
+
+              {/* Équipement */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Équipement</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <Label htmlFor="type_frigo" className="text-xs">Type Frigo</Label>
                     <Select value={formData.type_frigo} onValueChange={(value) => handleInputChange('type_frigo', value)}>
@@ -258,6 +314,100 @@ export function AIPredictionSection() {
                         <SelectItem value="FV 400">FV 400</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="af_nf" className="text-xs">AF/NF</Label>
+                    <Select value={formData.af_nf} onValueChange={(value) => handleInputChange('af_nf', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="AF">AF</SelectItem>
+                        <SelectItem value="NF">NF</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="branding" className="text-xs">Branding</Label>
+                    <Input
+                      id="branding"
+                      size="sm"
+                      value={formData.branding}
+                      onChange={(e) => handleInputChange('branding', e.target.value)}
+                      placeholder="Coca-Cola"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Options techniques */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Options Techniques</h4>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div>
+                    <Label htmlFor="securite" className="text-xs">Sécurité</Label>
+                    <Select value={formData.securite} onValueChange={(value) => handleInputChange('securite', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Disjoncteur">Disjoncteur</SelectItem>
+                        <SelectItem value="Régulateur">Régulateur</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="eclairage" className="text-xs">Éclairage</Label>
+                    <Select value={formData.eclairage} onValueChange={(value) => handleInputChange('eclairage', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="O">O (Oui)</SelectItem>
+                        <SelectItem value="N">N (Non)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="purge_circuit" className="text-xs">Purge du circuit</Label>
+                    <Select value={formData.purge_circuit} onValueChange={(value) => handleInputChange('purge_circuit', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="O">O (Oui)</SelectItem>
+                        <SelectItem value="N">N (Non)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="soufflage_parties" className="text-xs">Soufflage parties actives</Label>
+                    <Select value={formData.soufflage_parties} onValueChange={(value) => handleInputChange('soufflage_parties', value)}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="O">O (Oui)</SelectItem>
+                        <SelectItem value="N">N (Non)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Date */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Date d'intervention</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="date" className="text-xs">Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      size="sm"
+                      value={formData.date}
+                      onChange={(e) => handleInputChange('date', e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
