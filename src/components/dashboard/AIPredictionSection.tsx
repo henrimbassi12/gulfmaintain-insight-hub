@@ -15,7 +15,7 @@ export function AIPredictionSection() {
   const [formData, setFormData] = useState<PredictionData>({
     taux_remplissage: 0,
     temperature: 0,
-    lineaire: '1',
+    lineaire: 0,
     tension: 0,
     intensite_avant: 0,
     technicien_gfi: '',
@@ -31,18 +31,7 @@ export function AIPredictionSection() {
     eclairage: 'O',
     purge_circuit: 'O',
     soufflage_parties: 'O',
-    date: new Date().toISOString().split('T')[0],
-    puissance_electrique: 0,
-    debit_fluide: 0,
-    pression_condenseur: 0,
-    humidite: 0,
-    co2_niveau: 0,
-    vibrations: 0,
-    bruit: 0,
-    consommation: 0,
-    performance_globale: 0,
-    temperature_ambiante: 0,
-    poids_frigo: 0
+    date: new Date().toISOString().split('T')[0]
   });
 
   const [predictionResult, setPredictionResult] = useState<PredictionResultType | null>(null);
@@ -68,7 +57,7 @@ export function AIPredictionSection() {
     setFormData({
       taux_remplissage: 0,
       temperature: 0,
-      lineaire: '1',
+      lineaire: 0,
       tension: 0,
       intensite_avant: 0,
       technicien_gfi: '',
@@ -84,18 +73,7 @@ export function AIPredictionSection() {
       eclairage: 'O',
       purge_circuit: 'O',
       soufflage_parties: 'O',
-      date: new Date().toISOString().split('T')[0],
-      puissance_electrique: 0,
-      debit_fluide: 0,
-      pression_condenseur: 0,
-      humidite: 0,
-      co2_niveau: 0,
-      vibrations: 0,
-      bruit: 0,
-      consommation: 0,
-      performance_globale: 0,
-      temperature_ambiante: 0,
-      poids_frigo: 0
+      date: new Date().toISOString().split('T')[0]
     });
     setPredictionResult(null);
   };

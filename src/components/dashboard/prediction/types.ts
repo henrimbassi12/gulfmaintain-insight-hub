@@ -2,7 +2,7 @@
 export interface PredictionData {
   taux_remplissage: number;
   temperature: number;
-  lineaire: string;
+  lineaire: number;
   tension: number;
   intensite_avant: number;
   technicien_gfi: string;
@@ -19,17 +19,6 @@ export interface PredictionData {
   purge_circuit: string;
   soufflage_parties: string;
   date: string;
-  puissance_electrique: number;
-  debit_fluide: number;
-  pression_condenseur: number;
-  humidite: number;
-  co2_niveau: number;
-  vibrations: number;
-  bruit: number;
-  consommation: number;
-  performance_globale: number;
-  temperature_ambiante: number;
-  poids_frigo: number;
 }
 
 export interface PredictionResult {

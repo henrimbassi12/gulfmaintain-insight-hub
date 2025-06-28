@@ -15,7 +15,7 @@ export function usePredictionApi() {
       const apiPayload = {
         Taux_remplissage_pct: formData.taux_remplissage,
         Temperature_C: formData.temperature,
-        Lineaire_val: parseFloat(formData.lineaire),
+        Lineaire_val: formData.lineaire,
         Tension_V: formData.tension,
         Intensite_avant_entretien_A: formData.intensite_avant,
         Technicien_GFI: formData.technicien_gfi,
