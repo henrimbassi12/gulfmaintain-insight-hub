@@ -2,7 +2,6 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PredictionData } from '../types';
 
 interface PersonnelSectionProps {
@@ -13,21 +12,17 @@ interface PersonnelSectionProps {
 export function PersonnelSection({ formData, onInputChange }: PersonnelSectionProps) {
   return (
     <div>
-      <h4 className="text-sm font-semibold text-gray-900 mb-3">Personnel & Organisation</h4>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <h4 className="text-sm font-semibold text-gray-900 mb-3">Personnel et Organisation</h4>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <Label htmlFor="technicien_gfi" className="text-xs">Technicien GFI</Label>
-          <Select value={formData.technicien_gfi} onValueChange={(value) => onInputChange('technicien_gfi', value)}>
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Sélectionner" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="VOUKENG">VOUKENG</SelectItem>
-              <SelectItem value="MBAPBOU Grégoire">MBAPBOU Grégoire</SelectItem>
-              <SelectItem value="TCHINDA Constant">TCHINDA Constant</SelectItem>
-              <SelectItem value="Cédric">Cédric</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input
+            id="technicien_gfi"
+            size="sm"
+            value={formData.technicien_gfi}
+            onChange={(e) => onInputChange('technicien_gfi', e.target.value)}
+            placeholder="VOUKENG"
+          />
         </div>
         <div>
           <Label htmlFor="division" className="text-xs">Division</Label>
@@ -56,7 +51,7 @@ export function PersonnelSection({ formData, onInputChange }: PersonnelSectionPr
             size="sm"
             value={formData.partenaire}
             onChange={(e) => onInputChange('partenaire', e.target.value)}
-            placeholder="SABC"
+            placeholder="GUINNESS"
           />
         </div>
       </div>
