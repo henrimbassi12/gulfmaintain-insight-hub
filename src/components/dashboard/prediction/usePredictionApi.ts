@@ -13,11 +13,11 @@ export function usePredictionApi() {
       console.log('🤖 Envoi de la prédiction à l\'API...');
       
       const apiPayload = {
-        Taux_remplissage_pct: formData.taux_remplissage,
-        Temperature_C: formData.temperature,
-        Lineaire_val: formData.lineaire,
-        Tension_V: formData.tension,
-        Intensite_avant_entretien_A: formData.intensite_avant,
+        Taux_remplissage_pct: formData.taux_remplissage_pct,
+        Temperature_C: formData.temperature_c,
+        Lineaire_val: formData.lineaire_val,
+        Tension_V: formData.tension_v,
+        Intensite_avant_entretien_A: formData.intensite_avant_entretien_a,
         Technicien_GFI: formData.technicien_gfi,
         Division: formData.division,
         Secteur: formData.secteur,
@@ -29,8 +29,8 @@ export function usePredictionApi() {
         Branding: formData.branding,
         Securite: formData.securite,
         Eclairage: formData.eclairage,
-        Purge_circuit_eaux: formData.purge_circuit,
-        Soufflage_parties_actives: formData.soufflage_parties,
+        Purge_circuit_eaux: formData.purge_circuit_eaux,
+        Soufflage_parties_actives: formData.soufflage_parties_actives,
         Date: formData.date
       };
 

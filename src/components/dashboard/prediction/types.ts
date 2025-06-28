@@ -1,10 +1,10 @@
 
 export interface PredictionData {
-  taux_remplissage: number;
-  temperature: number;
-  lineaire: number;
-  tension: number;
-  intensite_avant: number;
+  taux_remplissage_pct: number;
+  temperature_c: number;
+  lineaire_val: number;
+  tension_v: number;
+  intensite_avant_entretien_a: number;
   technicien_gfi: string;
   division: string;
   secteur: string;
@@ -16,8 +16,8 @@ export interface PredictionData {
   branding: string;
   securite: string;
   eclairage: string;
-  purge_circuit: string;
-  soufflage_parties: string;
+  purge_circuit_eaux: string;
+  soufflage_parties_actives: string;
   date: string;
 }
 

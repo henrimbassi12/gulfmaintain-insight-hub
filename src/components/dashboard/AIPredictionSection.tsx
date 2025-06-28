@@ -13,11 +13,11 @@ import { PredictionData, PredictionResult as PredictionResultType } from './pred
 export function AIPredictionSection() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [formData, setFormData] = useState<PredictionData>({
-    taux_remplissage: 0,
-    temperature: 0,
-    lineaire: 0,
-    tension: 0,
-    intensite_avant: 0,
+    taux_remplissage_pct: 0,
+    temperature_c: 0,
+    lineaire_val: 0,
+    tension_v: 0,
+    intensite_avant_entretien_a: 0,
     technicien_gfi: '',
     division: '',
     secteur: '',
@@ -27,10 +27,10 @@ export function AIPredictionSection() {
     type_frigo: '',
     af_nf: 'AF',
     branding: '',
-    securite: 'Disjoncteur',
-    eclairage: 'O',
-    purge_circuit: 'O',
-    soufflage_parties: 'O',
+    securite: 'Oui',
+    eclairage: 'Oui',
+    purge_circuit_eaux: 'Oui',
+    soufflage_parties_actives: 'Oui',
     date: new Date().toISOString().split('T')[0]
   });
 
@@ -55,11 +55,11 @@ export function AIPredictionSection() {
 
   const resetForm = () => {
     setFormData({
-      taux_remplissage: 0,
-      temperature: 0,
-      lineaire: 0,
-      tension: 0,
-      intensite_avant: 0,
+      taux_remplissage_pct: 0,
+      temperature_c: 0,
+      lineaire_val: 0,
+      tension_v: 0,
+      intensite_avant_entretien_a: 0,
       technicien_gfi: '',
       division: '',
       secteur: '',
@@ -69,10 +69,10 @@ export function AIPredictionSection() {
       type_frigo: '',
       af_nf: 'AF',
       branding: '',
-      securite: 'Disjoncteur',
-      eclairage: 'O',
-      purge_circuit: 'O',
-      soufflage_parties: 'O',
+      securite: 'Oui',
+      eclairage: 'Oui',
+      purge_circuit_eaux: 'Oui',
+      soufflage_parties_actives: 'Oui',
       date: new Date().toISOString().split('T')[0]
     });
     setPredictionResult(null);

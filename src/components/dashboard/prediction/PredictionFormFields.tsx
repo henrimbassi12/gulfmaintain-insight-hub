@@ -20,62 +20,62 @@ export function PredictionFormFields({ formData, onInputChange, onNumberInputCha
         <h4 className="text-sm font-semibold text-gray-900 mb-3">Données Techniques Principales</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <Label htmlFor="taux_remplissage" className="text-xs">Taux remplissage (%)</Label>
+            <Label htmlFor="taux_remplissage_pct" className="text-xs">Taux remplissage (%)</Label>
             <Input
-              id="taux_remplissage"
+              id="taux_remplissage_pct"
               type="number"
               step="0.1"
               size="sm"
-              value={formData.taux_remplissage === 0 ? '' : formData.taux_remplissage.toString()}
-              onChange={(e) => onNumberInputChange('taux_remplissage', e.target.value)}
+              value={formData.taux_remplissage_pct === 0 ? '' : formData.taux_remplissage_pct.toString()}
+              onChange={(e) => onNumberInputChange('taux_remplissage_pct', e.target.value)}
               placeholder="75.5"
             />
           </div>
           <div>
-            <Label htmlFor="temperature" className="text-xs">Température (°C)</Label>
+            <Label htmlFor="temperature_c" className="text-xs">Température (°C)</Label>
             <Input
-              id="temperature"
+              id="temperature_c"
               type="number"
               step="0.1"
               size="sm"
-              value={formData.temperature === 0 ? '' : formData.temperature.toString()}
-              onChange={(e) => onNumberInputChange('temperature', e.target.value)}
+              value={formData.temperature_c === 0 ? '' : formData.temperature_c.toString()}
+              onChange={(e) => onNumberInputChange('temperature_c', e.target.value)}
               placeholder="6.5"
             />
           </div>
           <div>
-            <Label htmlFor="lineaire" className="text-xs">Linéaire</Label>
+            <Label htmlFor="lineaire_val" className="text-xs">Linéaire</Label>
             <Input
-              id="lineaire"
+              id="lineaire_val"
               type="number"
               step="0.1"
               size="sm"
-              value={formData.lineaire === 0 ? '' : formData.lineaire.toString()}
-              onChange={(e) => onNumberInputChange('lineaire', e.target.value)}
+              value={formData.lineaire_val === 0 ? '' : formData.lineaire_val.toString()}
+              onChange={(e) => onNumberInputChange('lineaire_val', e.target.value)}
               placeholder="1.0"
             />
           </div>
           <div>
-            <Label htmlFor="tension" className="text-xs">Tension (V)</Label>
+            <Label htmlFor="tension_v" className="text-xs">Tension (V)</Label>
             <Input
-              id="tension"
+              id="tension_v"
               type="number"
               step="0.1"
               size="sm"
-              value={formData.tension === 0 ? '' : formData.tension.toString()}
-              onChange={(e) => onNumberInputChange('tension', e.target.value)}
+              value={formData.tension_v === 0 ? '' : formData.tension_v.toString()}
+              onChange={(e) => onNumberInputChange('tension_v', e.target.value)}
               placeholder="220.0"
             />
           </div>
           <div>
-            <Label htmlFor="intensite_avant" className="text-xs">Intensité avant entretien (A)</Label>
+            <Label htmlFor="intensite_avant_entretien_a" className="text-xs">Intensité avant entretien (A)</Label>
             <Input
-              id="intensite_avant"
+              id="intensite_avant_entretien_a"
               type="number"
               step="0.1"
               size="sm"
-              value={formData.intensite_avant === 0 ? '' : formData.intensite_avant.toString()}
-              onChange={(e) => onNumberInputChange('intensite_avant', e.target.value)}
+              value={formData.intensite_avant_entretien_a === 0 ? '' : formData.intensite_avant_entretien_a.toString()}
+              onChange={(e) => onNumberInputChange('intensite_avant_entretien_a', e.target.value)}
               placeholder="2.5"
             />
           </div>
@@ -96,7 +96,7 @@ export function PredictionFormFields({ formData, onInputChange, onNumberInputCha
                 <SelectItem value="VOUKENG">VOUKENG</SelectItem>
                 <SelectItem value="MBAPBOU Grégoire">MBAPBOU Grégoire</SelectItem>
                 <SelectItem value="TCHINDA Constant">TCHINDA Constant</SelectItem>
-                <SelectItem value="Cédric">Cédrice</SelectItem>
+                <SelectItem value="Cédric">Cédric</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -216,8 +216,8 @@ export function PredictionFormFields({ formData, onInputChange, onNumberInputCha
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Disjoncteur">Disjoncteur</SelectItem>
-                <SelectItem value="Régulateur">Régulateur</SelectItem>
+                <SelectItem value="Oui">Oui</SelectItem>
+                <SelectItem value="Non">Non</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -228,32 +228,32 @@ export function PredictionFormFields({ formData, onInputChange, onNumberInputCha
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="O">O (Oui)</SelectItem>
-                <SelectItem value="N">N (Non)</SelectItem>
+                <SelectItem value="Oui">Oui</SelectItem>
+                <SelectItem value="Non">Non</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label htmlFor="purge_circuit" className="text-xs">Purge du circuit</Label>
-            <Select value={formData.purge_circuit} onValueChange={(value) => onInputChange('purge_circuit', value)}>
+            <Label htmlFor="purge_circuit_eaux" className="text-xs">Purge du circuit</Label>
+            <Select value={formData.purge_circuit_eaux} onValueChange={(value) => onInputChange('purge_circuit_eaux', value)}>
               <SelectTrigger className="h-8">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="O">O (Oui)</SelectItem>
-                <SelectItem value="N">N (Non)</SelectItem>
+                <SelectItem value="Oui">Oui</SelectItem>
+                <SelectItem value="Non">Non</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label htmlFor="soufflage_parties" className="text-xs">Soufflage parties actives</Label>
-            <Select value={formData.soufflage_parties} onValueChange={(value) => onInputChange('soufflage_parties', value)}>
+            <Label htmlFor="soufflage_parties_actives" className="text-xs">Soufflage parties actives</Label>
+            <Select value={formData.soufflage_parties_actives} onValueChange={(value) => onInputChange('soufflage_parties_actives', value)}>
               <SelectTrigger className="h-8">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="O">O (Oui)</SelectItem>
-                <SelectItem value="N">N (Non)</SelectItem>
+                <SelectItem value="Oui">Oui</SelectItem>
+                <SelectItem value="Non">Non</SelectItem>
               </SelectContent>
             </Select>
           </div>
