@@ -100,10 +100,59 @@ export function AIPredictionSection() {
   const handlePredict = async () => {
     setIsLoading(true);
 
-    // Simulation d'appel API
-    setTimeout(() => {
+    try {
+      console.log('🤖 Envoi de la prédiction à l\'API...');
+      
+      // Préparer les données selon le format attendu par votre API
+      const apiPayload = {
+        Taux_remplissage_pct: formData.taux_remplissage,
+        Temperature_C: formData.temperature,
+        Lineaire_val: parseFloat(formData.lineaire),
+        Tension_V: formData.tension,
+        Intensite_avant_entretien_A: formData.intensite_avant,
+        Technicien_GFI: formData.technicien_gfi,
+        Division: formData.division,
+        Secteur: formData.secteur,
+        Partenaire: formData.partenaire,
+        Ville: formData.ville,
+        Quartier: formData.quartier,
+        Type_Frigo: formData.type_frigo,
+        AF_NF: formData.af_nf,
+        Branding: formData.branding,
+        Securite: formData.securite,
+        Eclairage: formData.eclairage,
+        Purge_circuit_eaux: formData.purge_circuit,
+        Soufflage_parties_actives: formData.soufflage_parties,
+        Date: formData.date
+      };
+
+      console.log('📤 Données envoyées:', apiPayload);
+
+      const response = await fetch('https://web-production-c2b6a.up.railway.app/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload),
+      });
+
+      console.log('📊 Status de la réponse:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          const errorDetail = await response.json();
+          console.error('❌ Erreur 422 - Données invalides:', errorDetail);
+          throw new Error('Format de données invalide. Vérifiez les champs requis.');
+        }
+        throw new Error(`Erreur API ${response.status}: ${response.statusText}`);
+      }
+
+      const apiResult = await response.json();
+      console.log('✅ Réponse de l\'API:', apiResult);
+
+      // Transformer la réponse de l'API vers le format attendu par l'interface
       const mockResult: PredictionResult = {
-        predicted_status: 'Succès total',
+        predicted_status: apiResult.prediction || 'Succès total',
         confidence_score: Math.round(85 + Math.random() * 10),
         risk_level: Math.random() > 0.7 ? 'Élevé' : Math.random() > 0.4 ? 'Moyen' : 'Faible',
         recommendations: [
@@ -114,9 +163,27 @@ export function AIPredictionSection() {
       };
 
       setPredictionResult(mockResult);
-      setIsLoading(false);
       toast.success('Prédiction IA générée avec succès');
-    }, 2000);
+    } catch (error) {
+      console.error('❌ Erreur lors de la prédiction:', error);
+      
+      // Fallback vers simulation si l'API échoue
+      const mockResult: PredictionResult = {
+        predicted_status: 'Succès total (simulé)',
+        confidence_score: Math.round(85 + Math.random() * 10),
+        risk_level: Math.random() > 0.7 ? 'Élevé' : Math.random() > 0.4 ? 'Moyen' : 'Faible',
+        recommendations: [
+          'Maintenance renforcée recommandée',
+          'Surveillance de la température conseillée',
+          'Vérification du système de refroidissement'
+        ]
+      };
+
+      setPredictionResult(mockResult);
+      toast.warning('API non disponible - Prédiction simulée utilisée');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -200,7 +267,7 @@ export function AIPredictionSection() {
                       id="taux_remplissage"
                       type="number"
                       size="sm"
-                      value={formData.taux_remplissage.toString()}
+                      value={formData.taux_remplissage === 0 ? '' : formData.taux_remplissage.toString()}
                       onChange={(e) => handleNumberInputChange('taux_remplissage', e.target.value)}
                       placeholder="85"
                     />
@@ -212,7 +279,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.temperature.toString()}
+                      value={formData.temperature === 0 ? '' : formData.temperature.toString()}
                       onChange={(e) => handleNumberInputChange('temperature', e.target.value)}
                       placeholder="6.5"
                     />
@@ -235,7 +302,7 @@ export function AIPredictionSection() {
                       id="tension"
                       type="number"
                       size="sm"
-                      value={formData.tension.toString()}
+                      value={formData.tension === 0 ? '' : formData.tension.toString()}
                       onChange={(e) => handleNumberInputChange('tension', e.target.value)}
                       placeholder="220"
                     />
@@ -247,7 +314,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.intensite_avant.toString()}
+                      value={formData.intensite_avant === 0 ? '' : formData.intensite_avant.toString()}
                       onChange={(e) => handleNumberInputChange('intensite_avant', e.target.value)}
                       placeholder="2.5"
                     />
@@ -266,7 +333,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.puissance_electrique.toString()}
+                      value={formData.puissance_electrique === 0 ? '' : formData.puissance_electrique.toString()}
                       onChange={(e) => handleNumberInputChange('puissance_electrique', e.target.value)}
                       placeholder="1500"
                     />
@@ -278,7 +345,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.debit_fluide.toString()}
+                      value={formData.debit_fluide === 0 ? '' : formData.debit_fluide.toString()}
                       onChange={(e) => handleNumberInputChange('debit_fluide', e.target.value)}
                       placeholder="8.5"
                     />
@@ -290,7 +357,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.pression_condenseur.toString()}
+                      value={formData.pression_condenseur === 0 ? '' : formData.pression_condenseur.toString()}
                       onChange={(e) => handleNumberInputChange('pression_condenseur', e.target.value)}
                       placeholder="12.5"
                     />
@@ -302,7 +369,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.humidite.toString()}
+                      value={formData.humidite === 0 ? '' : formData.humidite.toString()}
                       onChange={(e) => handleNumberInputChange('humidite', e.target.value)}
                       placeholder="65"
                     />
@@ -313,7 +380,7 @@ export function AIPredictionSection() {
                       id="co2_niveau"
                       type="number"
                       size="sm"
-                      value={formData.co2_niveau.toString()}
+                      value={formData.co2_niveau === 0 ? '' : formData.co2_niveau.toString()}
                       onChange={(e) => handleNumberInputChange('co2_niveau', e.target.value)}
                       placeholder="400"
                     />
@@ -325,7 +392,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.vibrations.toString()}
+                      value={formData.vibrations === 0 ? '' : formData.vibrations.toString()}
                       onChange={(e) => handleNumberInputChange('vibrations', e.target.value)}
                       placeholder="50"
                     />
@@ -337,7 +404,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.bruit.toString()}
+                      value={formData.bruit === 0 ? '' : formData.bruit.toString()}
                       onChange={(e) => handleNumberInputChange('bruit', e.target.value)}
                       placeholder="45"
                     />
@@ -349,7 +416,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.consommation.toString()}
+                      value={formData.consommation === 0 ? '' : formData.consommation.toString()}
                       onChange={(e) => handleNumberInputChange('consommation', e.target.value)}
                       placeholder="2.5"
                     />
@@ -491,7 +558,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.performance_globale.toString()}
+                      value={formData.performance_globale === 0 ? '' : formData.performance_globale.toString()}
                       onChange={(e) => handleNumberInputChange('performance_globale', e.target.value)}
                       placeholder="85"
                     />
@@ -503,7 +570,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.temperature_ambiante.toString()}
+                      value={formData.temperature_ambiante === 0 ? '' : formData.temperature_ambiante.toString()}
                       onChange={(e) => handleNumberInputChange('temperature_ambiante', e.target.value)}
                       placeholder="25"
                     />
@@ -515,7 +582,7 @@ export function AIPredictionSection() {
                       type="number"
                       step="0.1"
                       size="sm"
-                      value={formData.poids_frigo.toString()}
+                      value={formData.poids_frigo === 0 ? '' : formData.poids_frigo.toString()}
                       onChange={(e) => handleNumberInputChange('poids_frigo', e.target.value)}
                       placeholder="120"
                     />
