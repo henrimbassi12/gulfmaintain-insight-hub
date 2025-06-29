@@ -13,11 +13,11 @@ export function usePredictionApi() {
       console.log('🤖 Envoi de la prédiction à l\'API...');
       
       const apiPayload = {
-        Taux_remplissage_pct: formData.taux_remplissage_pct,
-        Temperature_C: formData.temperature_c,
-        Lineaire_val: formData.lineaire_val,
-        Tension_V: formData.tension_v,
-        Intensite_avant_entretien_A: formData.intensite_avant_entretien_a,
+        Taux_remplissage_pct: Number(formData.taux_remplissage_pct) || 0,
+        Temperature_C: Number(formData.temperature_c) || 0,
+        Lineaire_val: Number(formData.lineaire_val) || 0,
+        Tension_V: Number(formData.tension_v) || 0,
+        Intensite_avant_entretien_A: Number(formData.intensite_avant_entretien_a) || 0,
         Technicien_GFI: formData.technicien_gfi,
         Division: formData.division,
         Secteur: formData.secteur,
@@ -59,8 +59,9 @@ export function usePredictionApi() {
       console.log('✅ Réponse de l\'API:', apiResult);
 
       // Calculer le score de confiance basé sur la probabilité la plus élevée
-      const maxProbability = apiResult.probabilities ? 
-        Math.max(...Object.values(apiResult.probabilities)) : 0.85;
+      const probabilities = apiResult.probabilities || {};
+      const probabilityValues = Object.values(probabilities) as number[];
+      const maxProbability = probabilityValues.length > 0 ? Math.max(...probabilityValues) : 0.85;
       
       const result: PredictionResult = {
         predicted_status: apiResult.predicted_status || 'Succès total',
@@ -71,7 +72,7 @@ export function usePredictionApi() {
           'Surveillance de la température conseillée',
           'Vérification du système de refroidissement'
         ],
-        probabilities: apiResult.probabilities || {}
+        probabilities: probabilities
       };
 
       toast.success('Prédiction IA générée avec succès');

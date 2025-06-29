@@ -13,11 +13,11 @@ import { PredictionData, PredictionResult as PredictionResultType } from './pred
 export function AIPredictionSection() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [formData, setFormData] = useState<PredictionData>({
-    taux_remplissage_pct: 0,
-    temperature_c: 0,
-    lineaire_val: 0,
-    tension_v: 0,
-    intensite_avant_entretien_a: 0,
+    taux_remplissage_pct: '0',
+    temperature_c: '0',
+    lineaire_val: '0',
+    tension_v: '0',
+    intensite_avant_entretien_a: '0',
     technicien_gfi: '',
     division: '',
     secteur: '',
@@ -37,13 +37,12 @@ export function AIPredictionSection() {
   const [predictionResult, setPredictionResult] = useState<PredictionResultType | null>(null);
   const { handlePredict, isLoading } = usePredictionApi();
 
-  const handleInputChange = (field: keyof PredictionData, value: string | number) => {
+  const handleInputChange = (field: keyof PredictionData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleNumberInputChange = (field: keyof PredictionData, value: string) => {
-    const numericValue = value === '' ? 0 : Number(value);
-    setFormData(prev => ({ ...prev, [field]: numericValue }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const onPredict = async () => {
@@ -55,11 +54,11 @@ export function AIPredictionSection() {
 
   const resetForm = () => {
     setFormData({
-      taux_remplissage_pct: 0,
-      temperature_c: 0,
-      lineaire_val: 0,
-      tension_v: 0,
-      intensite_avant_entretien_a: 0,
+      taux_remplissage_pct: '0',
+      temperature_c: '0',
+      lineaire_val: '0',
+      tension_v: '0',
+      intensite_avant_entretien_a: '0',
       technicien_gfi: '',
       division: '',
       secteur: '',

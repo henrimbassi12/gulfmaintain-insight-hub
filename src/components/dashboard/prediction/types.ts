@@ -1,10 +1,10 @@
 
 export interface PredictionData {
-  taux_remplissage_pct: number;
-  temperature_c: number;
-  lineaire_val: number;
-  tension_v: number;
-  intensite_avant_entretien_a: number;
+  taux_remplissage_pct: string;
+  temperature_c: string;
+  lineaire_val: string;
+  tension_v: string;
+  intensite_avant_entretien_a: string;
   technicien_gfi: string;
   division: string;
   secteur: string;
