@@ -10,7 +10,6 @@ import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { AIPredictionSection } from '@/components/dashboard/AIPredictionSection';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -29,19 +28,6 @@ export default function Dashboard() {
     setRefreshing(false);
   };
 
-  const handleProfileClick = () => {
-    navigate('/settings');
-  };
-
-  const getInitials = (name?: string) => {
-    if (!name) return 'U';
-    const nameParts = name.split(' ');
-    if (nameParts.length >= 2) {
-      return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
   // Données d'exemple
   const dashboardData = {
     totalEquipments: 150,
@@ -54,7 +40,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       <MobileHeader />
       
-      {/* Header principal avec notifications et profil */}
+      {/* Header principal sans profil utilisateur */}
       <div className="hidden md:block bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-40 w-full">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -72,7 +58,7 @@ export default function Dashboard() {
               </div>
             </div>
             
-            {/* Section notifications et profil */}
+            {/* Section contrôles sans profil utilisateur */}
             <div className="flex flex-wrap gap-2 md:gap-3 items-center w-full sm:w-auto">
               <ConnectionStatus />
               
@@ -101,30 +87,6 @@ export default function Dashboard() {
               </Button>
               
               <NotificationSystem />
-              
-              {/* Profil utilisateur */}
-              {userProfile && (
-                <button
-                  onClick={handleProfileClick}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={userProfile.avatar_url || ''} />
-                    <AvatarFallback className="bg-blue-100 text-blue-600 text-sm">
-                      {getInitials(userProfile.full_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden lg:block text-left">
-                    <p className="text-sm font-medium text-gray-900">
-                      {userProfile.full_name || 'Utilisateur'}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {userProfile.role === 'admin' ? 'Administrateur' : 
-                       userProfile.role === 'manager' ? 'Gestionnaire' : 'Technicien'}
-                    </p>
-                  </div>
-                </button>
-              )}
             </div>
           </div>
         </div>

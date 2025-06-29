@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, User, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { useNavigate } from 'react-router-dom';
 
 export function UserProfile() {
   const { user, userProfile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
@@ -58,6 +60,10 @@ export function UserProfile() {
     }
   };
 
+  const handleProfileClick = () => {
+    navigate('/settings');
+  };
+
   // Utiliser les vraies données du profil utilisateur
   const userRole = userProfile?.role || 'technician';
   const displayName = userProfile?.full_name || user.user_metadata?.full_name || 'Utilisateur';
@@ -67,25 +73,30 @@ export function UserProfile() {
   return (
     <div className="border-t p-4 mt-auto">
       <div className="flex items-center gap-3 mb-3">
-        <Avatar className="w-10 h-10">
-          <AvatarImage src={userProfile?.avatar_url || ""} />
-          <AvatarFallback className="bg-blue-100 text-blue-600">
-            {getInitials(displayName)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-            {displayName}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            {userEmail}
-          </p>
-          {userAgency && userAgency !== 'Non assigné' && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
-              {userAgency}
+        <button
+          onClick={handleProfileClick}
+          className="flex items-center gap-3 w-full hover:bg-gray-50 p-2 rounded-lg transition-colors"
+        >
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={userProfile?.avatar_url || ""} />
+            <AvatarFallback className="bg-blue-100 text-blue-600">
+              {getInitials(displayName)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {displayName}
             </p>
-          )}
-        </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {userEmail}
+            </p>
+            {userAgency && userAgency !== 'Non assigné' && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                {userAgency}
+              </p>
+            )}
+          </div>
+        </button>
       </div>
       
       <div className="flex items-center justify-between mb-3">
