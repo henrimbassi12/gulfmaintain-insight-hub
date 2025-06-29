@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -302,7 +303,7 @@ export function MaintenanceCalendar() {
         </CardContent>
       </Card>
 
-      {/* Tâches du jour - Section responsive */}
+      {/* Tâches du jour - Section responsive avec plus d'espace */}
       {selectedDate && (
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardHeader className="bg-gray-50 border-b border-gray-100">
@@ -321,9 +322,9 @@ export function MaintenanceCalendar() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {getEventsByDate(selectedDate).map(event => (
-                <div key={event.id} className="p-3 sm:p-4 border rounded-lg">
+                <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
                   <div className="flex flex-col sm:flex-row justify-between items-start mb-3 gap-2">
                     <h4 className="font-medium text-sm sm:text-base">{event.title}</h4>
                     <Badge className={`${getTypeColor(event.type)} text-xs`}>
@@ -332,7 +333,7 @@ export function MaintenanceCalendar() {
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-2 text-xs sm:text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
                     <div>
                       <span className="text-gray-500">Équipement:</span>
                       <div className="font-medium">{event.equipment}</div>
@@ -351,7 +352,7 @@ export function MaintenanceCalendar() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
                     <Button size="sm" variant="outline" className="text-xs">Modifier</Button>
                     <Button size="sm" className="text-xs">Voir détails</Button>
                   </div>
@@ -359,8 +360,10 @@ export function MaintenanceCalendar() {
               ))}
               
               {getEventsByDate(selectedDate).length === 0 && (
-                <div className="col-span-full text-center text-gray-500 py-8">
-                  Aucune tâche planifiée pour cette date
+                <div className="text-center text-gray-500 py-12">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg">Aucune tâche planifiée pour cette date</p>
+                  <p className="text-sm text-gray-400 mt-2">Les tâches apparaîtront ici une fois planifiées</p>
                 </div>
               )}
             </div>

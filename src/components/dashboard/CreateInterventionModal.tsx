@@ -88,7 +88,7 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Première ligne - Informations personnelles */}
+          {/* Première ligne - Noms et Numéro Barman */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="names">Noms</Label>
@@ -111,7 +111,7 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
             </div>
           </div>
 
-          {/* Deuxième ligne - Identification équipement */}
+          {/* Deuxième ligne - SERIAL NUMBER et TAG NUMBER */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="serialNumber">SERIAL NUMBER *</Label>
