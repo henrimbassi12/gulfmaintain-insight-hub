@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PredictionData } from '../types';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface PersonnelSectionProps {
   formData: PredictionData;
@@ -11,47 +11,60 @@ interface PersonnelSectionProps {
 
 export function PersonnelSection({ formData, onInputChange }: PersonnelSectionProps) {
   return (
-    <div>
-      <h4 className="text-sm font-semibold text-gray-900 mb-3">Personnel et Organisation</h4>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div className="space-y-4">
+      <h3 className="text-sm font-medium text-gray-700">Ressources Humaines</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="technicien_gfi" className="text-xs">Technicien GFI</Label>
+          <Label htmlFor="availableTechnicians">Techniciens disponibles</Label>
           <Input
-            id="technicien_gfi"
-            size="sm"
-            value={formData.technicien_gfi}
-            onChange={(e) => onInputChange('technicien_gfi', e.target.value)}
-            placeholder="VOUKENG"
+            id="availableTechnicians"
+            type="number"
+            value={formData.availableTechnicians}
+            onChange={(e) => onInputChange('availableTechnicians', e.target.value)}
+            className="mt-1"
+            placeholder="Ex: 3"
+            min="0"
           />
         </div>
+        
         <div>
-          <Label htmlFor="division" className="text-xs">Division</Label>
+          <Label htmlFor="technicianExperience">Expérience moyenne (années)</Label>
           <Input
-            id="division"
-            size="sm"
-            value={formData.division}
-            onChange={(e) => onInputChange('division', e.target.value)}
-            placeholder="Centre"
+            id="technicianExperience"
+            type="number"
+            value={formData.technicianExperience}
+            onChange={(e) => onInputChange('technicianExperience', e.target.value)}
+            className="mt-1"
+            placeholder="Ex: 5"
+            min="0"
           />
         </div>
+        
         <div>
-          <Label htmlFor="secteur" className="text-xs">Secteur</Label>
+          <Label htmlFor="workload">Charge de travail actuelle (%)</Label>
           <Input
-            id="secteur"
-            size="sm"
-            value={formData.secteur}
-            onChange={(e) => onInputChange('secteur', e.target.value)}
-            placeholder="Commercial"
+            id="workload"
+            type="number"
+            value={formData.workload}
+            onChange={(e) => onInputChange('workload', e.target.value)}
+            className="mt-1"
+            placeholder="Ex: 75"
+            min="0"
+            max="100"
           />
         </div>
+        
         <div>
-          <Label htmlFor="partenaire" className="text-xs">Partenaire</Label>
+          <Label htmlFor="responseTime">Temps de réponse souhaité (heures)</Label>
           <Input
-            id="partenaire"
-            size="sm"
-            value={formData.partenaire}
-            onChange={(e) => onInputChange('partenaire', e.target.value)}
-            placeholder="GUINNESS"
+            id="responseTime"
+            type="number"
+            value={formData.responseTime}
+            onChange={(e) => onInputChange('responseTime', e.target.value)}
+            className="mt-1"
+            placeholder="Ex: 2"
+            min="0"
           />
         </div>
       </div>

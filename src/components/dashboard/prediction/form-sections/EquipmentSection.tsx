@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PredictionData } from '../types';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface EquipmentSectionProps {
   formData: PredictionData;
@@ -12,45 +12,61 @@ interface EquipmentSectionProps {
 
 export function EquipmentSection({ formData, onInputChange }: EquipmentSectionProps) {
   return (
-    <div>
-      <h4 className="text-sm font-semibold text-gray-900 mb-3">Équipement</h4>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div className="space-y-4">
+      <h3 className="text-sm font-medium text-gray-700">Informations Équipement</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="type_frigo" className="text-xs">Type Frigo</Label>
-          <Select value={formData.type_frigo} onValueChange={(value) => onInputChange('type_frigo', value)}>
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Sélectionner" />
+          <Label htmlFor="equipmentType">Type d'équipement</Label>
+          <Select value={formData.equipmentType} onValueChange={(value) => onInputChange('equipmentType', value)}>
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Sélectionner le type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="INNOVA 420">INNOVA 420</SelectItem>
-              <SelectItem value="INNOVA 1000">INNOVA 1000</SelectItem>
-              <SelectItem value="INNOVA 650">INNOVA 650</SelectItem>
-              <SelectItem value="SANDEN 500">SANDEN 500</SelectItem>
-              <SelectItem value="SUPER-35">SUPER-35</SelectItem>
-              <SelectItem value="FV 400">FV 400</SelectItem>
+              <SelectItem value="refrigerator">Réfrigérateur</SelectItem>
+              <SelectItem value="freezer">Congélateur</SelectItem>
+              <SelectItem value="air_conditioner">Climatiseur</SelectItem>
+              <SelectItem value="generator">Générateur</SelectItem>
+              <SelectItem value="other">Autre</SelectItem>
             </SelectContent>
           </Select>
         </div>
+
         <div>
-          <Label htmlFor="af_nf" className="text-xs">AF/NF</Label>
-          <Select value={formData.af_nf} onValueChange={(value) => onInputChange('af_nf', value)}>
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="AF">AF</SelectItem>
-              <SelectItem value="NF">NF</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="branding" className="text-xs">Branding</Label>
+          <Label htmlFor="equipmentAge">Âge de l'équipement (années)</Label>
           <Input
-            id="branding"
-            size="sm"
-            value={formData.branding}
-            onChange={(e) => onInputChange('branding', e.target.value)}
-            placeholder="Coca-Cola"
+            id="equipmentAge"
+            type="number"
+            value={formData.equipmentAge}
+            onChange={(e) => onInputChange('equipmentAge', e.target.value)}
+            className="mt-1"
+            placeholder="Ex: 5"
+            min="0"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="lastMaintenanceDate">Dernière maintenance</Label>
+          <Input
+            id="lastMaintenanceDate"
+            type="date"
+            value={formData.lastMaintenanceDate}
+            onChange={(e) => onInputChange('lastMaintenanceDate', e.target.value)}
+            className="mt-1"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="usageIntensity">Intensité d'usage (1-10)</Label>
+          <Input
+            id="usageIntensity"
+            type="number"
+            value={formData.usageIntensity}
+            onChange={(e) => onInputChange('usageIntensity', e.target.value)}
+            className="mt-1"
+            placeholder="Ex: 7"
+            min="1"
+            max="10"
           />
         </div>
       </div>
