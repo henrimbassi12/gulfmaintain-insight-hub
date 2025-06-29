@@ -1,3 +1,4 @@
+
 import { FailurePrediction, TechnicianRecommendation } from '@/types/supervision';
 
 // Données d'exemple avec les nouvelles régions et équipements
@@ -162,3 +163,71 @@ export const technicianRecommendationSamples: TechnicianRecommendation[] = [
     updated_at: '2025-06-15T10:00:00Z'
   }
 ];
+
+// Structure des données pour la supervision
+export const supervisionSamples = {
+  technicians: [
+    {
+      id: '1',
+      name: 'J. Ekwalla',
+      zone: 'Akwa - Centre',
+      interventions: 47,
+      successRate: 98,
+      avgDuration: '38 min',
+      status: 'En mission'
+    },
+    {
+      id: '2',
+      name: 'VOUKENG',
+      zone: 'Bonaberi - Littoral',
+      interventions: 52,
+      successRate: 96,
+      avgDuration: '42 min',
+      status: 'Disponible'
+    },
+    {
+      id: '3',
+      name: 'TCHINDA Constant',
+      zone: 'Deïdo - Commercial',
+      interventions: 38,
+      successRate: 94,
+      avgDuration: '45 min',
+      status: 'En mission'
+    },
+    {
+      id: '4',
+      name: 'MBAPBOU Grégoire',
+      zone: 'Japoma - Industriel',
+      interventions: 41,
+      successRate: 92,
+      avgDuration: '48 min',
+      status: 'Disponible'
+    }
+  ],
+  predictions: [
+    {
+      id: '1',
+      equipment: 'SANDEN 300',
+      location: 'AKWA',
+      risk: 'Élevé',
+      confidence: 87,
+      nextMaintenance: 'Dans 3 jours'
+    },
+    {
+      id: '2',
+      equipment: 'INNOVA 650',
+      location: 'BONABERI',
+      risk: 'Moyen',
+      confidence: 72,
+      nextMaintenance: 'Dans 1 semaine'
+    },
+    {
+      id: '3',
+      equipment: 'INNOVA 420',
+      location: 'DEÏDO',
+      risk: 'Faible',
+      confidence: 91,
+      nextMaintenance: 'Dans 2 semaines'
+    }
+  ]
+};
