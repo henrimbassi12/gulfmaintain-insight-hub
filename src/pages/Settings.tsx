@@ -1,15 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, RefreshCw, Save } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfileSection } from '@/components/settings/UserProfileSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { SecuritySection } from '@/components/settings/SecuritySection';
+import { UserManagementSection } from '@/components/settings/UserManagementSection';
 
 export default function Settings() {
   const { user, userProfile, refreshProfile } = useAuth();
@@ -209,41 +210,64 @@ export default function Settings() {
         </div>
       </AirbnbHeader>
 
-      <div className="space-y-6">
-        <UserProfileSection
-          fullName={fullName}
-          setFullName={setFullName}
-          email={email}
-          role={role}
-          setRole={setRole}
-          agency={agency}
-          setAgency={setAgency}
-          isAdmin={isAdmin}
-          userProfile={userProfile}
-        />
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+          <TabsTrigger value="profile">Profil</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="security">Sécurité</TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+          )}
+        </TabsList>
 
-        <NotificationSection
-          emailNotifications={emailNotifications}
-          setEmailNotifications={setEmailNotifications}
-        />
+        <div className="mt-6">
+          <TabsContent value="profile" className="space-y-6">
+            <UserProfileSection
+              fullName={fullName}
+              setFullName={setFullName}
+              email={email}
+              role={role}
+              setRole={setRole}
+              agency={agency}
+              setAgency={setAgency}
+              isAdmin={isAdmin}
+              userProfile={userProfile}
+            />
+          </TabsContent>
 
-        <SecuritySection
-          currentPassword={currentPassword}
-          setCurrentPassword={setCurrentPassword}
-          newPassword={newPassword}
-          setNewPassword={setNewPassword}
-          confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
-          showCurrentPassword={showCurrentPassword}
-          setShowCurrentPassword={setShowCurrentPassword}
-          showNewPassword={showNewPassword}
-          setShowNewPassword={setShowNewPassword}
-          showConfirmPassword={showConfirmPassword}
-          setShowConfirmPassword={setShowConfirmPassword}
-          loadingPassword={loadingPassword}
-          handleChangePassword={handleChangePassword}
-        />
-      </div>
+          <TabsContent value="notifications" className="space-y-6">
+            <NotificationSection
+              emailNotifications={emailNotifications}
+              setEmailNotifications={setEmailNotifications}
+            />
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <SecuritySection
+              currentPassword={currentPassword}
+              setCurrentPassword={setCurrentPassword}
+              newPassword={newPassword}
+              setNewPassword={setNewPassword}
+              confirmPassword={confirmPassword}
+              setConfirmPassword={setConfirmPassword}
+              showCurrentPassword={showCurrentPassword}
+              setShowCurrentPassword={setShowCurrentPassword}
+              showNewPassword={showNewPassword}
+              setShowNewPassword={setShowNewPassword}
+              showConfirmPassword={showConfirmPassword}
+              setShowConfirmPassword={setShowConfirmPassword}
+              loadingPassword={loadingPassword}
+              handleChangePassword={handleChangePassword}
+            />
+          </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="users" className="space-y-6">
+              <UserManagementSection userProfile={userProfile} />
+            </TabsContent>
+          )}
+        </div>
+      </Tabs>
     </AirbnbContainer>
   );
 }

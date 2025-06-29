@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { 
@@ -26,7 +25,6 @@ import {
   Bot,
   FileText,
   Settings,
-  Users,
   Menu,
   Shield,
   MoreHorizontal,
@@ -70,27 +68,13 @@ export function AppSidebar() {
     { icon: MessageCircle, label: "Messages", href: "/messages" },
   ];
 
-  // Menu secondaire (dans "Plus")
+  // Menu secondaire (dans "Plus") - la gestion des utilisateurs n'est plus ici
   const secondaryMenuItems = [
     { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: FileText, label: "Rapports", href: "/reports" },
     { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-    // { icon: Bot, label: "Supervision", href: "/supervision" }, // MASQUÉ - Fonctionnalité intégrée au Dashboard
     { icon: Settings, label: "Paramètres", href: "/settings" },
   ];
-
-  // Ajouter la gestion des utilisateurs pour les admins
-  const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
-  console.log('🛡️ Is Admin Check Final:', {
-    userProfile: !!userProfile,
-    role: userProfile?.role,
-    accountStatus: userProfile?.account_status,
-    isAdmin
-  });
-  
-  if (isAdmin) {
-    secondaryMenuItems.push({ icon: Users, label: "Gestion des utilisateurs", href: "/user-management" });
-  }
 
   console.log('📋 Menu Items Final:', {
     primary: primaryMenuItems.map(item => ({ label: item.label, href: item.href })),
