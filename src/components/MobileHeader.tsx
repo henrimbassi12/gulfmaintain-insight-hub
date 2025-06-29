@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Shield, Bell, X } from 'lucide-react';
+import { Shield, Bell, X, Clock, Wrench, AlertTriangle, CheckCircle } from 'lucide-react';
 import { MobileDrawer } from './ui/mobile-drawer';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -14,32 +14,50 @@ export function MobileHeader() {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Notifications simulées
+  // Notifications simulées - alignées avec le système desktop
   const [notifications, setNotifications] = useState([
     {
       id: '1',
+      type: 'urgent' as const,
       title: 'Maintenance Urgente',
-      message: 'Température critique détectée sur le réfrigérateur FR-2024-012',
+      message: 'Température critique détectée sur le réfrigérateur',
+      equipment: 'FR-2024-012',
+      location: 'Région Littoral',
       timestamp: new Date(),
       read: false
     },
     {
       id: '2',
+      type: 'maintenance' as const,
       title: 'Maintenance Préventive',
-      message: 'Entretien programmé nécessaire pour FR-2024-089',
+      message: 'Entretien programmé nécessaire',
+      equipment: 'FR-2024-089',
+      location: 'Région Ouest',
       timestamp: new Date(Date.now() - 3600000),
       read: false
     },
     {
       id: '3',
+      type: 'success' as const,
       title: 'Réparation Terminée',
-      message: 'L\'intervention a été completée avec succès pour FR-2024-156',
+      message: 'L\'intervention a été completée avec succès',
+      equipment: 'FR-2024-156',
+      location: 'Région Nord',
       timestamp: new Date(Date.now() - 7200000),
       read: true
     }
   ]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'urgent': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      case 'maintenance': return <Wrench className="w-4 h-4 text-orange-500" />;
+      case 'success': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      default: return <Clock className="w-4 h-4 text-blue-500" />;
+    }
+  };
 
   const handleProfileClick = () => {
     navigate('/settings');
@@ -104,7 +122,7 @@ export function MobileHeader() {
         </div>
       </header>
 
-      {/* Panel de notifications mobile */}
+      {/* Panel de notifications mobile - Design aligné avec desktop */}
       {showNotifications && (
         <>
           {/* Overlay */}
@@ -121,7 +139,7 @@ export function MobileHeader() {
                 <div className="flex gap-2">
                   {unreadCount > 0 && (
                     <Button size="sm" variant="ghost" onClick={markAllAsRead}>
-                      Marquer tout comme lu
+                      Tout marquer lu
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => setShowNotifications(false)}>
@@ -145,9 +163,15 @@ export function MobileHeader() {
                       onClick={() => markAsRead(notification.id)}
                     >
                       <div className="flex items-start gap-3">
+                        {getNotificationIcon(notification.type)}
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm text-gray-900">{notification.title}</p>
                           <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+                          {notification.equipment && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              {notification.equipment} - {notification.location}
+                            </p>
+                          )}
                           <p className="text-xs text-gray-400 mt-2">
                             {notification.timestamp.toLocaleTimeString('fr-FR')}
                           </p>

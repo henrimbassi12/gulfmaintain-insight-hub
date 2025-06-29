@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Bell, X, Clock, Wrench, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,38 @@ interface Notification {
 }
 
 export function NotificationSystem() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      type: 'urgent',
+      title: 'Maintenance Urgente',
+      message: 'Température critique détectée sur le réfrigérateur',
+      equipment: 'FR-2024-012',
+      location: 'Région Littoral',
+      timestamp: new Date(),
+      read: false
+    },
+    {
+      id: '2',
+      type: 'maintenance',
+      title: 'Maintenance Préventive',
+      message: 'Entretien programmé nécessaire',
+      equipment: 'FR-2024-089',
+      location: 'Région Ouest',
+      timestamp: new Date(Date.now() - 3600000),
+      read: false
+    },
+    {
+      id: '3',
+      type: 'success',
+      title: 'Réparation Terminée',
+      message: 'L\'intervention a été completée avec succès',
+      equipment: 'FR-2024-156',
+      location: 'Région Nord',
+      timestamp: new Date(Date.now() - 7200000),
+      read: true
+    }
+  ]);
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
@@ -163,6 +195,10 @@ export function NotificationSystem() {
 
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    toast({
+      title: "Notifications",
+      description: "Toutes les notifications ont été marquées comme lues",
+    });
   };
 
   // Fermer les notifications quand on clique à l'extérieur

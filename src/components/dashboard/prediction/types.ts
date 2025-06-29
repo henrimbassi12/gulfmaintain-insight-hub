@@ -1,4 +1,3 @@
-
 export interface PredictionData {
   taux_remplissage_pct: string;
   temperature_c: string;
@@ -19,6 +18,23 @@ export interface PredictionData {
   purge_circuit_eaux: string;
   soufflage_parties_actives: string;
   date: string;
+  interventionDate: string;
+  seasonality: string;
+  equipmentType: string;
+  equipmentAge: string;
+  lastMaintenanceDate: string;
+  usageIntensity: string;
+  latitude: string;
+  longitude: string;
+  availableTechnicians: string;
+  technicianExperience: string;
+  workload: string;
+  responseTime: string;
+  temperature: string;
+  humidity: string;
+  vibration: string;
+  operatingHours: string;
+  failureHistory: string;
 }
 
 export interface PredictionResult {
