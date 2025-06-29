@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, RefreshCw, Save } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
@@ -11,6 +12,7 @@ import { UserProfileSection } from '@/components/settings/UserProfileSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { SecuritySection } from '@/components/settings/SecuritySection';
 import { UserManagementSection } from '@/components/settings/UserManagementSection';
+import { ThemeSection } from '@/components/settings/ThemeSection';
 
 export default function Settings() {
   const { user, userProfile, refreshProfile } = useAuth();
@@ -211,9 +213,10 @@ export default function Settings() {
       </AirbnbHeader>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
           <TabsTrigger value="profile">Profil</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="appearance">Apparence</TabsTrigger>
           <TabsTrigger value="security">Sécurité</TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
@@ -240,6 +243,10 @@ export default function Settings() {
               emailNotifications={emailNotifications}
               setEmailNotifications={setEmailNotifications}
             />
+          </TabsContent>
+
+          <TabsContent value="appearance" className="space-y-6">
+            <ThemeSection />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">

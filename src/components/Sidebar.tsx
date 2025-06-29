@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { 
@@ -39,25 +40,6 @@ export function AppSidebar() {
   const { user, userProfile } = useAuth();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
-  console.log('🔍 Sidebar Debug - État complet:', {
-    user: user ? {
-      id: user.id,
-      email: user.email,
-      metadata: user.user_metadata
-    } : null,
-    userProfile: userProfile ? {
-      id: userProfile.id,
-      role: userProfile.role,
-      account_status: userProfile.account_status,
-      full_name: userProfile.full_name
-    } : null,
-    userRole: userProfile?.role,
-    accountStatus: userProfile?.account_status,
-    isAdmin: userProfile?.role === 'admin',
-    isApproved: userProfile?.account_status === 'approved',
-    shouldShowUserManagement: userProfile?.role === 'admin' && userProfile?.account_status === 'approved'
-  });
-
   // Menu principal (navigation rapide)
   const primaryMenuItems = [
     { icon: BarChart3, label: "Tableau de bord", href: "/dashboard" },
@@ -68,18 +50,13 @@ export function AppSidebar() {
     { icon: MessageCircle, label: "Messages", href: "/messages" },
   ];
 
-  // Menu secondaire (dans "Plus") - la gestion des utilisateurs n'est plus ici
+  // Menu secondaire (dans "Plus") - gestion des utilisateurs retirée
   const secondaryMenuItems = [
     { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: FileText, label: "Rapports", href: "/reports" },
     { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
     { icon: Settings, label: "Paramètres", href: "/settings" },
   ];
-
-  console.log('📋 Menu Items Final:', {
-    primary: primaryMenuItems.map(item => ({ label: item.label, href: item.href })),
-    secondary: secondaryMenuItems.map(item => ({ label: item.label, href: item.href }))
-  });
 
   const isPathActive = (href: string) => location.pathname === href;
   const isMaintenanceActive = location.pathname === '/maintenance' || location.pathname === '/planning';
