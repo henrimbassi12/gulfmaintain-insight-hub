@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,21 +99,16 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Amélioration pour mobile */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prévention du zoom sur les inputs mobiles */
     font-size: 16px;
-    /* Transition fluide pour le changement de thème */
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Optimisations pour le mode sombre */
   .dark {
     color-scheme: dark;
   }
 
-  /* Amélioration des composants pour le mode sombre */
   .dark .bg-white {
     @apply bg-gray-900;
   }
@@ -133,10 +129,6 @@
     @apply text-gray-400;
   }
 
-  .dark .text-gray-500 {
-    @apply text-gray-500;
-  }
-
   .dark .border-gray-200 {
     @apply border-gray-700;
   }
@@ -153,7 +145,6 @@
     @apply bg-gray-700;
   }
 
-  /* Optimisations mobiles globales */
   @media (max-width: 768px) {
     .sidebar-trigger {
       @apply fixed top-4 left-4 z-50;
@@ -171,43 +162,35 @@
       @apply m-3 max-w-[calc(100vw-1.5rem)];
     }
 
-    /* Amélioration de l'espacement mobile - suppression des marges excessives */
     .container {
       @apply px-0 w-full max-w-none;
     }
 
-    /* Optimisation des cards mobiles */
     .card {
       @apply shadow-sm mx-0;
     }
 
-    /* Amélioration des boutons mobiles */
     button {
       @apply min-h-[44px];
     }
 
-    /* Amélioration de la lisibilité mobile */
     h1, h2, h3 {
       @apply leading-tight;
     }
 
-    /* Optimisation des tabs mobiles */
     [role="tablist"] {
       @apply overflow-x-auto scrollbar-hide;
     }
 
-    /* Amélioration des formulaires mobiles */
     input, textarea, select {
-      @apply text-base; /* Prévient le zoom sur iOS */
+      @apply text-base;
     }
 
-    /* Suppression des marges sur les conteneurs principaux */
     .max-w-7xl {
       @apply max-w-none;
     }
   }
 
-  /* Améliorations tactiles pour tous les écrans tactiles */
   @media (hover: none) and (pointer: coarse) {
     .hover-item {
       @apply active:bg-accent active:text-accent-foreground;
@@ -217,7 +200,6 @@
       @apply min-h-[44px] min-w-[44px];
     }
 
-    /* Amélioration des zones de tap */
     a, button, [role="button"], [role="tab"] {
       @apply relative;
     }
@@ -228,17 +210,14 @@
     }
   }
 
-  /* Prévention des problèmes de scroll mobile - utilisation complète de l'écran */
   html {
     @apply overflow-x-hidden w-full;
   }
 
-  /* Amélioration des transitions mobiles */
   .transition-all, .transition-colors, .transition-transform {
     @apply duration-200 ease-out;
   }
 
-  /* Amélioration des transitions pour le changement de thème */
   * {
     transition-property: background-color, border-color, color, fill, stroke;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -247,7 +226,6 @@
 }
 
 @layer components {
-  /* Classes utilitaires pour le responsive - utilisation complète de l'écran */
   .mobile-hidden {
     @apply hidden md:block;
   }
@@ -268,27 +246,22 @@
     @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t md:relative md:border-0;
   }
 
-  /* Amélioration de la navigation mobile - pleine largeur */
   .mobile-nav {
     @apply flex items-center justify-between p-3 bg-background border-b sticky top-0 z-40 w-full;
   }
 
-  /* Amélioration des conteneurs mobiles - pleine largeur */
   .mobile-container {
     @apply px-3 py-4 space-y-4 w-full;
   }
 
-  /* Amélioration des cards mobiles - pleine largeur */
   .mobile-card {
     @apply p-3 space-y-3 rounded-lg border bg-card w-full;
   }
 
-  /* Amélioration des boutons mobiles */
   .mobile-button {
     @apply px-4 py-3 text-sm font-medium rounded-lg touch-action-manipulation;
   }
 
-  /* Grille responsive améliorée - pleine largeur */
   .responsive-grid-auto {
     @apply grid gap-3 md:gap-4 w-full;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -300,7 +273,6 @@
     }
   }
 
-  /* Nouvelle classe pour conteneurs pleine largeur */
   .full-width-mobile {
     @apply w-full;
   }
@@ -312,7 +284,6 @@
   }
 }
 
-/* Animations pour les interactions mobiles */
 @layer utilities {
   .touch-action-manipulation {
     touch-action: manipulation;
@@ -322,7 +293,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Masquage de la scrollbar sur mobile */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -332,12 +302,10 @@
     display: none;
   }
 
-  /* Amélioration de la sélection de texte mobile */
   .select-none-mobile {
     @apply select-none md:select-auto;
   }
 
-  /* Amélioration des animations mobiles */
   .animate-fade-in {
     animation: fadeIn 0.3s ease-in-out;
   }
@@ -353,28 +321,24 @@
     }
   }
 
-  /* Amélioration du focus mobile */
   .focus-mobile {
     @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
-  /* Amélioration des états actifs mobiles */
   .active-mobile {
     @apply active:scale-95 active:bg-accent;
   }
 
-  /* Nouvelles utilities pour pleine largeur */
   .w-screen-safe {
     width: 100vw;
   }
 
   .h-screen-safe {
     height: 100vh;
-    height: 100dvh; /* Dynamic viewport height pour mobile */
+    height: 100dvh;
   }
 }
 
-/* Optimisations spécifiques pour les très petits écrans - pleine largeur */
 @media (max-width: 375px) {
   .container {
     @apply px-2 w-full max-w-none;
@@ -401,7 +365,6 @@
   }
 }
 
-/* Corrections spécifiques pour l'affichage mobile pleine largeur */
 @media (max-width: 768px) {
   .sidebar-provider {
     @apply w-full;
@@ -411,7 +374,6 @@
     @apply w-full min-w-0;
   }
 
-  /* Assurer que tous les conteneurs utilisent la pleine largeur */
   .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
     @apply max-w-none w-full;
   }
