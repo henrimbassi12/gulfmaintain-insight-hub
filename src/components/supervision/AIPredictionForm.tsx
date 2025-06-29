@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Calculator, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Brain, Calculator, TrendingUp, AlertTriangle, Zap } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
 
 interface PredictionData {
@@ -14,7 +15,7 @@ interface PredictionData {
   temperature: string;
   lineaire: string;
   tension: string;
-  intensite_avant: string;
+  intensite_avant_entretien: string;
   technicien_gfi: string;
   division: string;
   secteur: string;
@@ -26,8 +27,8 @@ interface PredictionData {
   branding: string;
   securite: string;
   eclairage: string;
-  purge_circuit: string;
-  soufflage_parties: string;
+  purge_circuit_eaux: boolean;
+  soufflage_parties_actives: boolean;
   date: string;
 }
 
@@ -44,7 +45,7 @@ export function AIPredictionForm() {
     temperature: '',
     lineaire: '1',
     tension: '',
-    intensite_avant: '',
+    intensite_avant_entretien: '',
     technicien_gfi: '',
     division: '',
     secteur: '',
@@ -56,15 +57,15 @@ export function AIPredictionForm() {
     branding: '',
     securite: 'Disjoncteur',
     eclairage: 'O',
-    purge_circuit: 'O',
-    soufflage_parties: 'O',
+    purge_circuit_eaux: false,
+    soufflage_parties_actives: false,
     date: new Date().toISOString().split('T')[0]
   });
 
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: keyof PredictionData, value: string) => {
+  const handleInputChange = (field: keyof PredictionData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -72,23 +73,28 @@ export function AIPredictionForm() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulation d'appel API
-    setTimeout(() => {
+    try {
+      // Simulation d'appel API de prédiction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       const mockResult: PredictionResult = {
-        predicted_status: 'Succès total',
-        confidence_score: Math.round(85 + Math.random() * 10),
+        predicted_status: Math.random() > 0.5 ? 'Succès total' : 'Nécessite intervention',
+        confidence_score: Math.round(80 + Math.random() * 15),
         risk_level: Math.random() > 0.7 ? 'Élevé' : Math.random() > 0.4 ? 'Moyen' : 'Faible',
         recommendations: [
-          'Maintenance renforcée recommandée',
-          'Surveillance de la température conseillée',
+          'Maintenance renforcée conseillée',
+          'Surveillance de la température requise',
           'Vérification du système de refroidissement'
         ]
       };
 
       setPredictionResult(mockResult);
-      setIsLoading(false);
       toast.success('Prédiction IA générée avec succès');
-    }, 2000);
+    } catch (error) {
+      toast.error('Erreur lors de la génération de la prédiction');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -97,7 +103,7 @@ export function AIPredictionForm() {
       temperature: '',
       lineaire: '1',
       tension: '',
-      intensite_avant: '',
+      intensite_avant_entretien: '',
       technicien_gfi: '',
       division: '',
       secteur: '',
@@ -109,8 +115,8 @@ export function AIPredictionForm() {
       branding: '',
       securite: 'Disjoncteur',
       eclairage: 'O',
-      purge_circuit: 'O',
-      soufflage_parties: 'O',
+      purge_circuit_eaux: false,
+      soufflage_parties_actives: false,
       date: new Date().toISOString().split('T')[0]
     });
     setPredictionResult(null);
@@ -118,25 +124,30 @@ export function AIPredictionForm() {
 
   return (
     <div className="space-y-6">
-      {/* Formulaire de saisie */}
-      <Card className="bg-white border border-gray-100 shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
+      <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+        <CardHeader>
           <CardTitle className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
+            <div className="p-3 bg-purple-600 rounded-xl">
+              <Brain className="w-8 h-8 text-white" />
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Saisie des Données de Prédiction</h2>
-              <p className="text-sm text-gray-600 font-normal">Entrez les paramètres pour générer une prédiction IA</p>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-purple-800">Prédiction IA - Statut Post-Entretien</h2>
+              <p className="text-sm text-purple-600 font-normal">Analyse prédictive du statut après maintenance</p>
+            </div>
+            <div className="flex gap-2">
+              <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
+                <Zap className="w-4 h-4" />
+                IA Active
+              </Badge>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Données techniques */}
-            <div>
+            {/* Données Techniques */}
+            <div className="bg-white rounded-lg p-4 border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Données Techniques</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="taux_remplissage">Taux de remplissage (%)</Label>
                   <Input
@@ -184,13 +195,13 @@ export function AIPredictionForm() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="intensite_avant">Intensité avant entretien (A)</Label>
+                  <Label htmlFor="intensite_avant_entretien">Intensité avant entretien (A)</Label>
                   <Input
-                    id="intensite_avant"
+                    id="intensite_avant_entretien"
                     type="number"
                     step="0.1"
-                    value={formData.intensite_avant}
-                    onChange={(e) => handleInputChange('intensite_avant', e.target.value)}
+                    value={formData.intensite_avant_entretien}
+                    onChange={(e) => handleInputChange('intensite_avant_entretien', e.target.value)}
                     placeholder="Ex: 2.5"
                     required
                   />
@@ -212,10 +223,10 @@ export function AIPredictionForm() {
               </div>
             </div>
 
-            {/* Données géographiques */}
-            <div>
+            {/* Localisation */}
+            <div className="bg-white rounded-lg p-4 border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Localisation</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="division">Division</Label>
                   <Input
@@ -270,9 +281,9 @@ export function AIPredictionForm() {
             </div>
 
             {/* Équipement */}
-            <div>
+            <div className="bg-white rounded-lg p-4 border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Équipement</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="type_frigo">Type Frigo</Label>
                   <Select value={formData.type_frigo} onValueChange={(value) => handleInputChange('type_frigo', value)}>
@@ -314,10 +325,10 @@ export function AIPredictionForm() {
               </div>
             </div>
 
-            {/* Options techniques */}
-            <div>
+            {/* Options Techniques */}
+            <div className="bg-white rounded-lg p-4 border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Options Techniques</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <Label htmlFor="securite">Sécurité</Label>
                   <Select value={formData.securite} onValueChange={(value) => handleInputChange('securite', value)}>
@@ -337,58 +348,55 @@ export function AIPredictionForm() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="O">O</SelectItem>
-                      <SelectItem value="N">N</SelectItem>
+                      <SelectItem value="O">O (Oui)</SelectItem>
+                      <SelectItem value="N">N (Non)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="purge_circuit">Purge du circuit</Label>
-                  <Select value={formData.purge_circuit} onValueChange={(value) => handleInputChange('purge_circuit', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="O">O</SelectItem>
-                      <SelectItem value="N">N</SelectItem>
-                    </SelectContent>
-                  </Select>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="purge_circuit_eaux"
+                    checked={formData.purge_circuit_eaux}
+                    onCheckedChange={(checked) => handleInputChange('purge_circuit_eaux', checked)}
+                  />
+                  <Label htmlFor="purge_circuit_eaux">Purge du circuit d'évacuation des eaux</Label>
                 </div>
-                <div>
-                  <Label htmlFor="soufflage_parties">Soufflage parties actives</Label>
-                  <Select value={formData.soufflage_parties} onValueChange={(value) => handleInputChange('soufflage_parties', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="O">O</SelectItem>
-                      <SelectItem value="N">N</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="soufflage_parties_actives"
+                    checked={formData.soufflage_parties_actives}
+                    onCheckedChange={(checked) => handleInputChange('soufflage_parties_actives', checked)}
+                  />
+                  <Label htmlFor="soufflage_parties_actives">Soufflage des parties actives à l'air</Label>
                 </div>
               </div>
             </div>
 
             {/* Date */}
-            <div>
-              <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                className="w-full md:w-auto"
-                required
-              />
+            <div className="bg-white rounded-lg p-4 border">
+              <div>
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  className="w-full md:w-auto"
+                  required
+                />
+              </div>
             </div>
 
             {/* Boutons */}
-            <div className="flex gap-3 pt-4 border-t">
-              <Button type="submit" disabled={isLoading} className="flex-1 md:flex-none">
+            <div className="flex gap-3 pt-4">
+              <Button type="submit" disabled={isLoading} className="flex-1 md:flex-none bg-purple-600 hover:bg-purple-700">
                 <Calculator className="w-4 h-4 mr-2" />
-                {isLoading ? 'Calcul en cours...' : 'Générer Prédiction'}
+                {isLoading ? 'Prédiction en cours...' : 'Lancer la Prédiction IA'}
               </Button>
-              <Button type="button" variant="outline" onClick={resetForm}>
+              <Button type="button" variant="outline" onClick={resetForm} className="border-purple-300 text-purple-700 hover:bg-purple-50">
                 Réinitialiser
               </Button>
             </div>
@@ -398,7 +406,7 @@ export function AIPredictionForm() {
 
       {/* Résultat de la prédiction */}
       {predictionResult && (
-        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 shadow-sm">
+        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
@@ -410,8 +418,8 @@ export function AIPredictionForm() {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="bg-white rounded-lg p-4 border">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge className="bg-blue-100 text-blue-800">Statut Prédit</Badge>
@@ -428,10 +436,6 @@ export function AIPredictionForm() {
 
               <div className="bg-white rounded-lg p-4 border">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className={`w-5 h-5 ${
-                    predictionResult.risk_level === 'Élevé' ? 'text-red-500' :
-                    predictionResult.risk_level === 'Moyen' ? 'text-yellow-500' : 'text-green-500'
-                  }`} />
                   <Badge className={
                     predictionResult.risk_level === 'Élevé' ? 'bg-red-100 text-red-800' :
                     predictionResult.risk_level === 'Moyen' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
@@ -448,11 +452,11 @@ export function AIPredictionForm() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Recommandations</h4>
               <div className="space-y-2">
                 {predictionResult.recommendations.map((rec, index) => (
-                  <div key={index} className="bg-white rounded-lg p-3 border border-gray-200">
+                  <div key={index} className="bg-white rounded-lg p-3 border">
                     <p className="text-sm text-gray-700">• {rec}</p>
                   </div>
                 ))}
