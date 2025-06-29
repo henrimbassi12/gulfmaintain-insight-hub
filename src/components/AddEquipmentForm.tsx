@@ -13,34 +13,34 @@ import { toast } from "sonner";
 import { Plus } from 'lucide-react';
 
 interface AddEquipmentFormData {
-  equipment_id: string;
-  type: string;
-  brand: string;
-  model: string;
-  location: string;
-  agency: string;
-  status: 'operational' | 'maintenance' | 'critical' | 'offline';
-  technician?: string;
+  date: string;
+  technician: string;
+  division: string;
+  secteur: string;
+  partenaire: string;
+  ville: string;
+  nom_client: string;
+  nom_pdv: string;
+  tel_barman: string;
+  serial_number: string;
+  tag_number: string;
+  quartier: string;
+  localisation: string;
+  type_frigo: string;
+  af_nf: string;
+  branding: string;
+  
+  // Champs optionnels pour compatibilité
+  equipment_id?: string;
+  type?: string;
+  brand?: string;
+  model?: string;
+  location?: string;
+  agency?: string;
+  status?: 'operational' | 'maintenance' | 'critical' | 'offline';
   last_maintenance?: string;
   next_maintenance?: string;
   temperature?: string;
-  serial_number: string;
-  
-  // Nouveaux champs demandés
-  date?: string;
-  division?: string;
-  secteur?: string;
-  partenaire?: string;
-  ville?: string;
-  nom_client?: string;
-  nom_pdv?: string;
-  tel_barman?: string;
-  tag_number?: string;
-  quartier?: string;
-  localisation?: string;
-  type_frigo?: string;
-  af_nf?: string;
-  branding?: string;
 }
 
 interface AddEquipmentFormProps {
@@ -53,20 +53,8 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
   const form = useForm<AddEquipmentFormData>({
     defaultValues: {
-      equipment_id: '',
-      type: '',
-      brand: '',
-      model: '',
-      location: '',
-      agency: '',
-      status: 'operational',
-      technician: '',
-      last_maintenance: '',
-      next_maintenance: '',
-      temperature: '',
-      serial_number: '',
-      // Nouveaux champs
       date: '',
+      technician: '',
       division: '',
       secteur: '',
       partenaire: '',
@@ -74,12 +62,15 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
       nom_client: '',
       nom_pdv: '',
       tel_barman: '',
+      serial_number: '',
       tag_number: '',
       quartier: '',
       localisation: '',
       type_frigo: '',
       af_nf: '',
       branding: '',
+      equipment_id: '',
+      status: 'operational',
     },
   });
 
@@ -113,34 +104,33 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
   const onSubmit = async (data: AddEquipmentFormData) => {
     setIsLoading(true);
     try {
+      // Générer un ID d'équipement automatique basé sur la date
+      const equipmentId = `EQ-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      
       const equipmentData = {
-        equipment_id: data.equipment_id,
-        type: data.type || null,
-        brand: data.brand || null,
-        model: data.model || null,
-        location: data.location || null,
-        agency: data.agency || null,
-        status: data.status,
-        technician: data.technician || null,
-        last_maintenance: data.last_maintenance || null,
-        next_maintenance: data.next_maintenance || null,
-        temperature: data.temperature || null,
+        equipment_id: equipmentId,
+        date: data.date,
+        technician: data.technician,
+        division: data.division,
+        secteur: data.secteur,
+        partenaire: data.partenaire,
+        ville: data.ville,
+        nom_client: data.nom_client,
+        nom_pdv: data.nom_pdv,
+        tel_barman: data.tel_barman,
         serial_number: data.serial_number,
-        // Nouveaux champs
-        date: data.date || null,
-        division: data.division || null,
-        secteur: data.secteur || null,
-        partenaire: data.partenaire || null,
-        ville: data.ville || null,
-        nom_client: data.nom_client || null,
-        nom_pdv: data.nom_pdv || null,
-        tel_barman: data.tel_barman || null,
-        tag_number: data.tag_number || null,
-        quartier: data.quartier || null,
-        localisation: data.localisation || null,
-        type_frigo: data.type_frigo || null,
-        af_nf: data.af_nf || null,
-        branding: data.branding || null,
+        tag_number: data.tag_number,
+        quartier: data.quartier,
+        localisation: data.localisation,
+        type_frigo: data.type_frigo,
+        af_nf: data.af_nf,
+        branding: data.branding,
+        status: 'operational' as const,
+        // Champs de compatibilité
+        type: data.type_frigo,
+        brand: data.branding,
+        location: data.localisation,
+        agency: data.ville,
       };
 
       const { error } = await supabase
@@ -200,20 +190,6 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="equipment_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID Équipement *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="FR-2024-001" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="technician" 
                   render={({ field }) => (
                     <FormItem>
@@ -228,30 +204,6 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                           {technicians.map(tech => (
                             <SelectItem key={tech} value={tech}>{tech}</SelectItem>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Statut</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un statut" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="operational">Opérationnel</SelectItem>
-                          <SelectItem value="maintenance">Maintenance</SelectItem>
-                          <SelectItem value="critical">Critique</SelectItem>
-                          <SelectItem value="offline">Hors ligne</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -501,56 +453,6 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                       <FormLabel>Branding *</FormLabel>
                       <FormControl>
                         <Input placeholder="Marque/branding" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="temperature"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Température (°C)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="4" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Maintenance */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Maintenance</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="last_maintenance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dernière maintenance</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="next_maintenance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prochaine maintenance</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

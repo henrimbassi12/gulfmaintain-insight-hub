@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,10 +7,9 @@ import { Package, Plus, RefreshCw, Activity } from "lucide-react";
 import { EquipmentStats } from '@/components/EquipmentStats';
 import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
-import { EquipmentFormModal } from '@/components/EquipmentFormModal';
+import { AddEquipmentForm } from '@/components/AddEquipmentForm';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
-import { ModernButton } from '@/components/ui/modern-button';
 import { useEquipments } from '@/hooks/useEquipments';
 import { toast } from 'sonner';
 
@@ -96,17 +96,17 @@ const Equipments = () => {
         subtitle={`Gestion et suivi de ${equipments.length} équipement${equipments.length > 1 ? 's' : ''}${filteredEquipments.length !== equipments.length ? ` (${filteredEquipments.length} affiché${filteredEquipments.length > 1 ? 's' : ''})` : ''}`}
         icon={Package}
       >
-        <ModernButton 
+        <Button 
           variant="outline" 
           onClick={handleRefresh}
           disabled={refreshing}
-          icon={RefreshCw}
-          className={refreshing ? 'animate-spin' : ''}
+          className={`${refreshing ? 'animate-spin' : ''} hover:bg-blue-50 border-gray-200`}
         >
+          <RefreshCw className="w-4 h-4 mr-2" />
           Actualiser
-        </ModernButton>
+        </Button>
         
-        <EquipmentFormModal onSuccess={refetch} />
+        <AddEquipmentForm onSuccess={refetch} />
       </AirbnbHeader>
 
       {/* Statistics épurées */}
