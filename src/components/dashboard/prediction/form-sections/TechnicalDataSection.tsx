@@ -6,10 +6,10 @@ import { PredictionData } from '../types';
 
 interface TechnicalDataSectionProps {
   formData: PredictionData;
-  onNumberInputChange: (field: keyof PredictionData, value: string) => void;
+  onInputChange: (field: keyof PredictionData, value: string) => void;
 }
 
-export function TechnicalDataSection({ formData, onNumberInputChange }: TechnicalDataSectionProps) {
+export function TechnicalDataSection({ formData, onInputChange }: TechnicalDataSectionProps) {
   return (
     <div>
       <h4 className="text-sm font-semibold text-gray-900 mb-3">Données techniques</h4>
@@ -21,7 +21,7 @@ export function TechnicalDataSection({ formData, onNumberInputChange }: Technica
             type="number"
             size="sm"
             value={formData.taux_remplissage_pct}
-            onChange={(e) => onNumberInputChange('taux_remplissage_pct', e.target.value)}
+            onChange={(e) => onInputChange('taux_remplissage_pct', e.target.value)}
             placeholder="0"
           />
         </div>
@@ -32,7 +32,7 @@ export function TechnicalDataSection({ formData, onNumberInputChange }: Technica
             type="number"
             size="sm"
             value={formData.temperature_c}
-            onChange={(e) => onNumberInputChange('temperature_c', e.target.value)}
+            onChange={(e) => onInputChange('temperature_c', e.target.value)}
             placeholder="0"
           />
         </div>
@@ -43,7 +43,7 @@ export function TechnicalDataSection({ formData, onNumberInputChange }: Technica
             type="number"
             size="sm"
             value={formData.lineaire_val}
-            onChange={(e) => onNumberInputChange('lineaire_val', e.target.value)}
+            onChange={(e) => onInputChange('lineaire_val', e.target.value)}
             placeholder="0"
           />
         </div>
@@ -54,7 +54,7 @@ export function TechnicalDataSection({ formData, onNumberInputChange }: Technica
             type="number"
             size="sm"
             value={formData.tension_v}
-            onChange={(e) => onNumberInputChange('tension_v', e.target.value)}
+            onChange={(e) => onInputChange('tension_v', e.target.value)}
             placeholder="0"
           />
         </div>
@@ -65,7 +65,7 @@ export function TechnicalDataSection({ formData, onNumberInputChange }: Technica
             type="number"
             size="sm"
             value={formData.intensite_avant_entretien_a}
-            onChange={(e) => onNumberInputChange('intensite_avant_entretien_a', e.target.value)}
+            onChange={(e) => onInputChange('intensite_avant_entretien_a', e.target.value)}
             placeholder="0"
           />
         </div>
