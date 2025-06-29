@@ -11,10 +11,9 @@ import { DateSection } from './form-sections/DateSection';
 interface PredictionFormFieldsProps {
   formData: PredictionData;
   onInputChange: (field: keyof PredictionData, value: string) => void;
-  onNumberInputChange: (field: keyof PredictionData, value: string) => void;
 }
 
-export function PredictionFormFields({ formData, onInputChange, onNumberInputChange }: PredictionFormFieldsProps) {
+export function PredictionFormFields({ formData, onInputChange }: PredictionFormFieldsProps) {
   return (
     <div className="space-y-4">
       <TechnicalDataSection 

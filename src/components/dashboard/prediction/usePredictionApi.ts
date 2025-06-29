@@ -5,9 +5,13 @@ import { PredictionData, PredictionResult } from './types';
 
 export function usePredictionApi() {
   const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<PredictionResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePredict = async (formData: PredictionData): Promise<PredictionResult | null> => {
+  const predict = async (formData: PredictionData): Promise<void> => {
     setIsLoading(true);
+    setError(null);
+    setResult(null);
 
     try {
       console.log('🤖 Envoi de la prédiction à l\'API...');
@@ -63,7 +67,7 @@ export function usePredictionApi() {
       const probabilityValues = Object.values(probabilities) as number[];
       const maxProbability = probabilityValues.length > 0 ? Math.max(...probabilityValues) : 0.85;
       
-      const result: PredictionResult = {
+      const predictionResult: PredictionResult = {
         predicted_status: apiResult.predicted_status || 'Succès total',
         confidence_score: Math.round(maxProbability * 100),
         risk_level: maxProbability > 0.7 ? 'Faible' : maxProbability > 0.4 ? 'Moyen' : 'Élevé',
@@ -75,10 +79,13 @@ export function usePredictionApi() {
         probabilities: probabilities
       };
 
+      setResult(predictionResult);
       toast.success('Prédiction IA générée avec succès');
-      return result;
     } catch (error) {
       console.error('❌ Erreur lors de la prédiction:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      setError(errorMessage);
       
       const fallbackResult: PredictionResult = {
         predicted_status: 'Succès total (simulé)',
@@ -91,12 +98,12 @@ export function usePredictionApi() {
         ]
       };
 
+      setResult(fallbackResult);
       toast.warning('API non disponible - Prédiction simulée utilisée');
-      return fallbackResult;
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { handlePredict, isLoading };
+  return { predict, isLoading, result, error };
 }
