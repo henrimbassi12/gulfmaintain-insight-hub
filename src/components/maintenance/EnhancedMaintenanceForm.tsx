@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus } from 'lucide-react';
 
 interface MaintenanceFormData {
   date: string;
@@ -37,11 +36,12 @@ interface MaintenanceFormData {
 }
 
 interface EnhancedMaintenanceFormProps {
+  isOpen: boolean;
+  onClose: () => void;
   onSuccess: () => void;
 }
 
-export function EnhancedMaintenanceForm({ onSuccess }: EnhancedMaintenanceFormProps) {
-  const [open, setOpen] = useState(false);
+export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: EnhancedMaintenanceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<MaintenanceFormData>({
@@ -134,7 +134,6 @@ export function EnhancedMaintenanceForm({ onSuccess }: EnhancedMaintenanceFormPr
       
       toast.success('Maintenance programmée avec succès');
       form.reset();
-      setOpen(false);
       onSuccess();
     } catch (error) {
       console.error('Erreur lors de la programmation de la maintenance:', error);
@@ -145,13 +144,7 @@ export function EnhancedMaintenanceForm({ onSuccess }: EnhancedMaintenanceFormPr
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvelle maintenance
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Programmer une nouvelle maintenance</DialogTitle>
@@ -573,7 +566,7 @@ export function EnhancedMaintenanceForm({ onSuccess }: EnhancedMaintenanceFormPr
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={onClose}
                 disabled={isLoading}
               >
                 Annuler
