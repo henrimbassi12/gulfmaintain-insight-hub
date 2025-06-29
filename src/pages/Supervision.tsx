@@ -7,7 +7,7 @@ import { Bot, TrendingUp, AlertTriangle, Clock, User, Award, BarChart3, FileText
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { MobileHeader } from '@/components/MobileHeader';
-import { AIPredictionForm } from '@/components/supervision/AIPredictionForm';
+import { PredictionForm } from '@/components/supervision/PredictionForm';
 import { useNavigate } from 'react-router-dom';
 
 export default function Supervision() {
@@ -214,8 +214,8 @@ export default function Supervision() {
           </CardContent>
         </Card>
 
-        {/* Prédiction IA - Formulaire */}
-        <AIPredictionForm />
+        {/* Prédiction IA - Nouveau formulaire */}
+        <PredictionForm />
 
         {/* Top techniciens */}
         <Card className="bg-white border border-gray-100 shadow-sm">
