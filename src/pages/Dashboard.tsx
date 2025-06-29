@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BarChart3, Package, Wrench, AlertTriangle, Activity, TrendingUp, Clock, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +6,7 @@ import { DashboardCard } from '@/components/DashboardCard';
 import { InterventionTrendChart } from '@/components/dashboard/InterventionTrendChart';
 import { NotificationSystem } from '@/components/NotificationSystem';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
-import { AIPredictionSection } from '@/components/dashboard/AIPredictionSection';
+import { DashboardAIPredictionForm } from '@/components/dashboard/DashboardAIPredictionForm';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
@@ -237,8 +236,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Section Prédiction IA - Nouveau bloc repliable */}
-        <AIPredictionSection />
+        {/* Section Prédiction IA - Formulaire mis à jour */}
+        <div className="mt-8">
+          <DashboardAIPredictionForm />
+        </div>
       </div>
     </div>
   );

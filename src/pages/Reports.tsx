@@ -9,12 +9,14 @@ import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
 import { RecentReports } from '@/components/reports/RecentReports';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
+import { MaintenanceFormModal } from '@/components/reports/MaintenanceFormModal';
 import { toast } from 'sonner';
 import { Wrench, Settings } from 'lucide-react';
 
 export default function Reports() {
   const [refreshing, setRefreshing] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [selectedForm, setSelectedForm] = useState<{type: string, title: string} | null>(null);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -29,10 +31,25 @@ export default function Reports() {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
+  const handleCreateForm = (formId: string) => {
+    const formTitles: Record<string, string> = {
+      'tracking': 'Fiche de Suivi et de Maintenance du Réfrigérateur Guinness',
+      'maintenance': 'Fiche d\'Entretien des Frigos',
+      'movement': 'Fiche de Suivi de Mouvement des Frigos',
+      'repair': 'Fiche de Suivi des Réparations des Frigos',
+      'depot': 'Fiche de Passe au Dépôt'
+    };
+
+    setSelectedForm({
+      type: formId,
+      title: formTitles[formId] || 'Fiche de maintenance'
+    });
+  };
+
   // Données d'exemple pour les rapports - types corrigés
   const sampleReports = [
     {
-      id: 1, // Changé en number
+      id: 1,
       title: 'Rapport de maintenance préventive',
       type: 'maintenance',
       date: '2024-06-24',
@@ -40,7 +57,7 @@ export default function Reports() {
       size: '2.5 MB'
     },
     {
-      id: 2, // Changé en number
+      id: 2,
       title: 'Rapport d\'intervention corrective',
       type: 'intervention',
       date: '2024-06-23',
@@ -56,8 +73,8 @@ export default function Reports() {
       title: 'Maintenance préventive',
       description: 'Formulaire pour les maintenances programmées',
       fields: ['equipment', 'technician', 'date', 'duration'],
-      icon: Wrench, // Changé en composant React
-      action: () => console.log('Create maintenance form')
+      icon: Wrench,
+      action: () => handleCreateForm('maintenance')
     },
     {
       id: 'form-2',
@@ -65,8 +82,8 @@ export default function Reports() {
       title: 'Intervention corrective',
       description: 'Formulaire pour les réparations',
       fields: ['equipment', 'issue', 'solution', 'parts'],
-      icon: Settings, // Changé en composant React
-      action: () => console.log('Create intervention form')
+      icon: Settings,
+      action: () => handleCreateForm('repair')
     }
   ];
 
@@ -101,7 +118,7 @@ export default function Reports() {
         <ReportsStats reports={sampleReports} />
         <AvailableForms 
           reportForms={sampleReportForms} 
-          onCreateForm={() => console.log('Create form')}
+          onCreateForm={handleCreateForm}
         />
         <RecentReports reports={sampleReports} />
       </div>
@@ -110,6 +127,15 @@ export default function Reports() {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
       />
+
+      {selectedForm && (
+        <MaintenanceFormModal
+          isOpen={!!selectedForm}
+          onClose={() => setSelectedForm(null)}
+          formType={selectedForm.type}
+          formTitle={selectedForm.title}
+        />
+      )}
     </AirbnbContainer>
   );
 }
