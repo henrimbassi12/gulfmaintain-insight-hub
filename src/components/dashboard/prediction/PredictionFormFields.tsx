@@ -19,7 +19,7 @@ export function PredictionFormFields({ formData, onInputChange, onNumberInputCha
     <div className="space-y-4">
       <TechnicalDataSection 
         formData={formData} 
-        onNumberInputChange={onNumberInputChange} 
+        onInputChange={onInputChange} 
       />
       
       <PersonnelSection 
