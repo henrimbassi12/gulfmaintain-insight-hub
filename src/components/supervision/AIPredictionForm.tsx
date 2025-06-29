@@ -360,7 +360,7 @@ export function AIPredictionForm() {
                   <Checkbox
                     id="purge_circuit_eaux"
                     checked={formData.purge_circuit_eaux}
-                    onCheckedChange={(checked) => handleInputChange('purge_circuit_eaux', checked)}
+                    onCheckedChange={(checked) => handleInputChange('purge_circuit_eaux', !!checked)}
                   />
                   <Label htmlFor="purge_circuit_eaux">Purge du circuit d'évacuation des eaux</Label>
                 </div>
@@ -368,7 +368,7 @@ export function AIPredictionForm() {
                   <Checkbox
                     id="soufflage_parties_actives"
                     checked={formData.soufflage_parties_actives}
-                    onCheckedChange={(checked) => handleInputChange('soufflage_parties_actives', checked)}
+                    onCheckedChange={(checked) => handleInputChange('soufflage_parties_actives', !!checked)}
                   />
                   <Label htmlFor="soufflage_parties_actives">Soufflage des parties actives à l'air</Label>
                 </div>
