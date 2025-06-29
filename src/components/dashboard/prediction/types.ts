@@ -26,4 +26,7 @@ export interface PredictionResult {
   confidence_score: number;
   risk_level: 'Faible' | 'Moyen' | 'Élevé';
   recommendations: string[];
+  probabilities?: {
+    [key: string]: number;
+  };
 }

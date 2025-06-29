@@ -58,15 +58,20 @@ export function usePredictionApi() {
       const apiResult = await response.json();
       console.log('✅ Réponse de l\'API:', apiResult);
 
+      // Calculer le score de confiance basé sur la probabilité la plus élevée
+      const maxProbability = apiResult.probabilities ? 
+        Math.max(...Object.values(apiResult.probabilities)) : 0.85;
+      
       const result: PredictionResult = {
-        predicted_status: apiResult.prediction || 'Succès total',
-        confidence_score: Math.round(85 + Math.random() * 10),
-        risk_level: Math.random() > 0.7 ? 'Élevé' : Math.random() > 0.4 ? 'Moyen' : 'Faible',
+        predicted_status: apiResult.predicted_status || 'Succès total',
+        confidence_score: Math.round(maxProbability * 100),
+        risk_level: maxProbability > 0.7 ? 'Faible' : maxProbability > 0.4 ? 'Moyen' : 'Élevé',
         recommendations: [
           'Maintenance renforcée recommandée',
           'Surveillance de la température conseillée',
           'Vérification du système de refroidissement'
-        ]
+        ],
+        probabilities: apiResult.probabilities || {}
       };
 
       toast.success('Prédiction IA générée avec succès');
