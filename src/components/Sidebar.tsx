@@ -50,7 +50,7 @@ export function AppSidebar() {
     { icon: MessageCircle, label: "Messages", href: "/messages" },
   ];
 
-  // Menu secondaire (dans "Plus") - gestion des utilisateurs retirée
+  // Menu secondaire (dans "Plus") - sans gestion des utilisateurs
   const secondaryMenuItems = [
     { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: FileText, label: "Rapports", href: "/reports" },
@@ -67,10 +67,10 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <Shield className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
           <div className="group-data-[collapsible=icon]:hidden">
-            <h1 className="text-base md:text-lg font-semibold text-gray-900">
+            <h1 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">
               GulfMaintain
             </h1>
-            <p className="text-xs text-gray-500 font-normal">
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
               Gestion de maintenance
             </p>
           </div>
@@ -92,11 +92,11 @@ export function AppSidebar() {
                         <div className="flex items-center gap-3 w-full">
                           <item.icon className={cn(
                             "w-5 h-5 md:w-4 md:h-4",
-                            isActive ? "text-blue-600" : "text-gray-500"
+                            isActive ? "text-blue-600" : "text-gray-500 dark:text-gray-400"
                           )} />
                           <span className={cn(
                             "font-medium text-sm md:text-sm flex-1 text-left group-data-[collapsible=icon]:hidden",
-                            isActive ? "text-blue-600" : "text-gray-700"
+                            isActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
                           )}>
                             {item.label}
                           </span>
@@ -111,8 +111,8 @@ export function AppSidebar() {
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
                             isPathActive(item.href) 
-                              ? "bg-blue-50 text-blue-600" 
-                              : "text-gray-600 hover:bg-gray-50"
+                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
+                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                           )}
                         >
                           Liste des tâches
@@ -124,8 +124,8 @@ export function AppSidebar() {
                             className={cn(
                               "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
                               isPathActive(subItem.href) 
-                                ? "bg-blue-50 text-blue-600" 
-                                : "text-gray-600 hover:bg-gray-50"
+                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                             )}
                           >
                             <subItem.icon className="w-4 h-4" />
@@ -145,11 +145,11 @@ export function AppSidebar() {
                   <Link to={item.href} className="flex items-center gap-3 w-full">
                     <item.icon className={cn(
                       "w-5 h-5 md:w-4 md:h-4",
-                      isActive ? "text-blue-600" : "text-gray-500"
+                      isActive ? "text-blue-600" : "text-gray-500 dark:text-gray-400"
                     )} />
                     <span className={cn(
                       "font-medium text-sm md:text-sm group-data-[collapsible=icon]:hidden",
-                      isActive ? "text-blue-600" : "text-gray-700"
+                      isActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
                     )}>
                       {item.label}
                     </span>
@@ -165,8 +165,8 @@ export function AppSidebar() {
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton size="lg" className="w-full">
                   <div className="flex items-center gap-3 w-full">
-                    <MoreHorizontal className="w-5 h-5 md:w-4 md:h-4 text-gray-500" />
-                    <span className="font-medium text-sm md:text-sm text-gray-700 flex-1 text-left group-data-[collapsible=icon]:hidden">
+                    <MoreHorizontal className="w-5 h-5 md:w-4 md:h-4 text-gray-500 dark:text-gray-400" />
+                    <span className="font-medium text-sm md:text-sm text-gray-700 dark:text-gray-300 flex-1 text-left group-data-[collapsible=icon]:hidden">
                       Plus
                     </span>
                     <div className="group-data-[collapsible=icon]:hidden">
@@ -190,8 +190,8 @@ export function AppSidebar() {
                         className={cn(
                           "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
                           isActive 
-                            ? "bg-blue-50 text-blue-600" 
-                            : "text-gray-600 hover:bg-gray-50"
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
+                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                         )}
                       >
                         <item.icon className="w-4 h-4" />
@@ -206,7 +206,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       
-      <SidebarFooter className="mt-8 pt-4 border-t border-gray-200">
+      <SidebarFooter className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="px-2 py-1">
