@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,12 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus } from 'lucide-react';
 
-interface AddEquipmentFormData {
+interface MaintenanceFormData {
   date: string;
   technician: string;
   division: string;
@@ -29,17 +28,23 @@ interface AddEquipmentFormData {
   type_frigo: string;
   af_nf: string;
   branding: string;
+  // Champs supplémentaires pour maintenance
+  type_maintenance: string;
+  priorite: string;
+  duree_estimee: string;
+  date_programmee: string;
+  description?: string;
 }
 
-interface AddEquipmentFormProps {
+interface EnhancedMaintenanceFormProps {
   onSuccess: () => void;
 }
 
-export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
+export function EnhancedMaintenanceForm({ onSuccess }: EnhancedMaintenanceFormProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<AddEquipmentFormData>({
+  const form = useForm<MaintenanceFormData>({
     defaultValues: {
       date: '',
       technician: '',
@@ -57,18 +62,13 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
       type_frigo: '',
       af_nf: '',
       branding: '',
+      type_maintenance: '',
+      priorite: '',
+      duree_estimee: '',
+      date_programmee: '',
+      description: '',
     },
   });
-
-  const fridgeTypes = [
-    'INNOVA 420',
-    'INNOVA 1000', 
-    'INNOVA 650',
-    'SANDEN 500',
-    'SUPER-35',
-    'FV 400',
-    'Autres'
-  ];
 
   const technicians = [
     'VOUKENG',
@@ -86,54 +86,59 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
     'Garoua'
   ];
 
-  const onSubmit = async (data: AddEquipmentFormData) => {
+  const fridgeTypes = [
+    'INNOVA 420',
+    'INNOVA 1000', 
+    'INNOVA 650',
+    'SANDEN 500',
+    'SUPER-35',
+    'FV 400',
+    'Autres'
+  ];
+
+  const maintenanceTypes = [
+    'Maintenance préventive',
+    'Maintenance corrective',
+    'Surveillance Renforcée',
+    'Investigation Défaillance',
+    'Entretien Renforcé'
+  ];
+
+  const priorities = [
+    'Faible',
+    'Normale',
+    'Haute',
+    'Critique',
+    'Urgent'
+  ];
+
+  const estimatedDurations = [
+    '30 minutes',
+    '1 heure',
+    '2 heures',
+    '3 heures',
+    '4 heures',
+    '1 jour',
+    '2 jours',
+    'Plus de 2 jours'
+  ];
+
+  const onSubmit = async (data: MaintenanceFormData) => {
     setIsLoading(true);
     try {
-      // Générer un ID d'équipement automatique basé sur la date
-      const equipmentId = `EQ-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      // Simuler l'ajout de maintenance (remplacer par l'appel API réel)
+      console.log('Données de maintenance:', data);
       
-      const equipmentData = {
-        equipment_id: equipmentId,
-        serial_number: data.serial_number,
-        type: data.type_frigo,
-        brand: data.branding,
-        model: data.type_frigo, // Utiliser type_frigo comme modèle pour la compatibilité
-        location: data.localisation,
-        agency: data.ville,
-        status: 'operational' as const,
-        technician: data.technician,
-        // Nouveaux champs spécifiques
-        date: data.date,
-        division: data.division,
-        secteur: data.secteur,
-        partenaire: data.partenaire,
-        ville: data.ville,
-        nom_client: data.nom_client,
-        nom_pdv: data.nom_pdv,
-        tel_barman: data.tel_barman,
-        tag_number: data.tag_number,
-        quartier: data.quartier,
-        localisation: data.localisation,
-        type_frigo: data.type_frigo,
-        af_nf: data.af_nf,
-        branding: data.branding,
-      };
-
-      const { error } = await supabase
-        .from('equipments')
-        .insert(equipmentData);
-
-      if (error) {
-        throw error;
-      }
-
-      toast.success('Équipement ajouté avec succès');
+      // Ici vous ajouteriez l'appel à votre API Supabase
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('Maintenance programmée avec succès');
       form.reset();
       setOpen(false);
       onSuccess();
     } catch (error) {
-      console.error('Erreur lors de l\'ajout de l\'équipement:', error);
-      toast.error('Erreur lors de l\'ajout de l\'équipement');
+      console.error('Erreur lors de la programmation de la maintenance:', error);
+      toast.error('Erreur lors de la programmation de la maintenance');
     } finally {
       setIsLoading(false);
     }
@@ -144,16 +149,107 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
       <DialogTrigger asChild>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
-          Nouvel équipement
+          Nouvelle maintenance
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Ajouter un nouvel équipement</DialogTitle>
+          <DialogTitle>Programmer une nouvelle maintenance</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
+            {/* Informations de planification */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Planification de la maintenance</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="type_maintenance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type de maintenance *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner le type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {maintenanceTypes.map(type => (
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="priorite"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priorité *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner la priorité" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {priorities.map(priority => (
+                            <SelectItem key={priority} value={priority}>{priority}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="duree_estimee"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Durée estimée *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner la durée" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {estimatedDurations.map(duration => (
+                            <SelectItem key={duration} value={duration}>{duration}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="date_programmee"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date programmée *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
             {/* Informations de base */}
             <Card>
               <CardHeader>
@@ -165,7 +261,7 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                   name="date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date *</FormLabel>
+                      <FormLabel>Date de création *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} required />
                       </FormControl>
@@ -179,7 +275,7 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                   name="technician" 
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Technicien *</FormLabel>
+                      <FormLabel>Technicien assigné *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -199,7 +295,7 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
               </CardContent>
             </Card>
 
-            {/* Organisation */}
+            {/* Organisation - reprise des champs du formulaire équipement */}
             <Card>
               <CardHeader>
                 <CardTitle>Organisation</CardTitle>
@@ -447,6 +543,32 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
               </CardContent>
             </Card>
 
+            {/* Description additionnelle */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Description de la maintenance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description détaillée</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Décrire les travaux à effectuer, les problèmes identifiés, etc." 
+                          rows={4}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"
@@ -457,7 +579,7 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                 Annuler
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Ajout...' : 'Ajouter'}
+                {isLoading ? 'Programmation...' : 'Programmer la maintenance'}
               </Button>
             </div>
           </form>

@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { RefreshCw, Plus, Download } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
 import { MaintenanceFormModal } from '@/components/maintenance/MaintenanceFormModal';
 import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
 import { MaintenanceList } from '@/components/maintenance/MaintenanceList';
 import { MaintenancePageFilters } from '@/components/maintenance/MaintenancePageFilters';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
-import { ModernButton } from '@/components/ui/modern-button';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Wrench } from 'lucide-react';
 
@@ -29,10 +29,6 @@ export default function Maintenance() {
       }
     );
     setTimeout(() => setRefreshing(false), 1500);
-  };
-
-  const handleExportPDF = () => {
-    toast.success('Export PDF en cours...');
   };
 
   const handleResetFilters = () => {
@@ -106,35 +102,26 @@ export default function Maintenance() {
     <AirbnbContainer>
       <AirbnbHeader
         title="Maintenance"
-        subtitle="Gestion et suivi des interventions préventives et curatives"
+        subtitle={`Gestion et suivi de ${maintenances.length} intervention${maintenances.length > 1 ? 's' : ''}${filteredMaintenances.length !== maintenances.length ? ` (${filteredMaintenances.length} affichée${filteredMaintenances.length > 1 ? 's' : ''})` : ''}`}
         icon={Wrench}
       >
-        <div className="flex flex-col gap-2 w-full">
-          <ModernButton 
-            variant="outline" 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            icon={RefreshCw}
-            className={refreshing ? 'animate-spin' : ''}
-          >
-            Actualiser
-          </ModernButton>
-          
-          <ModernButton 
-            onClick={() => setIsFormModalOpen(true)}
-            icon={Plus}
-          >
-            Nouvelle Maintenance
-          </ModernButton>
-
-          <ModernButton 
-            variant="outline"
-            onClick={handleExportPDF}
-            icon={Download}
-          >
-            Exporter PDF
-          </ModernButton>
-        </div>
+        <Button 
+          variant="outline" 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className={`${refreshing ? 'animate-spin' : ''} hover:bg-blue-50 border-gray-200`}
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Actualiser
+        </Button>
+        
+        <Button 
+          onClick={() => setIsFormModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvelle maintenance
+        </Button>
       </AirbnbHeader>
 
       <div className="space-y-6">
