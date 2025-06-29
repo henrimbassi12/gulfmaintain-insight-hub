@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FileText, RefreshCw, Filter } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
@@ -9,7 +8,11 @@ import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
 import { RecentReports } from '@/components/reports/RecentReports';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
-import { MaintenanceFormModal } from '@/components/reports/MaintenanceFormModal';
+import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
+import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
+import { MovementForm } from '@/components/forms/MovementForm';
+import { RepairForm } from '@/components/forms/RepairForm';
+import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
 import { toast } from 'sonner';
 import { Wrench, Settings } from 'lucide-react';
 
@@ -44,6 +47,11 @@ export default function Reports() {
       type: formId,
       title: formTitles[formId] || 'Fiche de maintenance'
     });
+  };
+
+  const handleSaveForm = (data: any) => {
+    console.log('Données sauvegardées:', data);
+    // Ici on pourrait sauvegarder les données dans la base de données
   };
 
   // Données d'exemple pour les rapports - types corrigés
@@ -128,12 +136,44 @@ export default function Reports() {
         onClose={() => setIsFilterModalOpen(false)}
       />
 
-      {selectedForm && (
-        <MaintenanceFormModal
+      {/* Formulaires dynamiques */}
+      {selectedForm?.type === 'tracking' && (
+        <MaintenanceTrackingForm
           isOpen={!!selectedForm}
           onClose={() => setSelectedForm(null)}
-          formType={selectedForm.type}
-          formTitle={selectedForm.title}
+          onSave={handleSaveForm}
+        />
+      )}
+
+      {selectedForm?.type === 'maintenance' && (
+        <RefrigeratorMaintenanceForm
+          isOpen={!!selectedForm}
+          onClose={() => setSelectedForm(null)}
+          onSave={handleSaveForm}
+        />
+      )}
+
+      {selectedForm?.type === 'movement' && (
+        <MovementForm
+          isOpen={!!selectedForm}
+          onClose={() => setSelectedForm(null)}
+          onSave={handleSaveForm}
+        />
+      )}
+
+      {selectedForm?.type === 'repair' && (
+        <RepairForm
+          isOpen={!!selectedForm}
+          onClose={() => setSelectedForm(null)}
+          onSave={handleSaveForm}
+        />
+      )}
+
+      {selectedForm?.type === 'depot' && (
+        <DepotScheduleForm
+          isOpen={!!selectedForm}
+          onClose={() => setSelectedForm(null)}
+          onSave={handleSaveForm}
         />
       )}
     </AirbnbContainer>

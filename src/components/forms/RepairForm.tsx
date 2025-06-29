@@ -7,9 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save, Download } from "lucide-react";
+import { ArrowLeft, Save, Download, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface RepairFormProps {
   isOpen: boolean;
@@ -18,71 +17,107 @@ interface RepairFormProps {
   onBack?: () => void;
 }
 
+interface ReplacedPart {
+  id: string;
+  designation1: string;
+  quantite1: string;
+  designation2: string;
+  quantite2: string;
+}
+
 export function RepairForm({ isOpen, onClose, onSave, onBack }: RepairFormProps) {
   const [formData, setFormData] = useState({
     // En-tête
     nomClient: '',
     nomPdv: '',
     
-    // 1. Déclaration de pannes
-    date1: new Date().toISOString().split('T')[0],
-    heure1: '',
-    ancienFrigo: false,
-    nouveauFrigo: false,
+    // Déclaration de pannes
+    date: new Date().toISOString().split('T')[0],
+    heure: '',
+    ancienFrigo: '',
+    nouveauFrigo: '',
     sn: '',
     tagNumber: '',
-    fv800: false,
-    fv420: false,
-    sdm1500: false,
-    sdm650: false,
-    branding: '',
-    autres: '',
+    typeFrigo: '',
     quartier: '',
-    emplacement: '',
+    arrondissement: '',
     organisation: '',
     partenaire: '',
-    villeDivision: '',
+    reparation: '',
     descriptionPanne: '',
-    nomPrenomSignature1: '',
+    nomPrenomDateSignature: '',
     
-    // 2. Statut de réparation
-    date2: new Date().toISOString().split('T')[0],
+    // Statut de réparation
+    seWs2: '',
+    abdm: '',
+    tas: '',
+    gulfFroid: '',
+    dateReparation: new Date().toISOString().split('T')[0],
     panneDetectee: '',
     travauxEffectues: '',
-    piecesRemplacees: [
-      { designation: '', quantite: '' },
-      { designation: '', quantite: '' }
-    ],
     nomPrenomTechnicien: '',
+    dateTechnicien: '',
+    signatureTechnicien: '',
     telephoneTechnicien: '',
-    satisfait: false,
-    insatisfaisant: false,
+    resultatAudit: '',
     commentaires: '',
     
     // Approbations
-    gerant: '',
-    sd: '',
-    se: '',
-    abdm: '',
-    tas: ''
+    gerantNom: '',
+    gerantSignature: '',
+    gerantDate: '',
+    sdNom: '',
+    sdSignature: '',
+    sdDate: '',
+    seNom: '',
+    seSignature: '',
+    seDate: '',
+    abdmNom: '',
+    abdmSignature: '',
+    abdmDate: '',
+    tasNom: '',
+    tasSignature: '',
+    tasDate: ''
   });
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const [replacedParts, setReplacedParts] = useState<ReplacedPart[]>([
+    { id: '1', designation1: '', quantite1: '', designation2: '', quantite2: '' }
+  ]);
+
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePieceChange = (index: number, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      piecesRemplacees: prev.piecesRemplacees.map((piece, i) => 
-        i === index ? { ...piece, [field]: value } : piece
+  const addReplacedPart = () => {
+    const newPart: ReplacedPart = {
+      id: Date.now().toString(),
+      designation1: '',
+      quantite1: '',
+      designation2: '',
+      quantite2: ''
+    };
+    setReplacedParts(prev => [...prev, newPart]);
+  };
+
+  const removeReplacedPart = (id: string) => {
+    setReplacedParts(prev => prev.filter(part => part.id !== id));
+  };
+
+  const updateReplacedPart = (id: string, field: string, value: string) => {
+    setReplacedParts(prev => 
+      prev.map(part => 
+        part.id === id ? { ...part, [field]: value } : part
       )
-    }));
+    );
   };
 
   const handleSave = () => {
-    onSave(formData);
-    toast.success('Fiche de réparation sauvegardée avec succès !');
+    const completeData = {
+      ...formData,
+      replacedParts
+    };
+    onSave(completeData);
+    toast.success('Fiche de suivi des réparations sauvegardée avec succès !');
     onClose();
   };
 
@@ -92,7 +127,7 @@ export function RepairForm({ isOpen, onClose, onSave, onBack }: RepairFormProps)
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `fiche-reparation-${formData.tagNumber || 'nouveau'}-${formData.date1}.txt`;
+    link.download = `fiche-reparation-${formData.nomPdv || 'nouveau'}-${formData.date}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -108,54 +143,57 @@ Nom du client: ${formData.nomClient}
 Nom du PDV: ${formData.nomPdv}
 
 === 1. DÉCLARATION DE PANNES ===
-Date: ${formData.date1}
-Heure: ${formData.heure1}
+Date: ${formData.date}
+Heure: ${formData.heure}
 
 Informations sur le frigo:
-- Ancien frigo: ${formData.ancienFrigo ? 'Oui' : 'Non'}
-- Nouveau frigo: ${formData.nouveauFrigo ? 'Oui' : 'Non'}
+- Ancien frigo: ${formData.ancienFrigo}
+- Nouveau Frigo: ${formData.nouveauFrigo}
 - S.N: ${formData.sn}
 - TAG NUMBER: ${formData.tagNumber}
 
-Type de frigo:
-- FV800: ${formData.fv800 ? 'Oui' : 'Non'}
-- FV420: ${formData.fv420 ? 'Oui' : 'Non'}
-- SDM1500: ${formData.sdm1500 ? 'Oui' : 'Non'}
-- SDM650: ${formData.sdm650 ? 'Oui' : 'Non'}
-- Branding: ${formData.branding}
-- Autres: ${formData.autres}
+Type de frigo: ${formData.typeFrigo}
 
 Localisation:
 - Quartier: ${formData.quartier}
-- Emplacement exact: ${formData.emplacement}
+- Arrondissement: ${formData.arrondissement}
 - Organisation: ${formData.organisation}
 - Partenaire: ${formData.partenaire}
-- Ville Division: ${formData.villeDivision}
+- Réparation: ${formData.reparation}
 
 Description de la panne: ${formData.descriptionPanne}
+Nom, prénom, date, signature: ${formData.nomPrenomDateSignature}
 
 === 2. STATUT DE RÉPARATION ===
-Date: ${formData.date2}
-Panne détectée: ${formData.panneDetectee}
-Travaux effectués: ${formData.travauxEffectues}
+SE/WS2: ${formData.seWs2}
+ABDM: ${formData.abdm}
+TAS: ${formData.tas}
+GULF FROID INDUSTRIEL: ${formData.gulfFroid}
+Date: ${formData.dateReparation}
 
-Pièces remplacées:
-${formData.piecesRemplacees.map((piece, index) => 
-  `${index + 1}. ${piece.designation} - Quantité: ${piece.quantite}`
-).join('\n')}
+Panne détectée(s): ${formData.panneDetectee}
+Travaux effectué(s): ${formData.travauxEffectues}
+
+=== PIÈCES REMPLACÉES ===
+${replacedParts.map(part => `
+Désignation: ${part.designation1} - Quantité: ${part.quantite1}
+Désignation: ${part.designation2} - Quantité: ${part.quantite2}
+`).join('\n')}
 
 Technicien: ${formData.nomPrenomTechnicien}
+Date: ${formData.dateTechnicien}
+Signature: ${formData.signatureTechnicien}
 Téléphone: ${formData.telephoneTechnicien}
 
-Résultat audit: ${formData.satisfait ? 'Satisfait' : formData.insatisfaisant ? 'Insatisfaisant' : 'Non renseigné'}
+Résultat Audit Guinness Rep: ${formData.resultatAudit}
 Commentaires: ${formData.commentaires}
 
-Approbations:
-- Gérant: ${formData.gerant}
-- SD: ${formData.sd}
-- SE: ${formData.se}
-- ABDM: ${formData.abdm}
-- TAS: ${formData.tas}
+=== APPROBATIONS ===
+Gérant: ${formData.gerantNom} - ${formData.gerantSignature} - ${formData.gerantDate}
+SD: ${formData.sdNom} - ${formData.sdSignature} - ${formData.sdDate}
+SE: ${formData.seNom} - ${formData.seSignature} - ${formData.seDate}
+ABDM: ${formData.abdmNom} - ${formData.abdmSignature} - ${formData.abdmDate}
+TAS: ${formData.tasNom} - ${formData.tasSignature} - ${formData.tasDate}
 
 Généré le: ${new Date().toLocaleString('fr-FR')}
 `;
@@ -213,47 +251,46 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date1">Date</Label>
+                  <Label htmlFor="date">Date</Label>
                   <Input
-                    id="date1"
+                    id="date"
                     type="date"
-                    value={formData.date1}
-                    onChange={(e) => handleInputChange('date1', e.target.value)}
+                    value={formData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="heure1">HEURE</Label>
+                  <Label htmlFor="heure">HEURE</Label>
                   <Input
-                    id="heure1"
+                    id="heure"
                     type="time"
-                    value={formData.heure1}
-                    onChange={(e) => handleInputChange('heure1', e.target.value)}
+                    value={formData.heure}
+                    onChange={(e) => handleInputChange('heure', e.target.value)}
                   />
                 </div>
               </div>
 
-              <div>
-                <Label className="text-base font-medium">Informations sur le frigo</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
+              <div className="space-y-4">
+                <h4 className="font-medium">Informations sur le frigo:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ancienFrigo">Ancien frigo</Label>
+                    <Input
                       id="ancienFrigo"
-                      checked={formData.ancienFrigo}
-                      onCheckedChange={(checked) => handleInputChange('ancienFrigo', checked)}
+                      value={formData.ancienFrigo}
+                      onChange={(e) => handleInputChange('ancienFrigo', e.target.value)}
+                      placeholder="Ancien frigo"
                     />
-                    <Label htmlFor="ancienFrigo">Ancien Frigo</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="nouveauFrigo"
-                      checked={formData.nouveauFrigo}
-                      onCheckedChange={(checked) => handleInputChange('nouveauFrigo', checked)}
-                    />
+                  <div className="space-y-2">
                     <Label htmlFor="nouveauFrigo">Nouveau Frigo</Label>
+                    <Input
+                      id="nouveauFrigo"
+                      value={formData.nouveauFrigo}
+                      onChange={(e) => handleInputChange('nouveauFrigo', e.target.value)}
+                      placeholder="Nouveau frigo"
+                    />
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div className="space-y-2">
                     <Label htmlFor="sn">S.N</Label>
                     <Input
@@ -275,68 +312,26 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                 </div>
               </div>
 
-              <div>
-                <Label className="text-base font-medium">Type de frigo</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="fv800"
-                      checked={formData.fv800}
-                      onCheckedChange={(checked) => handleInputChange('fv800', checked)}
-                    />
-                    <Label htmlFor="fv800">FV800</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="fv420"
-                      checked={formData.fv420}
-                      onCheckedChange={(checked) => handleInputChange('fv420', checked)}
-                    />
-                    <Label htmlFor="fv420">FV420</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="sdm1500"
-                      checked={formData.sdm1500}
-                      onCheckedChange={(checked) => handleInputChange('sdm1500', checked)}
-                    />
-                    <Label htmlFor="sdm1500">SDM1500</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="sdm650"
-                      checked={formData.sdm650}
-                      onCheckedChange={(checked) => handleInputChange('sdm650', checked)}
-                    />
-                    <Label htmlFor="sdm650">SDM650</Label>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="branding">Branding</Label>
-                    <Input
-                      id="branding"
-                      value={formData.branding}
-                      onChange={(e) => handleInputChange('branding', e.target.value)}
-                      placeholder="Branding"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="autres">Autres</Label>
-                    <Input
-                      id="autres"
-                      value={formData.autres}
-                      onChange={(e) => handleInputChange('autres', e.target.value)}
-                      placeholder="Autres types"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="typeFrigo">Type de frigo</Label>
+                <Select value={formData.typeFrigo} onValueChange={(value) => handleInputChange('typeFrigo', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner le type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FV800">FV800</SelectItem>
+                    <SelectItem value="FV420">FV420</SelectItem>
+                    <SelectItem value="SDMA1500">SDMA1500</SelectItem>
+                    <SelectItem value="SDMA650">SDMA650</SelectItem>
+                    <SelectItem value="Branding">Branding</SelectItem>
+                    <SelectItem value="Autres">Autres</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <Label className="text-base font-medium">Localisation</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="space-y-4">
+                <h4 className="font-medium">Localisation:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="quartier">Quartier</Label>
                     <Input
@@ -347,12 +342,12 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="emplacement">Emplacement exact</Label>
+                    <Label htmlFor="arrondissement">Arrondissement sélect.</Label>
                     <Input
-                      id="emplacement"
-                      value={formData.emplacement}
-                      onChange={(e) => handleInputChange('emplacement', e.target.value)}
-                      placeholder="Emplacement exact"
+                      id="arrondissement"
+                      value={formData.arrondissement}
+                      onChange={(e) => handleInputChange('arrondissement', e.target.value)}
+                      placeholder="Arrondissement"
                     />
                   </div>
                   <div className="space-y-2">
@@ -374,12 +369,12 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="villeDivision">Ville Division</Label>
+                    <Label htmlFor="reparation">Réparation</Label>
                     <Input
-                      id="villeDivision"
-                      value={formData.villeDivision}
-                      onChange={(e) => handleInputChange('villeDivision', e.target.value)}
-                      placeholder="Ville Division"
+                      id="reparation"
+                      value={formData.reparation}
+                      onChange={(e) => handleInputChange('reparation', e.target.value)}
+                      placeholder="Réparation"
                     />
                   </div>
                 </div>
@@ -391,8 +386,18 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                   id="descriptionPanne"
                   value={formData.descriptionPanne}
                   onChange={(e) => handleInputChange('descriptionPanne', e.target.value)}
-                  placeholder="Décrire la panne en détail..."
-                  rows={4}
+                  placeholder="Description détaillée de la panne..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nomPrenomDateSignature">Nom, prénom, date, signature, n° de signature</Label>
+                <Input
+                  id="nomPrenomDateSignature"
+                  value={formData.nomPrenomDateSignature}
+                  onChange={(e) => handleInputChange('nomPrenomDateSignature', e.target.value)}
+                  placeholder="Nom, prénom, date, signature, n° de signature"
                 />
               </div>
             </CardContent>
@@ -404,72 +409,165 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
               <CardTitle>2. STATUT DE RÉPARATION</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="seWs2">SE/WS2</Label>
+                  <Input
+                    id="seWs2"
+                    value={formData.seWs2}
+                    onChange={(e) => handleInputChange('seWs2', e.target.value)}
+                    placeholder="SE/WS2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="abdm">ABDM</Label>
+                  <Input
+                    id="abdm"
+                    value={formData.abdm}
+                    onChange={(e) => handleInputChange('abdm', e.target.value)}
+                    placeholder="ABDM"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tas">TAS</Label>
+                  <Input
+                    id="tas"
+                    value={formData.tas}
+                    onChange={(e) => handleInputChange('tas', e.target.value)}
+                    placeholder="TAS"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gulfFroid">GULF FROID INDUSTRIEL</Label>
+                  <Input
+                    id="gulfFroid"
+                    value={formData.gulfFroid}
+                    onChange={(e) => handleInputChange('gulfFroid', e.target.value)}
+                    placeholder="Gulf Froid Industriel"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="date2">Date</Label>
+                <Label htmlFor="dateReparation">Date</Label>
                 <Input
-                  id="date2"
+                  id="dateReparation"
                   type="date"
-                  value={formData.date2}
-                  onChange={(e) => handleInputChange('date2', e.target.value)}
+                  value={formData.dateReparation}
+                  onChange={(e) => handleInputChange('dateReparation', e.target.value)}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="panneDetectee">Panne détectée(s)</Label>
-                <Textarea
-                  id="panneDetectee"
-                  value={formData.panneDetectee}
-                  onChange={(e) => handleInputChange('panneDetectee', e.target.value)}
-                  placeholder="Pannes détectées..."
-                  rows={3}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="panneDetectee">Panne détectée(s)</Label>
+                  <Textarea
+                    id="panneDetectee"
+                    value={formData.panneDetectee}
+                    onChange={(e) => handleInputChange('panneDetectee', e.target.value)}
+                    placeholder="Pannes détectées..."
+                    rows={2}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="travauxEffectues">Travaux effectué(s)</Label>
+                  <Textarea
+                    id="travauxEffectues"
+                    value={formData.travauxEffectues}
+                    onChange={(e) => handleInputChange('travauxEffectues', e.target.value)}
+                    placeholder="Travaux effectués..."
+                    rows={2}
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="travauxEffectues">Travaux effectué(s)</Label>
-                <Textarea
-                  id="travauxEffectues"
-                  value={formData.travauxEffectues}
-                  onChange={(e) => handleInputChange('travauxEffectues', e.target.value)}
-                  placeholder="Travaux effectués..."
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label className="text-base font-medium">Pièces remplacée(s)</Label>
-                <div className="space-y-3 mt-2">
-                  {formData.piecesRemplacees.map((piece, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border rounded-lg">
+              {/* Pièces remplacées */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Pièces remplacée(s)</h4>
+                  <Button onClick={addReplacedPart} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Ajouter des pièces
+                  </Button>
+                </div>
+                {replacedParts.map((part, index) => (
+                  <div key={part.id} className="border rounded-lg p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium">Pièces {index + 1}</h5>
+                      {replacedParts.length > 1 && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => removeReplacedPart(part.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Désignation</Label>
                         <Input
-                          value={piece.designation}
-                          onChange={(e) => handlePieceChange(index, 'designation', e.target.value)}
+                          value={part.designation1}
+                          onChange={(e) => updateReplacedPart(part.id, 'designation1', e.target.value)}
                           placeholder="Désignation de la pièce"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label>Quantités</Label>
                         <Input
-                          value={piece.quantite}
-                          onChange={(e) => handlePieceChange(index, 'quantite', e.target.value)}
+                          value={part.quantite1}
+                          onChange={(e) => updateReplacedPart(part.id, 'quantite1', e.target.value)}
+                          placeholder="Quantité"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Désignation</Label>
+                        <Input
+                          value={part.designation2}
+                          onChange={(e) => updateReplacedPart(part.id, 'designation2', e.target.value)}
+                          placeholder="Désignation de la pièce"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Quantités</Label>
+                        <Input
+                          value={part.quantite2}
+                          onChange={(e) => updateReplacedPart(part.id, 'quantite2', e.target.value)}
                           placeholder="Quantité"
                         />
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nomPrenomTechnicien">Nom, Prénom technicien</Label>
+                  <Label htmlFor="nomPrenomTechnicien">Nom, Prénom Technicien</Label>
                   <Input
                     id="nomPrenomTechnicien"
                     value={formData.nomPrenomTechnicien}
                     onChange={(e) => handleInputChange('nomPrenomTechnicien', e.target.value)}
                     placeholder="Nom et prénom du technicien"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dateTechnicien">Date</Label>
+                  <Input
+                    id="dateTechnicien"
+                    type="date"
+                    value={formData.dateTechnicien}
+                    onChange={(e) => handleInputChange('dateTechnicien', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signatureTechnicien">Signature</Label>
+                  <Input
+                    id="signatureTechnicien"
+                    value={formData.signatureTechnicien}
+                    onChange={(e) => handleInputChange('signatureTechnicien', e.target.value)}
+                    placeholder="Signature du technicien"
                   />
                 </div>
                 <div className="space-y-2">
@@ -483,32 +581,17 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
                 </div>
               </div>
 
-              <div>
-                <Label className="text-base font-medium">Résultat Audit Guinness Rep</Label>
-                <div className="flex gap-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="satisfait"
-                      checked={formData.satisfait}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('satisfait', checked);
-                        if (checked) handleInputChange('insatisfaisant', false);
-                      }}
-                    />
-                    <Label htmlFor="satisfait">Satisfait</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="insatisfaisant"
-                      checked={formData.insatisfaisant}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('insatisfaisant', checked);
-                        if (checked) handleInputChange('satisfait', false);
-                      }}
-                    />
-                    <Label htmlFor="insatisfaisant">Insatisfaisant</Label>
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="resultatAudit">Résultat Audit Guinness Rep</Label>
+                <Select value={formData.resultatAudit} onValueChange={(value) => handleInputChange('resultatAudit', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner le résultat" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Satisfait">Satisfait</SelectItem>
+                    <SelectItem value="Insatisfaisant">Insatisfaisant</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -530,53 +613,43 @@ Généré le: ${new Date().toLocaleString('fr-FR')}
               <CardTitle>Approbation (Nom, Prénom, Signature, Date)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="gerant">Gérant</Label>
-                  <Input
-                    id="gerant"
-                    value={formData.gerant}
-                    onChange={(e) => handleInputChange('gerant', e.target.value)}
-                    placeholder="Nom, prénom, date"
-                  />
+              {[
+                { prefix: 'gerant', label: 'Gérant' },
+                { prefix: 'sd', label: 'SD' },
+                { prefix: 'se', label: 'SE' },
+                { prefix: 'abdm', label: 'ABDM' },
+                { prefix: 'tas', label: 'TAS' }
+              ].map(({ prefix, label }) => (
+                <div key={prefix} className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-3">{label}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nom</Label>
+                      <Input
+                        value={formData[`${prefix}Nom` as keyof typeof formData] as string}
+                        onChange={(e) => handleInputChange(`${prefix}Nom`, e.target.value)}
+                        placeholder="Nom"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Signature</Label>
+                      <Input
+                        value={formData[`${prefix}Signature` as keyof typeof formData] as string}
+                        onChange={(e) => handleInputChange(`${prefix}Signature`, e.target.value)}
+                        placeholder="Signature"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Date</Label>
+                      <Input
+                        type="date"
+                        value={formData[`${prefix}Date` as keyof typeof formData] as string}
+                        onChange={(e) => handleInputChange(`${prefix}Date`, e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sd">SD</Label>
-                  <Input
-                    id="sd"
-                    value={formData.sd}
-                    onChange={(e) => handleInputChange('sd', e.target.value)}
-                    placeholder="Nom, prénom, date"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="se">SE</Label>
-                  <Input
-                    id="se"
-                    value={formData.se}
-                    onChange={(e) => handleInputChange('se', e.target.value)}
-                    placeholder="Nom, prénom, date"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="abdm">ABDM</Label>
-                  <Input
-                    id="abdm"
-                    value={formData.abdm}
-                    onChange={(e) => handleInputChange('abdm', e.target.value)}
-                    placeholder="Nom, prénom, date"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tas">TAS</Label>
-                  <Input
-                    id="tas"
-                    value={formData.tas}
-                    onChange={(e) => handleInputChange('tas', e.target.value)}
-                    placeholder="Nom, prénom, date"
-                  />
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
         </div>
