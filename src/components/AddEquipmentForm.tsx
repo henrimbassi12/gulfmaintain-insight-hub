@@ -26,21 +26,21 @@ interface AddEquipmentFormData {
   temperature?: string;
   serial_number: string;
   
-  // Nouveaux champs ajoutés
-  date_installation?: string;
+  // Nouveaux champs demandés
+  date?: string;
   division?: string;
-  sector?: string;
-  partner?: string;
-  city?: string;
-  client_name?: string;
-  pdv_name?: string;
-  barman_phone?: string;
-  neighborhood?: string;
-  precise_location?: string;
-  fridge_type?: string;
+  secteur?: string;
+  partenaire?: string;
+  ville?: string;
+  nom_client?: string;
+  nom_pdv?: string;
+  tel_barman?: string;
+  tag_number?: string;
+  quartier?: string;
+  localisation?: string;
+  type_frigo?: string;
   af_nf?: string;
   branding?: string;
-  tag_number?: string;
 }
 
 interface AddEquipmentFormProps {
@@ -65,20 +65,21 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
       next_maintenance: '',
       temperature: '',
       serial_number: '',
-      date_installation: '',
+      // Nouveaux champs
+      date: '',
       division: '',
-      sector: '',
-      partner: '',
-      city: '',
-      client_name: '',
-      pdv_name: '',
-      barman_phone: '',
-      neighborhood: '',
-      precise_location: '',
-      fridge_type: '',
+      secteur: '',
+      partenaire: '',
+      ville: '',
+      nom_client: '',
+      nom_pdv: '',
+      tel_barman: '',
+      tag_number: '',
+      quartier: '',
+      localisation: '',
+      type_frigo: '',
       af_nf: '',
       branding: '',
-      tag_number: '',
     },
   });
 
@@ -112,7 +113,6 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
   const onSubmit = async (data: AddEquipmentFormData) => {
     setIsLoading(true);
     try {
-      // Créer un objet avec tous les champs, en gérant les valeurs nulles/vides
       const equipmentData = {
         equipment_id: data.equipment_id,
         type: data.type || null,
@@ -127,20 +127,20 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
         temperature: data.temperature || null,
         serial_number: data.serial_number,
         // Nouveaux champs
-        date_installation: data.date_installation || null,
+        date: data.date || null,
         division: data.division || null,
-        sector: data.sector || null,
-        partner: data.partner || null,
-        city: data.city || null,
-        client_name: data.client_name || null,
-        pdv_name: data.pdv_name || null,
-        barman_phone: data.barman_phone || null,
-        neighborhood: data.neighborhood || null,
-        precise_location: data.precise_location || null,
-        fridge_type: data.fridge_type || null,
+        secteur: data.secteur || null,
+        partenaire: data.partenaire || null,
+        ville: data.ville || null,
+        nom_client: data.nom_client || null,
+        nom_pdv: data.nom_pdv || null,
+        tel_barman: data.tel_barman || null,
+        tag_number: data.tag_number || null,
+        quartier: data.quartier || null,
+        localisation: data.localisation || null,
+        type_frigo: data.type_frigo || null,
         af_nf: data.af_nf || null,
         branding: data.branding || null,
-        tag_number: data.tag_number || null,
       };
 
       const { error } = await supabase
@@ -186,6 +186,20 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="equipment_id"
                   render={({ field }) => (
                     <FormItem>
@@ -200,24 +214,10 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="date_installation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date d'installation</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="technician" 
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Technicien</FormLabel>
+                      <FormLabel>Technicien *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -272,9 +272,9 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                   name="division"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Division</FormLabel>
+                      <FormLabel>Division *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Division commerciale" {...field} />
+                        <Input placeholder="Division commerciale" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -283,12 +283,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="sector"
+                  name="secteur"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Secteur</FormLabel>
+                      <FormLabel>Secteur *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Secteur d'activité" {...field} />
+                        <Input placeholder="Secteur d'activité" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -297,12 +297,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="partner"
+                  name="partenaire"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Partenaire</FormLabel>
+                      <FormLabel>Partenaire *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du partenaire" {...field} />
+                        <Input placeholder="Nom du partenaire" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -311,10 +311,10 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="city"
+                  name="ville"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Ville</FormLabel>
+                      <FormLabel>Ville *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -342,12 +342,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="client_name"
+                  name="nom_client"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom client</FormLabel>
+                      <FormLabel>Nom client *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du client" {...field} />
+                        <Input placeholder="Nom du client" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -356,12 +356,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="pdv_name"
+                  name="nom_pdv"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom PDV</FormLabel>
+                      <FormLabel>Nom PDV *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du point de vente" {...field} />
+                        <Input placeholder="Nom du point de vente" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -370,12 +370,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="barman_phone"
+                  name="tel_barman"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Téléphone barman</FormLabel>
+                      <FormLabel>Tel barman *</FormLabel>
                       <FormControl>
-                        <Input type="tel" placeholder="+237 6XX XXX XXX" {...field} />
+                        <Input type="tel" placeholder="+237 6XX XXX XXX" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -384,12 +384,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="neighborhood"
+                  name="quartier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quartier</FormLabel>
+                      <FormLabel>Quartier *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du quartier" {...field} />
+                        <Input placeholder="Nom du quartier" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -399,12 +399,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                 <div className="md:col-span-2">
                   <FormField
                     control={form.control}
-                    name="precise_location"
+                    name="localisation"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Localisation précise</FormLabel>
+                        <FormLabel>Localisation *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Adresse complète ou coordonnées GPS" {...field} />
+                          <Input placeholder="Adresse complète ou coordonnées GPS" {...field} required />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -422,10 +422,38 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="fridge_type"
+                  name="serial_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type Frigo</FormLabel>
+                      <FormLabel>SERIAL NUMBER *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SAM789456123" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tag_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>TAG NUMBER *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Numéro de tag" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type_frigo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type Frigo *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -448,7 +476,7 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                   name="af_nf"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>AF/NF</FormLabel>
+                      <FormLabel>AF/NF *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -470,37 +498,9 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
                   name="branding"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Branding</FormLabel>
+                      <FormLabel>Branding *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Marque/branding" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="serial_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Serial Number *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="SAM789456123" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tag_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tag Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Numéro de tag" {...field} />
+                        <Input placeholder="Marque/branding" {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
