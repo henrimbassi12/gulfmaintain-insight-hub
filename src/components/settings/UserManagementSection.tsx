@@ -78,17 +78,17 @@ export function UserManagementSection({ userProfile }: UserManagementSectionProp
 
   const getRoleBadge = (role: string) => {
     const colors = {
-      admin: 'bg-red-100 text-red-800',
-      manager: 'bg-blue-100 text-blue-800',
-      technician: 'bg-green-100 text-green-800'
+      admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      technician: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
     };
-    return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   };
 
   return (
-    <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <CardHeader className="bg-gray-50 border-b border-gray-100">
-        <CardTitle className="flex items-center gap-3 text-lg">
+    <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <CardHeader className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
+        <CardTitle className="flex items-center gap-3 text-lg text-gray-900 dark:text-white">
           <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
             <Users className="w-5 h-5 text-white" />
           </div>
@@ -104,19 +104,19 @@ export function UserManagementSection({ userProfile }: UserManagementSectionProp
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Chargement...</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Chargement...</p>
           </div>
         ) : pendingUsers.length === 0 ? (
           <div className="text-center py-8">
             <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Aucun utilisateur en attente</p>
-            <p className="text-sm text-gray-500 mt-2">Les nouvelles demandes d'inscription apparaîtront ici</p>
+            <p className="text-gray-600 dark:text-gray-400">Aucun utilisateur en attente</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Les nouvelles demandes d'inscription apparaîtront ici</p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="w-5 h-5 text-amber-600" />
-              <span className="font-medium text-gray-900">
+              <span className="font-medium text-gray-900 dark:text-gray-100">
                 Utilisateurs en attente de validation ({pendingUsers.length})
               </span>
             </div>
@@ -125,28 +125,28 @@ export function UserManagementSection({ userProfile }: UserManagementSectionProp
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Rôle</TableHead>
-                    <TableHead>Agence</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-gray-900 dark:text-gray-100">Nom</TableHead>
+                    <TableHead className="text-gray-900 dark:text-gray-100">Email</TableHead>
+                    <TableHead className="text-gray-900 dark:text-gray-100">Rôle</TableHead>
+                    <TableHead className="text-gray-900 dark:text-gray-100">Agence</TableHead>
+                    <TableHead className="text-gray-900 dark:text-gray-100">Date</TableHead>
+                    <TableHead className="text-gray-900 dark:text-gray-100">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendingUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-gray-900 dark:text-gray-100">
                         {user.full_name || 'Non renseigné'}
                       </TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell className="text-gray-700 dark:text-gray-300">{user.email}</TableCell>
                       <TableCell>
                         <Badge className={getRoleBadge(user.role)}>
                           {user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell>{user.agency || 'Non renseignée'}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-gray-700 dark:text-gray-300">{user.agency || 'Non renseignée'}</TableCell>
+                      <TableCell className="text-gray-700 dark:text-gray-300">
                         {new Date(user.created_at).toLocaleDateString('fr-FR')}
                       </TableCell>
                       <TableCell>

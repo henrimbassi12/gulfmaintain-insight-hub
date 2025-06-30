@@ -59,9 +59,9 @@ export function UserProfileSection({
   };
 
   return (
-    <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <CardHeader className="bg-gray-50 border-b border-gray-100">
-        <CardTitle className="flex items-center gap-3 text-lg">
+    <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <CardHeader className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
+        <CardTitle className="flex items-center gap-3 text-lg text-gray-900 dark:text-white">
           <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
             <User className="w-5 h-5 text-white" />
           </div>
@@ -75,7 +75,7 @@ export function UserProfileSection({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name">Nom complet *</Label>
+              <Label htmlFor="name" className="text-gray-900 dark:text-gray-100">Nom complet *</Label>
               <Input 
                 id="name" 
                 value={fullName}
@@ -85,20 +85,20 @@ export function UserProfileSection({
               />
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-900 dark:text-gray-100">Email</Label>
               <Input 
                 id="email" 
                 type="email" 
                 value={email}
                 disabled
-                className="mt-1 bg-gray-50" 
+                className="mt-1 bg-gray-50 dark:bg-gray-700" 
               />
-              <p className="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">L'email ne peut pas être modifié</p>
             </div>
           </div>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="role">Rôle</Label>
+              <Label htmlFor="role" className="text-gray-900 dark:text-gray-100">Rôle</Label>
               {isAdmin ? (
                 <Select value={role} onValueChange={setRole}>
                   <SelectTrigger className="mt-1">
@@ -116,17 +116,17 @@ export function UserProfileSection({
                     id="role" 
                     value={getRoleLabel(role)}
                     disabled
-                    className="mt-1 bg-gray-50" 
+                    className="mt-1 bg-gray-50 dark:bg-gray-700" 
                   />
-                  <p className="text-xs text-gray-500 mt-1">Le rôle est géré par l'administrateur</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Le rôle est géré par l'administrateur</p>
                 </>
               )}
               {isAdmin && (
-                <p className="text-xs text-green-600 mt-1">En tant qu'administrateur, vous pouvez modifier votre rôle</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">En tant qu'administrateur, vous pouvez modifier votre rôle</p>
               )}
             </div>
             <div>
-              <Label htmlFor="agency">Région</Label>
+              <Label htmlFor="agency" className="text-gray-900 dark:text-gray-100">Région</Label>
               <Select value={agency} onValueChange={setAgency}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Sélectionner une région" />

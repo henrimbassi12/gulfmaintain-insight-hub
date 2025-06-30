@@ -41,9 +41,9 @@ export function SecuritySection({
   handleChangePassword
 }: SecuritySectionProps) {
   return (
-    <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <CardHeader className="bg-gray-50 border-b border-gray-100">
-        <CardTitle className="flex items-center gap-3 text-lg">
+    <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <CardHeader className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
+        <CardTitle className="flex items-center gap-3 text-lg text-gray-900 dark:text-white">
           <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
             <Shield className="w-5 h-5 text-white" />
           </div>
@@ -53,7 +53,7 @@ export function SecuritySection({
       <CardContent className="p-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="current-password">Mot de passe actuel *</Label>
+            <Label htmlFor="current-password" className="text-gray-900 dark:text-gray-100">Mot de passe actuel *</Label>
             <div className="relative mt-1">
               <Input 
                 id="current-password" 
@@ -79,7 +79,7 @@ export function SecuritySection({
             </div>
           </div>
           <div>
-            <Label htmlFor="new-password">Nouveau mot de passe *</Label>
+            <Label htmlFor="new-password" className="text-gray-900 dark:text-gray-100">Nouveau mot de passe *</Label>
             <div className="relative mt-1">
               <Input 
                 id="new-password" 
@@ -105,7 +105,7 @@ export function SecuritySection({
             </div>
           </div>
           <div>
-            <Label htmlFor="confirm-password">Confirmer le mot de passe *</Label>
+            <Label htmlFor="confirm-password" className="text-gray-900 dark:text-gray-100">Confirmer le mot de passe *</Label>
             <div className="relative mt-1">
               <Input 
                 id="confirm-password" 
@@ -140,10 +140,10 @@ export function SecuritySection({
             </ModernButton>
           </div>
           {newPassword && newPassword.length < 6 && (
-            <p className="text-sm text-orange-600">Le mot de passe doit contenir au moins 6 caractères</p>
+            <p className="text-sm text-orange-600 dark:text-orange-400">Le mot de passe doit contenir au moins 6 caractères</p>
           )}
           {newPassword && confirmPassword && newPassword !== confirmPassword && (
-            <p className="text-sm text-red-600">Les mots de passe ne correspondent pas</p>
+            <p className="text-sm text-red-600 dark:text-red-400">Les mots de passe ne correspondent pas</p>
           )}
         </div>
       </CardContent>
