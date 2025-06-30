@@ -28,14 +28,6 @@ export function MaintenanceList({ maintenances, onMaintenanceClick }: Maintenanc
   if (maintenances.length === 0) {
     return (
       <Card className="bg-white border border-gray-100 shadow-sm">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Wrench className="w-5 h-5" />
-              Maintenances (0)
-            </div>
-          </CardTitle>
-        </CardHeader>
         <CardContent className="p-6">
           <div className="text-center py-8 text-gray-500">
             <Wrench className="w-12 h-12 mx-auto mb-4 text-gray-300" />
@@ -48,17 +40,6 @@ export function MaintenanceList({ maintenances, onMaintenanceClick }: Maintenanc
 
   return (
     <Card className="bg-white border border-gray-100 shadow-sm">
-      <CardHeader className="bg-gray-50 border-b border-gray-100">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Wrench className="w-5 h-5" />
-            Maintenances ({maintenances.length})
-          </div>
-          <Badge variant="outline" className="text-xs">
-            {maintenances.filter(m => m.status === 'En cours').length} en cours
-          </Badge>
-        </CardTitle>
-      </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-4">
           {maintenances.map((maintenance) => (
