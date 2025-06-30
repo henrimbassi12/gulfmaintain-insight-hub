@@ -10,7 +10,7 @@ import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Wrench } from 'lucide-react';
-import { useMaintenances } from '@/hooks/useMaintenances';
+import { usePlannedMaintenances } from '@/hooks/usePlannedMaintenances';
 
 export default function Maintenance() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -19,7 +19,7 @@ export default function Maintenance() {
   const [filterBy, setFilterBy] = useState('all');
   const [technicianFilter, setTechnicianFilter] = useState('all');
 
-  const { maintenances, isLoading, refetch } = useMaintenances();
+  const { maintenances, isLoading, refetch } = usePlannedMaintenances();
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -52,24 +52,24 @@ export default function Maintenance() {
 
   // Filtrage des maintenances basé sur les données réelles
   const filteredMaintenances = maintenances.filter(maintenance => {
-    if (filterBy !== 'all' && maintenance.status !== filterBy) return false;
-    if (technicianFilter !== 'all' && maintenance.technician !== technicianFilter) return false;
+    if (filterBy !== 'all' && maintenance.priorite.toLowerCase() !== filterBy) return false;
+    if (technicianFilter !== 'all' && maintenance.technician_assigne !== technicianFilter) return false;
     return true;
   });
 
   // Transformation des données pour compatibilité avec MaintenanceList
   const transformedMaintenances = filteredMaintenances.map(maintenance => ({
-    id: maintenance.report_id,
-    equipment: maintenance.equipment,
-    type: maintenance.type,
-    status: maintenance.status,
-    technician: maintenance.technician,
-    scheduledDate: maintenance.date,
-    timeSlot: '09:00 - 17:00', // Valeur par défaut
-    priority: maintenance.priority || 'Normale',
-    location: maintenance.location,
-    client: maintenance.equipment, // Utiliser equipment comme client pour l'instant
-    description: maintenance.description
+    id: maintenance.id,
+    equipment: `${maintenance.type_frigo} - ${maintenance.serial_number}`,
+    type: maintenance.type_maintenance,
+    status: 'planned', // Statut par défaut car c'est une planification
+    technician: maintenance.technician_assigne,
+    scheduledDate: maintenance.date_programmee,
+    timeSlot: maintenance.duree_estimee,
+    priority: maintenance.priorite,
+    location: `${maintenance.ville} - ${maintenance.quartier}`,
+    client: maintenance.nom_client,
+    description: maintenance.description || 'Maintenance planifiée'
   }));
 
   if (isLoading) {
@@ -89,7 +89,7 @@ export default function Maintenance() {
     <AirbnbContainer>
       <AirbnbHeader
         title="Maintenance"
-        subtitle={`Gestion et suivi de ${maintenances.length} intervention${maintenances.length > 1 ? 's' : ''}${filteredMaintenances.length !== maintenances.length ? ` (${filteredMaintenances.length} affichée${filteredMaintenances.length > 1 ? 's' : ''})` : ''}`}
+        subtitle={`Gestion et suivi de ${maintenances.length} maintenance${maintenances.length > 1 ? 's' : ''} planifiée${maintenances.length > 1 ? 's' : ''}${filteredMaintenances.length !== maintenances.length ? ` (${filteredMaintenances.length} affichée${filteredMaintenances.length > 1 ? 's' : ''})` : ''}`}
         icon={Wrench}
       >
         <Button 
@@ -152,7 +152,7 @@ export default function Maintenance() {
         onSuccess={() => {
           toast.success('Maintenance créée avec succès');
           setIsFormModalOpen(false);
-          refetch(); // Actualiser la liste après création
+          refetch();
         }}
       />
 

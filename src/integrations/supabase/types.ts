@@ -310,6 +310,87 @@ export type Database = {
           },
         ]
       }
+      planned_maintenances: {
+        Row: {
+          af_nf: string
+          branding: string
+          created_at: string
+          date_creation: string
+          date_programmee: string
+          description: string | null
+          division: string
+          duree_estimee: string
+          id: string
+          localisation: string
+          nom_client: string
+          nom_pdv: string
+          partenaire: string
+          priorite: string
+          quartier: string
+          secteur: string
+          serial_number: string
+          tag_number: string
+          technician_assigne: string
+          tel_barman: string
+          type_frigo: string
+          type_maintenance: string
+          updated_at: string
+          ville: string
+        }
+        Insert: {
+          af_nf: string
+          branding: string
+          created_at?: string
+          date_creation: string
+          date_programmee: string
+          description?: string | null
+          division: string
+          duree_estimee: string
+          id?: string
+          localisation: string
+          nom_client: string
+          nom_pdv: string
+          partenaire: string
+          priorite: string
+          quartier: string
+          secteur: string
+          serial_number: string
+          tag_number: string
+          technician_assigne: string
+          tel_barman: string
+          type_frigo: string
+          type_maintenance: string
+          updated_at?: string
+          ville: string
+        }
+        Update: {
+          af_nf?: string
+          branding?: string
+          created_at?: string
+          date_creation?: string
+          date_programmee?: string
+          description?: string | null
+          division?: string
+          duree_estimee?: string
+          id?: string
+          localisation?: string
+          nom_client?: string
+          nom_pdv?: string
+          partenaire?: string
+          priorite?: string
+          quartier?: string
+          secteur?: string
+          serial_number?: string
+          tag_number?: string
+          technician_assigne?: string
+          tel_barman?: string
+          type_frigo?: string
+          type_maintenance?: string
+          updated_at?: string
+          ville?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"] | null

@@ -1,7 +1,7 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -9,10 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { usePlannedMaintenances } from '@/hooks/usePlannedMaintenances';
 
 interface MaintenanceFormData {
-  date: string;
-  technician: string;
+  type_maintenance: string;
+  priorite: string;
+  duree_estimee: string;
+  date_programmee: string;
+  date_creation: string;
+  technician_assigne: string;
   division: string;
   secteur: string;
   partenaire: string;
@@ -20,18 +25,13 @@ interface MaintenanceFormData {
   nom_client: string;
   nom_pdv: string;
   tel_barman: string;
-  serial_number: string;
-  tag_number: string;
   quartier: string;
   localisation: string;
+  serial_number: string;
+  tag_number: string;
   type_frigo: string;
   af_nf: string;
   branding: string;
-  // Champs supplémentaires pour maintenance
-  type_maintenance: string;
-  priorite: string;
-  duree_estimee: string;
-  date_programmee: string;
   description?: string;
 }
 
@@ -43,11 +43,16 @@ interface EnhancedMaintenanceFormProps {
 
 export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: EnhancedMaintenanceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { createMaintenance } = usePlannedMaintenances();
 
   const form = useForm<MaintenanceFormData>({
     defaultValues: {
-      date: '',
-      technician: '',
+      type_maintenance: '',
+      priorite: '',
+      duree_estimee: '',
+      date_programmee: '',
+      date_creation: new Date().toISOString().split('T')[0],
+      technician_assigne: '',
       division: '',
       secteur: '',
       partenaire: '',
@@ -55,17 +60,13 @@ export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: Enhanced
       nom_client: '',
       nom_pdv: '',
       tel_barman: '',
-      serial_number: '',
-      tag_number: '',
       quartier: '',
       localisation: '',
+      serial_number: '',
+      tag_number: '',
       type_frigo: '',
       af_nf: '',
       branding: '',
-      type_maintenance: '',
-      priorite: '',
-      duree_estimee: '',
-      date_programmee: '',
       description: '',
     },
   });
@@ -126,18 +127,12 @@ export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: Enhanced
   const onSubmit = async (data: MaintenanceFormData) => {
     setIsLoading(true);
     try {
-      // Simuler l'ajout de maintenance (remplacer par l'appel API réel)
-      console.log('Données de maintenance:', data);
-      
-      // Ici vous ajouteriez l'appel à votre API Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Maintenance programmée avec succès');
+      await createMaintenance(data);
       form.reset();
       onSuccess();
+      onClose();
     } catch (error) {
       console.error('Erreur lors de la programmation de la maintenance:', error);
-      toast.error('Erreur lors de la programmation de la maintenance');
     } finally {
       setIsLoading(false);
     }
@@ -251,7 +246,7 @@ export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: Enhanced
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="date"
+                  name="date_creation"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Date de création *</FormLabel>
@@ -265,7 +260,7 @@ export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: Enhanced
 
                 <FormField
                   control={form.control}
-                  name="technician" 
+                  name="technician_assigne" 
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Technicien assigné *</FormLabel>
@@ -288,7 +283,7 @@ export function EnhancedMaintenanceForm({ isOpen, onClose, onSuccess }: Enhanced
               </CardContent>
             </Card>
 
-            {/* Organisation - reprise des champs du formulaire équipement */}
+            {/* Organisation */}
             <Card>
               <CardHeader>
                 <CardTitle>Organisation</CardTitle>
