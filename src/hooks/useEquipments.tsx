@@ -5,18 +5,22 @@ import { toast } from "sonner";
 
 export interface Equipment {
   id: string;
-  equipment_id: string;
-  type: string;
-  brand: string;
-  model: string;
-  location: string;
-  agency: string;
-  status: 'operational' | 'maintenance' | 'critical' | 'offline';
-  technician: string | null;
-  last_maintenance: string | null;
-  next_maintenance: string | null;
-  temperature: string | null;
+  date: string;
+  technician: string;
+  division: string;
+  secteur: string;
+  partenaire: string;
+  ville: string;
+  nom_client: string;
+  nom_pdv: string;
+  tel_barman: string;
+  quartier: string;
+  localisation: string;
+  type_frigo: string;
+  af_nf: 'AF' | 'NF';
+  branding: string;
   serial_number: string;
+  tag_number: string;
   created_at: string;
   updated_at: string;
 }
@@ -40,14 +44,8 @@ export function useEquipments() {
         throw error;
       }
 
-      // Type assertion pour s'assurer que les données correspondent au type Equipment
-      const typedData = (data || []).map(item => ({
-        ...item,
-        status: item.status as 'operational' | 'maintenance' | 'critical' | 'offline'
-      }));
-
-      setEquipments(typedData);
-      console.log(`✅ Récupération de ${typedData.length} équipements réussie`);
+      setEquipments(data || []);
+      console.log(`✅ Récupération de ${data?.length || 0} équipements réussie`);
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des équipements:', error);
       setError('Erreur lors de la récupération des équipements');
@@ -71,14 +69,9 @@ export function useEquipments() {
         throw error;
       }
 
-      const newEquipment = {
-        ...data,
-        status: data.status as 'operational' | 'maintenance' | 'critical' | 'offline'
-      } as Equipment;
-
-      setEquipments(prev => [newEquipment, ...prev]);
+      setEquipments(prev => [data, ...prev]);
       toast.success('Équipement créé avec succès');
-      return newEquipment;
+      return data;
     } catch (error) {
       console.error('❌ Erreur lors de la création de l\'équipement:', error);
       toast.error('Erreur lors de la création de l\'équipement');
@@ -99,16 +92,11 @@ export function useEquipments() {
         throw error;
       }
 
-      const updatedEquipment = {
-        ...data,
-        status: data.status as 'operational' | 'maintenance' | 'critical' | 'offline'
-      } as Equipment;
-
       setEquipments(prev => prev.map(equipment => 
-        equipment.id === id ? updatedEquipment : equipment
+        equipment.id === id ? data : equipment
       ));
       toast.success('Équipement mis à jour avec succès');
-      return updatedEquipment;
+      return data;
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour de l\'équipement:', error);
       toast.error('Erreur lors de la mise à jour de l\'équipement');
@@ -153,21 +141,11 @@ export function useEquipments() {
           console.log('📡 Changement détecté dans equipments:', payload);
           
           if (payload.eventType === 'INSERT') {
-            const newEquipment = {
-              ...payload.new,
-              status: payload.new.status as 'operational' | 'maintenance' | 'critical' | 'offline'
-            } as Equipment;
-            
-            setEquipments(prev => [newEquipment, ...prev]);
+            setEquipments(prev => [payload.new as Equipment, ...prev]);
             toast.info('Nouvel équipement ajouté');
           } else if (payload.eventType === 'UPDATE') {
-            const updatedEquipment = {
-              ...payload.new,
-              status: payload.new.status as 'operational' | 'maintenance' | 'critical' | 'offline'
-            } as Equipment;
-            
             setEquipments(prev => prev.map(equipment => 
-              equipment.id === updatedEquipment.id ? updatedEquipment : equipment
+              equipment.id === payload.new.id ? payload.new as Equipment : equipment
             ));
             toast.info('Équipement mis à jour');
           } else if (payload.eventType === 'DELETE') {

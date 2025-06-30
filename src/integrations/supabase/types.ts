@@ -70,55 +70,67 @@ export type Database = {
       }
       equipments: {
         Row: {
-          agency: string
-          brand: string
+          af_nf: string
+          branding: string
           created_at: string
-          equipment_id: string
+          date: string
+          division: string
           id: string
-          last_maintenance: string | null
-          location: string
-          model: string
-          next_maintenance: string | null
+          localisation: string
+          nom_client: string
+          nom_pdv: string
+          partenaire: string
+          quartier: string
+          secteur: string
           serial_number: string
-          status: string
-          technician: string | null
-          temperature: string | null
-          type: string
+          tag_number: string
+          technician: string
+          tel_barman: string
+          type_frigo: string
           updated_at: string
+          ville: string
         }
         Insert: {
-          agency: string
-          brand: string
+          af_nf: string
+          branding: string
           created_at?: string
-          equipment_id: string
+          date: string
+          division: string
           id?: string
-          last_maintenance?: string | null
-          location: string
-          model: string
-          next_maintenance?: string | null
+          localisation: string
+          nom_client: string
+          nom_pdv: string
+          partenaire: string
+          quartier: string
+          secteur: string
           serial_number: string
-          status: string
-          technician?: string | null
-          temperature?: string | null
-          type: string
+          tag_number: string
+          technician: string
+          tel_barman: string
+          type_frigo: string
           updated_at?: string
+          ville: string
         }
         Update: {
-          agency?: string
-          brand?: string
+          af_nf?: string
+          branding?: string
           created_at?: string
-          equipment_id?: string
+          date?: string
+          division?: string
           id?: string
-          last_maintenance?: string | null
-          location?: string
-          model?: string
-          next_maintenance?: string | null
+          localisation?: string
+          nom_client?: string
+          nom_pdv?: string
+          partenaire?: string
+          quartier?: string
+          secteur?: string
           serial_number?: string
-          status?: string
-          technician?: string | null
-          temperature?: string | null
-          type?: string
+          tag_number?: string
+          technician?: string
+          tel_barman?: string
+          type_frigo?: string
           updated_at?: string
+          ville?: string
         }
         Relationships: []
       }
