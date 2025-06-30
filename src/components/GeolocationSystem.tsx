@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Route, Clock, AlertCircle, MapIcon, Search, Filter, Target, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -285,7 +284,6 @@ export function GeolocationSystem() {
 
   const centerOnItem = (lat: number, lng: number, itemId: string) => {
     setSelectedItem(itemId);
-    // Ici vous pourriez déclencher le centrage de la carte
     toast({
       title: "🎯 Centrage sur l'élément",
       description: "La carte se centre sur l'élément sélectionné",
@@ -296,7 +294,7 @@ export function GeolocationSystem() {
     const allItems = [
       ...technicians.map(t => ({ ...t, type: 'technician' as const })),
       ...equipments.map(e => ({ ...e, type: 'equipment' as const })),
-      ...interventions.map(i => ({ ...i, type: 'intervention' as const }))
+      ...interventions.map(i => ({ ...i, type: 'intervention' as const, name: i.equipment }))
     ];
 
     return allItems.filter(item => {
@@ -315,18 +313,11 @@ export function GeolocationSystem() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header avec recherche et actions */}
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <div className="flex items-center gap-3">
-          <MapPin className="w-6 h-6 text-blue-600" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Géolocalisation intelligente
-          </h2>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 lg:w-80">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Rechercher technicien, équipement, site..."
@@ -383,26 +374,23 @@ export function GeolocationSystem() {
         onFiltersChange={setActiveFilters}
       />
 
-      {/* Layout principal avec carte et liste */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Layout principal avec carte et liste - sections empilées verticalement */}
+      <div className="space-y-4 w-full">
         {/* Carte interactive */}
-        <div className="lg:col-span-2">
-          <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-            <CardContent className="p-0">
-              <div className="h-[600px] rounded-lg overflow-hidden">
-                <InteractiveMap 
-                  userLocation={userLocation}
-                  technicians={technicians}
-                  maintenancePoints={interventions}
-                  selectedItem={selectedItem}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 w-full">
+          <CardContent className="p-0">
+            <div className="h-[600px] rounded-lg overflow-hidden">
+              <InteractiveMap 
+                userLocation={userLocation}
+                technicians={technicians}
+                maintenancePoints={interventions}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Liste synchronisée */}
-        <div className="lg:col-span-1">
+        <div className="w-full">
           <GeolocationList 
             items={getFilteredItems()}
             onCenterOnMap={centerOnItem}
@@ -412,7 +400,7 @@ export function GeolocationSystem() {
       </div>
 
       {/* Statistiques en temps réel */}
-      <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+      <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Target className="w-5 h-5 text-blue-600" />

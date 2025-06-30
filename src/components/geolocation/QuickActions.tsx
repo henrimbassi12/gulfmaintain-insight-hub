@@ -20,6 +20,7 @@ interface QuickActionsProps {
 
 export function QuickActions({ userLocation }: QuickActionsProps) {
   const [isSharing, setIsSharing] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const { toast } = useToast();
   const { userProfile } = useAuth();
   
@@ -35,17 +36,29 @@ export function QuickActions({ userLocation }: QuickActionsProps) {
 
     setIsSharing(true);
     
-    // Simulation du partage de position
-    setTimeout(() => {
-      setIsSharing(false);
+    try {
+      // Simulation du partage de position avec animation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simuler l'envoi des coordonnées à l'équipe
+      console.log('Position partagée:', userLocation);
+      
       toast({
         title: "📍 Position partagée",
-        description: "Votre position a été partagée avec l'équipe",
+        description: "Votre position a été partagée avec l'équipe de supervision",
       });
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "❌ Erreur de partage",
+        description: "Impossible de partager votre position",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSharing(false);
+    }
   };
 
-  const navigateToNext = () => {
+  const navigateToNext = async () => {
     if (!userLocation) {
       toast({
         title: "❌ Position requise",
@@ -55,19 +68,51 @@ export function QuickActions({ userLocation }: QuickActionsProps) {
       return;
     }
 
-    // Simulation de la navigation vers la prochaine intervention
-    const nextIntervention = "Agence BONABERI Port";
-    const googleMapsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/4.0383,9.7792`;
+    setIsNavigating(true);
     
-    window.open(googleMapsUrl, '_blank');
-    
-    toast({
-      title: "🧭 Navigation démarrée",
-      description: `Direction: ${nextIntervention}`,
-    });
+    try {
+      // Prochaine intervention simulée
+      const nextIntervention = {
+        name: "Agence BONABERI Port",
+        address: "Rue de la Liberté, Bonabéri, Douala",
+        lat: 4.0383,
+        lng: 9.7792,
+        equipment: "FR-2024-012"
+      };
+      
+      // Construire l'URL Google Maps avec navigation
+      const googleMapsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${nextIntervention.lat},${nextIntervention.lng}`;
+      
+      // Ouvrir dans un nouvel onglet
+      window.open(googleMapsUrl, '_blank');
+      
+      toast({
+        title: "🧭 Navigation démarrée",
+        description: `Direction: ${nextIntervention.name}`,
+      });
+      
+      console.log('Navigation vers:', nextIntervention);
+    } catch (error) {
+      toast({
+        title: "❌ Erreur de navigation",
+        description: "Impossible de démarrer la navigation",
+        variant: "destructive"
+      });
+    } finally {
+      setIsNavigating(false);
+    }
   };
 
   const reportIssue = () => {
+    const issueData = {
+      timestamp: new Date().toISOString(),
+      userLocation,
+      userId: userProfile?.id,
+      type: 'geolocation_issue'
+    };
+    
+    console.log('Problème signalé:', issueData);
+    
     toast({
       title: "🆘 Problème signalé",
       description: "Votre signalement a été envoyé à l'équipe de supervision",
@@ -75,9 +120,26 @@ export function QuickActions({ userLocation }: QuickActionsProps) {
   };
 
   const emergencyCall = () => {
+    const emergencyData = {
+      timestamp: new Date().toISOString(),
+      userLocation,
+      userId: userProfile?.id,
+      type: 'emergency_call'
+    };
+    
+    console.log('Appel d\'urgence déclenché:', emergencyData);
+    
+    // Simuler l'ouverture de l'interface d'appel
+    const phoneNumber = '+237650000000'; // Numéro de supervision
+    
+    if (navigator.userAgent.includes('Mobile')) {
+      // Sur mobile, essayer d'ouvrir l'application téléphone
+      window.location.href = `tel:${phoneNumber}`;
+    }
+    
     toast({
       title: "📞 Appel d'urgence",
-      description: "Connexion avec le centre de supervision...",
+      description: "Connexion avec le centre de supervision en cours...",
     });
   };
 
@@ -105,10 +167,13 @@ export function QuickActions({ userLocation }: QuickActionsProps) {
         variant="outline"
         size="sm"
         onClick={navigateToNext}
+        disabled={isNavigating}
         className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 dark:border-blue-700"
       >
-        <Navigation className="w-4 h-4" />
-        <span className="hidden sm:inline">Navigation</span>
+        <Navigation className={`w-4 h-4 ${isNavigating ? 'animate-pulse' : ''}`} />
+        <span className="hidden sm:inline">
+          {isNavigating ? 'Navigation...' : 'Navigation'}
+        </span>
       </Button>
 
       <Button
