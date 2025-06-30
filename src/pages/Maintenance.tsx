@@ -5,6 +5,7 @@ import { MaintenanceFormModal } from '@/components/maintenance/MaintenanceFormMo
 import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
 import { MaintenanceList } from '@/components/maintenance/MaintenanceList';
 import { MaintenancePageFilters } from '@/components/maintenance/MaintenancePageFilters';
+import { MaintenanceStatsCard } from '@/components/maintenance/MaintenanceStatsCard';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { Button } from '@/components/ui/button';
@@ -63,10 +64,17 @@ export default function Maintenance() {
   }));
 
   const handleUpdateStatus = (maintenanceId: string, newStatus: string) => {
-    // Ici vous pouvez ajouter la logique pour mettre à jour le statut dans la base de données
+    // Mettre à jour le statut de la maintenance sélectionnée
+    if (selectedMaintenance && selectedMaintenance.id === maintenanceId) {
+      setSelectedMaintenance({
+        ...selectedMaintenance,
+        status: newStatus
+      });
+    }
+    
     toast.success(`Statut mis à jour vers: ${newStatus}`);
-    setSelectedMaintenance(null);
-    refetch();
+    // Ici vous pouvez ajouter la logique pour mettre à jour le statut dans la base de données
+    // refetch();
   };
 
   const handleEditMaintenance = (maintenanceId: string) => {
@@ -115,6 +123,9 @@ export default function Maintenance() {
       </AirbnbHeader>
 
       <div className="space-y-6">
+        {/* Statistiques des maintenances */}
+        <MaintenanceStatsCard maintenances={transformedMaintenances} />
+
         <MaintenancePageFilters
           filterBy={filterBy}
           technicianFilter={technicianFilter}

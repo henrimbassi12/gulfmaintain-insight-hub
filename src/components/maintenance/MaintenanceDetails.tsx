@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, User, MapPin, Wrench, Calendar, Brain, MessageSquare, Edit, CheckCircle, Play, AlertTriangle } from "lucide-react";
+import { Clock, User, MapPin, Wrench, Calendar, Brain, Edit, CheckCircle } from "lucide-react";
 import { toast } from 'sonner';
+import { MaintenanceStatusButton } from './MaintenanceStatusButton';
 
 interface MaintenanceDetailsProps {
   isOpen: boolean;
@@ -26,7 +27,6 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState(maintenance?.status || 'planned');
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   if (!maintenance) return null;
 
@@ -77,11 +77,6 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
   const handleCompleteMaintenance = () => {
     onUpdateStatus('completed');
     toast.success('Maintenance terminée');
-  };
-
-  const handleOpenChat = () => {
-    setIsChatOpen(true);
-    toast.info('Ouverture de la discussion...');
   };
 
   const aiRiskLevel = maintenance.equipment === 'FR-2024-012' ? 83 : 
@@ -173,33 +168,15 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
 
             {/* Status Actions */}
             <div className="flex gap-2 flex-wrap">
-              {maintenance.status === 'planned' && (
-                <Button 
-                  size="sm" 
-                  className="bg-orange-600 hover:bg-orange-700"
-                  onClick={handleStartMaintenance}
-                >
-                  <Play className="w-4 h-4 mr-1" />
-                  Démarrer
-                </Button>
-              )}
-              {maintenance.status === 'in-progress' && (
-                <Button 
-                  size="sm" 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={handleCompleteMaintenance}
-                >
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Terminer
-                </Button>
-              )}
+              <MaintenanceStatusButton
+                status={maintenance.status}
+                onStart={handleStartMaintenance}
+                onComplete={handleCompleteMaintenance}
+              />
+              
               <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
                 <Edit className="w-4 h-4 mr-1" />
                 Modifier
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleOpenChat}>
-                <MessageSquare className="w-4 h-4 mr-1" />
-                Discussion
               </Button>
             </div>
 
@@ -257,24 +234,6 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
                 Mettre à jour
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de discussion (placeholder) */}
-      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Discussion - {maintenance.equipment}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div className="bg-gray-50 p-4 rounded-lg text-center">
-              <MessageSquare className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600">Fonctionnalité de discussion à implémenter</p>
-            </div>
-            <Button onClick={() => setIsChatOpen(false)} className="w-full">
-              Fermer
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
