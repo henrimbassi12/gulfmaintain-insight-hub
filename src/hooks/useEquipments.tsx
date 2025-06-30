@@ -44,12 +44,18 @@ export function useEquipments() {
         throw error;
       }
 
-      setEquipments(data || []);
-      console.log(`✅ Récupération de ${data?.length || 0} équipements réussie`);
+      // Type assertion pour assurer que af_nf est correctement typé
+      const typedEquipments = (data || []).map(equipment => ({
+        ...equipment,
+        af_nf: equipment.af_nf as 'AF' | 'NF'
+      })) as Equipment[];
+
+      setEquipments(typedEquipments);
+      console.log(`✅ Récupération de ${typedEquipments.length} équipements réussie`);
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des équipements:', error);
       setError('Erreur lors de la récupération des équipements');
-      toast.error('Erreur lors de la récupération des équipements', {
+      toast.error('Erreur lors de la récupération des équipments', {
         description: 'Vérifiez votre connexion et réessayez'
       });
     } finally {
@@ -69,9 +75,14 @@ export function useEquipments() {
         throw error;
       }
 
-      setEquipments(prev => [data, ...prev]);
+      const typedEquipment = {
+        ...data,
+        af_nf: data.af_nf as 'AF' | 'NF'
+      } as Equipment;
+
+      setEquipments(prev => [typedEquipment, ...prev]);
       toast.success('Équipement créé avec succès');
-      return data;
+      return typedEquipment;
     } catch (error) {
       console.error('❌ Erreur lors de la création de l\'équipement:', error);
       toast.error('Erreur lors de la création de l\'équipement');
@@ -92,11 +103,16 @@ export function useEquipments() {
         throw error;
       }
 
+      const typedEquipment = {
+        ...data,
+        af_nf: data.af_nf as 'AF' | 'NF'
+      } as Equipment;
+
       setEquipments(prev => prev.map(equipment => 
-        equipment.id === id ? data : equipment
+        equipment.id === id ? typedEquipment : equipment
       ));
       toast.success('Équipement mis à jour avec succès');
-      return data;
+      return typedEquipment;
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour de l\'équipement:', error);
       toast.error('Erreur lors de la mise à jour de l\'équipement');
@@ -141,11 +157,19 @@ export function useEquipments() {
           console.log('📡 Changement détecté dans equipments:', payload);
           
           if (payload.eventType === 'INSERT') {
-            setEquipments(prev => [payload.new as Equipment, ...prev]);
+            const newEquipment = {
+              ...payload.new,
+              af_nf: payload.new.af_nf as 'AF' | 'NF'
+            } as Equipment;
+            setEquipments(prev => [newEquipment, ...prev]);
             toast.info('Nouvel équipement ajouté');
           } else if (payload.eventType === 'UPDATE') {
+            const updatedEquipment = {
+              ...payload.new,
+              af_nf: payload.new.af_nf as 'AF' | 'NF'
+            } as Equipment;
             setEquipments(prev => prev.map(equipment => 
-              equipment.id === payload.new.id ? payload.new as Equipment : equipment
+              equipment.id === updatedEquipment.id ? updatedEquipment : equipment
             ));
             toast.info('Équipement mis à jour');
           } else if (payload.eventType === 'DELETE') {

@@ -16,18 +16,23 @@ export function EquipmentExportButton({ equipments, className }: EquipmentExport
       date: new Date().toISOString(),
       total: equipments.length,
       equipments: equipments.map(eq => ({
-        id: eq.equipment_id,
-        type: eq.type,
-        brand: eq.brand,
-        model: eq.model,
-        serial_number: eq.serial_number,
-        location: eq.location,
-        agency: eq.agency,
+        id: eq.id,
+        date: eq.date,
         technician: eq.technician,
-        status: eq.status,
-        temperature: eq.temperature,
-        last_maintenance: eq.last_maintenance,
-        next_maintenance: eq.next_maintenance
+        division: eq.division,
+        secteur: eq.secteur,
+        partenaire: eq.partenaire,
+        ville: eq.ville,
+        nom_client: eq.nom_client,
+        nom_pdv: eq.nom_pdv,
+        tel_barman: eq.tel_barman,
+        quartier: eq.quartier,
+        localisation: eq.localisation,
+        type_frigo: eq.type_frigo,
+        af_nf: eq.af_nf,
+        branding: eq.branding,
+        serial_number: eq.serial_number,
+        tag_number: eq.tag_number
       }))
     };
 
@@ -38,32 +43,42 @@ export function EquipmentExportButton({ equipments, className }: EquipmentExport
     // Export CSV
     const csvHeaders = [
       'ID',
-      'Type',
-      'Marque',
-      'Modèle',
-      'N° Série',
-      'Localisation',
-      'Agence',
+      'Date',
       'Technicien',
-      'Statut',
-      'Température',
-      'Dernière maintenance',
-      'Prochaine maintenance'
+      'Division',
+      'Secteur',
+      'Partenaire',
+      'Ville',
+      'Nom Client',
+      'Nom PDV',
+      'Tel Barman',
+      'Quartier',
+      'Localisation',
+      'Type Frigo',
+      'AF/NF',
+      'Branding',
+      'N° Série',
+      'TAG Number'
     ];
     
     const csvRows = equipments.map(eq => [
-      eq.equipment_id,
-      eq.type,
-      eq.brand,
-      eq.model,
+      eq.id,
+      eq.date,
+      eq.technician,
+      eq.division,
+      eq.secteur,
+      eq.partenaire,
+      eq.ville,
+      eq.nom_client,
+      eq.nom_pdv,
+      eq.tel_barman,
+      eq.quartier,
+      eq.localisation,
+      eq.type_frigo,
+      eq.af_nf,
+      eq.branding,
       eq.serial_number,
-      eq.location,
-      eq.agency,
-      eq.technician || '',
-      eq.status,
-      eq.temperature || '',
-      eq.last_maintenance ? new Date(eq.last_maintenance).toLocaleDateString('fr-FR') : '',
-      eq.next_maintenance ? new Date(eq.next_maintenance).toLocaleDateString('fr-FR') : ''
+      eq.tag_number
     ]);
     
     const csvContent = [

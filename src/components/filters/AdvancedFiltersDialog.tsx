@@ -1,23 +1,21 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Filter, X } from 'lucide-react';
+import { Filter, X } from "lucide-react";
 import { Equipment } from '@/hooks/useEquipments';
-
-interface AdvancedFilters {
-  brands: string[];
-  types: string[];
-  agencies: string[];
-  maintenanceStatus: string[];
-}
 
 interface AdvancedFiltersDialogProps {
   showAdvancedFilters: boolean;
   setShowAdvancedFilters: (show: boolean) => void;
-  advancedFilters: AdvancedFilters;
+  advancedFilters: {
+    brands: string[];
+    types: string[];
+    agencies: string[];
+    maintenanceStatus: string[];
+  };
   equipments: Equipment[];
   onAdvancedFilterChange: (category: string, value: string, checked: boolean) => void;
   onApplyFilters: () => void;
@@ -33,127 +31,116 @@ export function AdvancedFiltersDialog({
   onApplyFilters,
   onClearFilters
 }: AdvancedFiltersDialogProps) {
-  const brandOptions = Array.from(new Set(equipments.map(eq => eq.brand))).filter(Boolean);
-  const typeOptions = Array.from(new Set(equipments.map(eq => eq.type))).filter(Boolean);
-  const agencyOptions = Array.from(new Set(equipments.map(eq => eq.agency))).filter(Boolean);
-  const maintenanceOptions = ['À jour', 'En retard', 'Programmée', 'Urgente'];
-
-  const hasActiveFilters = Object.values(advancedFilters).some(arr => arr.length > 0);
-  const totalActiveFilters = Object.values(advancedFilters).reduce((acc, arr) => acc + arr.length, 0);
+  const uniqueBrands = [...new Set(equipments.map(eq => eq.branding))];
+  const uniqueTypes = [...new Set(equipments.map(eq => eq.type_frigo))];
+  const uniqueAgencies = [...new Set(equipments.map(eq => eq.division))];
 
   return (
     <Dialog open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full h-10 relative">
+        <Button variant="outline" className="border-gray-200 hover:bg-gray-50">
           <Filter className="w-4 h-4 mr-2" />
           Filtres avancés
-          {hasActiveFilters && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {totalActiveFilters}
-            </span>
-          )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Filtres avancés</span>
-            <Button variant="ghost" size="sm" onClick={onClearFilters}>
+            Filtres avancés
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearFilters}
+              className="text-gray-500 hover:text-gray-700"
+            >
               <X className="w-4 h-4 mr-1" />
-              Effacer tout
+              Réinitialiser
             </Button>
           </DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium mb-3 block">Marques ({brandOptions.length})</Label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2">
-                {brandOptions.length > 0 ? brandOptions.map(brand => (
-                  <div key={brand} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`brand-${brand}`}
-                      checked={advancedFilters.brands.includes(brand)}
-                      onCheckedChange={(checked) => 
-                        onAdvancedFilterChange('brands', brand, checked as boolean)
-                      }
-                    />
-                    <Label htmlFor={`brand-${brand}`} className="text-sm cursor-pointer">{brand}</Label>
-                  </div>
-                )) : (
-                  <p className="text-sm text-gray-500 italic">Aucune marque disponible</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium mb-3 block">Types d'équipement ({typeOptions.length})</Label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2">
-                {typeOptions.length > 0 ? typeOptions.map(type => (
-                  <div key={type} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`type-${type}`}
-                      checked={advancedFilters.types.includes(type)}
-                      onCheckedChange={(checked) => 
-                        onAdvancedFilterChange('types', type, checked as boolean)
-                      }
-                    />
-                    <Label htmlFor={`type-${type}`} className="text-sm cursor-pointer">{type}</Label>
-                  </div>
-                )) : (
-                  <p className="text-sm text-gray-500 italic">Aucun type disponible</p>
-                )}
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">
+              Marques ({uniqueBrands.length})
+            </Label>
+            <div className="space-y-3 max-h-48 overflow-y-auto">
+              {uniqueBrands.map((brand) => (
+                <div key={brand} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`brand-${brand}`}
+                    checked={advancedFilters.brands.includes(brand)}
+                    onCheckedChange={(checked) => 
+                      onAdvancedFilterChange('brands', brand, checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor={`brand-${brand}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {brand}
+                  </Label>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium mb-3 block">Agences ({agencyOptions.length})</Label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2">
-                {agencyOptions.length > 0 ? agencyOptions.map(agency => (
-                  <div key={agency} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`agency-${agency}`}
-                      checked={advancedFilters.agencies.includes(agency)}
-                      onCheckedChange={(checked) => 
-                        onAdvancedFilterChange('agencies', agency, checked as boolean)
-                      }
-                    />
-                    <Label htmlFor={`agency-${agency}`} className="text-sm cursor-pointer">{agency}</Label>
-                  </div>
-                )) : (
-                  <p className="text-sm text-gray-500 italic">Aucune agence disponible</p>
-                )}
-              </div>
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">
+              Types ({uniqueTypes.length})
+            </Label>
+            <div className="space-y-3 max-h-48 overflow-y-auto">
+              {uniqueTypes.map((type) => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`type-${type}`}
+                    checked={advancedFilters.types.includes(type)}
+                    onCheckedChange={(checked) => 
+                      onAdvancedFilterChange('types', type, checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor={`type-${type}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {type}
+                  </Label>
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <Label className="text-sm font-medium mb-3 block">État maintenance</Label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2">
-                {maintenanceOptions.map(option => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`maintenance-${option}`}
-                      checked={advancedFilters.maintenanceStatus.includes(option)}
-                      onCheckedChange={(checked) => 
-                        onAdvancedFilterChange('maintenanceStatus', option, checked as boolean)
-                      }
-                    />
-                    <Label htmlFor={`maintenance-${option}`} className="text-sm cursor-pointer">{option}</Label>
-                  </div>
-                ))}
-              </div>
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">
+              Divisions ({uniqueAgencies.length})
+            </Label>
+            <div className="space-y-3 max-h-48 overflow-y-auto">
+              {uniqueAgencies.map((agency) => (
+                <div key={agency} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`agency-${agency}`}
+                    checked={advancedFilters.agencies.includes(agency)}
+                    onCheckedChange={(checked) => 
+                      onAdvancedFilterChange('agencies', agency, checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor={`agency-${agency}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {agency}
+                  </Label>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+        <div className="flex justify-end gap-3 pt-4 border-t">
           <Button variant="outline" onClick={() => setShowAdvancedFilters(false)}>
             Annuler
           </Button>
-          <Button onClick={onApplyFilters} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={onApplyFilters}>
             Appliquer les filtres
           </Button>
         </div>

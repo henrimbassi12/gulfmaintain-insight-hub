@@ -49,29 +49,28 @@ const Equipments = () => {
   // Enhanced filtering logic
   const filteredEquipments = useMemo(() => {
     return equipments.filter(equipment => {
-      const matchesStatus = filters.status === 'all' || equipment.status === filters.status;
-      const matchesType = filters.type === 'all' || equipment.type.toLowerCase().includes(filters.type.toLowerCase());
-      const matchesAgency = filters.agency === 'all' || equipment.agency === filters.agency;
+      const matchesType = filters.type === 'all' || equipment.type_frigo.toLowerCase().includes(filters.type.toLowerCase());
+      const matchesAgency = filters.agency === 'all' || equipment.division === filters.agency;
       const matchesTechnician = filters.technician === 'all' || equipment.technician === filters.technician;
       
       const matchesSearch = filters.search === '' || 
-        equipment.equipment_id.toLowerCase().includes(filters.search.toLowerCase()) ||
-        equipment.type.toLowerCase().includes(filters.search.toLowerCase()) ||
-        equipment.brand.toLowerCase().includes(filters.search.toLowerCase()) ||
-        equipment.location.toLowerCase().includes(filters.search.toLowerCase()) ||
-        equipment.model.toLowerCase().includes(filters.search.toLowerCase());
+        equipment.serial_number.toLowerCase().includes(filters.search.toLowerCase()) ||
+        equipment.type_frigo.toLowerCase().includes(filters.search.toLowerCase()) ||
+        equipment.branding.toLowerCase().includes(filters.search.toLowerCase()) ||
+        equipment.localisation.toLowerCase().includes(filters.search.toLowerCase()) ||
+        equipment.tag_number.toLowerCase().includes(filters.search.toLowerCase());
 
       // Advanced filters
       const selectedBrands = filters.brands ? filters.brands.split(',').filter(Boolean) : [];
-      const matchesBrands = selectedBrands.length === 0 || selectedBrands.includes(equipment.brand);
+      const matchesBrands = selectedBrands.length === 0 || selectedBrands.includes(equipment.branding);
 
       const selectedTypes = filters.types ? filters.types.split(',').filter(Boolean) : [];
-      const matchesTypes = selectedTypes.length === 0 || selectedTypes.includes(equipment.type);
+      const matchesTypes = selectedTypes.length === 0 || selectedTypes.includes(equipment.type_frigo);
 
       const selectedAgencies = filters.agencies ? filters.agencies.split(',').filter(Boolean) : [];
-      const matchesAgencies = selectedAgencies.length === 0 || selectedAgencies.includes(equipment.agency);
+      const matchesAgencies = selectedAgencies.length === 0 || selectedAgencies.includes(equipment.division);
 
-      return matchesStatus && matchesType && matchesAgency && matchesTechnician && 
+      return matchesType && matchesAgency && matchesTechnician && 
              matchesSearch && matchesBrands && matchesTypes && matchesAgencies;
     });
   }, [equipments, filters]);
