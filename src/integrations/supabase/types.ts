@@ -124,54 +124,84 @@ export type Database = {
       }
       failure_predictions: {
         Row: {
+          confidence_score: number | null
           created_at: string
+          environmental_factors: Json | null
+          equipment_brand: string | null
           equipment_id: string
+          equipment_model: string | null
           equipment_name: string
+          equipment_serial_number: string | null
           failure_risk: number
           id: string
           location: string
+          maintenance_history: Json | null
           predicted_date: string
           recommended_action: string
           type: string
           updated_at: string
+          usage_pattern: string | null
         }
         Insert: {
+          confidence_score?: number | null
           created_at?: string
+          environmental_factors?: Json | null
+          equipment_brand?: string | null
           equipment_id: string
+          equipment_model?: string | null
           equipment_name: string
+          equipment_serial_number?: string | null
           failure_risk: number
           id?: string
           location: string
+          maintenance_history?: Json | null
           predicted_date: string
           recommended_action: string
           type: string
           updated_at?: string
+          usage_pattern?: string | null
         }
         Update: {
+          confidence_score?: number | null
           created_at?: string
+          environmental_factors?: Json | null
+          equipment_brand?: string | null
           equipment_id?: string
+          equipment_model?: string | null
           equipment_name?: string
+          equipment_serial_number?: string | null
           failure_risk?: number
           id?: string
           location?: string
+          maintenance_history?: Json | null
           predicted_date?: string
           recommended_action?: string
           type?: string
           updated_at?: string
+          usage_pattern?: string | null
         }
         Relationships: []
       }
       maintenance_reports: {
         Row: {
+          assigned_technician: string | null
+          completion_percentage: number | null
           cost: number
           created_at: string
           date: string
           description: string
           duration: string
           equipment: string
+          equipment_brand: string | null
+          equipment_model: string | null
+          equipment_serial_number: string | null
           id: string
+          images: string[] | null
           location: string
+          next_maintenance_date: string | null
+          notes: string | null
           parts_used: string[] | null
+          priority: string | null
           region: string
           report_id: string
           status: string
@@ -180,15 +210,24 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_technician?: string | null
+          completion_percentage?: number | null
           cost?: number
           created_at?: string
           date: string
           description: string
           duration: string
           equipment: string
+          equipment_brand?: string | null
+          equipment_model?: string | null
+          equipment_serial_number?: string | null
           id?: string
+          images?: string[] | null
           location: string
+          next_maintenance_date?: string | null
+          notes?: string | null
           parts_used?: string[] | null
+          priority?: string | null
           region: string
           report_id: string
           status: string
@@ -197,15 +236,24 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_technician?: string | null
+          completion_percentage?: number | null
           cost?: number
           created_at?: string
           date?: string
           description?: string
           duration?: string
           equipment?: string
+          equipment_brand?: string | null
+          equipment_model?: string | null
+          equipment_serial_number?: string | null
           id?: string
+          images?: string[] | null
           location?: string
+          next_maintenance_date?: string | null
+          notes?: string | null
           parts_used?: string[] | null
+          priority?: string | null
           region?: string
           report_id?: string
           status?: string
@@ -256,13 +304,20 @@ export type Database = {
           agency: string | null
           approved_at: string | null
           approved_by: string | null
+          availability_status: string | null
           avatar_url: string | null
+          certification_level: string | null
           created_at: string
+          current_location: string | null
           email: string
+          experience_years: number | null
           full_name: string | null
           id: string
+          last_login: string | null
+          notification_preferences: Json | null
           phone: string | null
           role: string
+          specialization: string[] | null
           updated_at: string
         }
         Insert: {
@@ -270,13 +325,20 @@ export type Database = {
           agency?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          availability_status?: string | null
           avatar_url?: string | null
+          certification_level?: string | null
           created_at?: string
+          current_location?: string | null
           email: string
+          experience_years?: number | null
           full_name?: string | null
           id: string
+          last_login?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           role?: string
+          specialization?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -284,13 +346,20 @@ export type Database = {
           agency?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          availability_status?: string | null
           avatar_url?: string | null
+          certification_level?: string | null
           created_at?: string
+          current_location?: string | null
           email?: string
+          experience_years?: number | null
           full_name?: string | null
           id?: string
+          last_login?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           role?: string
+          specialization?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -313,42 +382,63 @@ export type Database = {
       technician_recommendations: {
         Row: {
           availability: string
+          certification_level: string | null
           created_at: string
+          current_workload: number | null
+          email: string | null
           equipment_id: string
           equipment_name: string
           experience: string
           expertise: string[] | null
           id: string
+          last_assignment_date: string | null
           location: string
           match_score: number
+          phone: string | null
+          rating: number | null
+          specialization: string[] | null
           success_rate: number
           technician: string
           updated_at: string
         }
         Insert: {
           availability: string
+          certification_level?: string | null
           created_at?: string
+          current_workload?: number | null
+          email?: string | null
           equipment_id: string
           equipment_name: string
           experience: string
           expertise?: string[] | null
           id?: string
+          last_assignment_date?: string | null
           location: string
           match_score: number
+          phone?: string | null
+          rating?: number | null
+          specialization?: string[] | null
           success_rate: number
           technician: string
           updated_at?: string
         }
         Update: {
           availability?: string
+          certification_level?: string | null
           created_at?: string
+          current_workload?: number | null
+          email?: string | null
           equipment_id?: string
           equipment_name?: string
           experience?: string
           expertise?: string[] | null
           id?: string
+          last_assignment_date?: string | null
           location?: string
           match_score?: number
+          phone?: string | null
+          rating?: number | null
+          specialization?: string[] | null
           success_rate?: number
           technician?: string
           updated_at?: string
