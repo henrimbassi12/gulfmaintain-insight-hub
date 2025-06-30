@@ -13,22 +13,16 @@ import { toast } from "sonner";
 import { Plus } from 'lucide-react';
 
 interface AddEquipmentFormData {
-  date: string;
-  technician: string;
-  division: string;
-  secteur: string;
-  partenaire: string;
-  ville: string;
-  nom_client: string;
-  nom_pdv: string;
-  tel_barman: string;
+  equipment_id: string;
+  type: string;
+  brand: string;
+  model: string;
   serial_number: string;
-  tag_number: string;
-  quartier: string;
-  localisation: string;
-  type_frigo: string;
-  af_nf: string;
-  branding: string;
+  location: string;
+  agency: string;
+  technician: string;
+  status: 'operational' | 'maintenance' | 'critical' | 'offline';
+  temperature: string;
 }
 
 interface AddEquipmentFormProps {
@@ -41,22 +35,16 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
   const form = useForm<AddEquipmentFormData>({
     defaultValues: {
-      date: '',
-      technician: '',
-      division: '',
-      secteur: '',
-      partenaire: '',
-      ville: '',
-      nom_client: '',
-      nom_pdv: '',
-      tel_barman: '',
+      equipment_id: '',
+      type: '',
+      brand: '',
+      model: '',
       serial_number: '',
-      tag_number: '',
-      quartier: '',
-      localisation: '',
-      type_frigo: '',
-      af_nf: '',
-      branding: '',
+      location: '',
+      agency: '',
+      technician: '',
+      status: 'operational',
+      temperature: '',
     },
   });
 
@@ -67,14 +55,32 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
     'SANDEN 500',
     'SUPER-35',
     'FV 400',
-    'Autres'
+    'Réfrigérateur',
+    'Congélateur',
+    'Climatiseur',
+    'Frigo vitrine',
+    'Armoire réfrigérée'
+  ];
+
+  const brands = [
+    'GUINNESS',
+    'Samsung',
+    'LG',
+    'Whirlpool',
+    'Bosch',
+    'Electrolux'
   ];
 
   const technicians = [
     'VOUKENG',
     'MBAPBOU Grégoire', 
     'TCHINDA Constant',
-    'Cédric'
+    'Cédric',
+    'Jean Mballa',
+    'Pierre Nkomo',
+    'Marie Fouda',
+    'Paul Essomba',
+    'Catherine Biya'
   ];
 
   const cities = [
@@ -83,57 +89,73 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
     'Bafoussam',
     'Kribi',
     'Maroua',
-    'Garoua'
+    'Garoua',
+    'Douala Centre'
+  ];
+
+  const statusOptions = [
+    { value: 'operational', label: 'Opérationnel' },
+    { value: 'maintenance', label: 'En maintenance' },
+    { value: 'critical', label: 'Critique' },
+    { value: 'offline', label: 'Hors service' }
   ];
 
   const onSubmit = async (data: AddEquipmentFormData) => {
     setIsLoading(true);
+    console.log('🚀 Tentative d\'ajout d\'équipement:', data);
+    
     try {
-      // Générer un ID d'équipement automatique basé sur la date
-      const equipmentId = `EQ-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      // Générer un ID d'équipement automatique si vide
+      const equipmentId = data.equipment_id || `EQ-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
       
       const equipmentData = {
         equipment_id: equipmentId,
+        type: data.type,
+        brand: data.brand,
+        model: data.model || data.type, // Utiliser le type comme modèle si pas de modèle spécifié
         serial_number: data.serial_number,
-        type: data.type_frigo,
-        brand: data.branding,
-        model: data.type_frigo, // Utiliser type_frigo comme modèle pour la compatibilité
-        location: data.localisation,
-        agency: data.ville,
-        status: 'operational' as const,
-        technician: data.technician,
-        // Nouveaux champs spécifiques
-        date: data.date,
-        division: data.division,
-        secteur: data.secteur,
-        partenaire: data.partenaire,
-        ville: data.ville,
-        nom_client: data.nom_client,
-        nom_pdv: data.nom_pdv,
-        tel_barman: data.tel_barman,
-        tag_number: data.tag_number,
-        quartier: data.quartier,
-        localisation: data.localisation,
-        type_frigo: data.type_frigo,
-        af_nf: data.af_nf,
-        branding: data.branding,
+        location: data.location,
+        agency: data.agency,
+        status: data.status,
+        technician: data.technician || null,
+        temperature: data.temperature || null,
+        last_maintenance: null,
+        next_maintenance: null
       };
 
-      const { error } = await supabase
+      console.log('📝 Données à insérer:', equipmentData);
+
+      const { data: insertedData, error } = await supabase
         .from('equipments')
-        .insert(equipmentData);
+        .insert(equipmentData)
+        .select()
+        .single();
 
       if (error) {
+        console.error('❌ Erreur Supabase:', error);
         throw error;
       }
 
+      console.log('✅ Équipement créé avec succès:', insertedData);
       toast.success('Équipement ajouté avec succès');
       form.reset();
       setOpen(false);
       onSuccess();
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout de l\'équipement:', error);
-      toast.error('Erreur lors de l\'ajout de l\'équipement');
+    } catch (error: any) {
+      console.error('❌ Erreur lors de l\'ajout de l\'équipement:', error);
+      
+      // Messages d'erreur détaillés
+      let errorMessage = 'Erreur lors de l\'ajout de l\'équipement';
+      
+      if (error.code === '23505') {
+        errorMessage = 'Un équipement avec cet ID existe déjà';
+      } else if (error.code === '23502') {
+        errorMessage = 'Certains champs obligatoires sont manquants';
+      } else if (error.message) {
+        errorMessage = `Erreur: ${error.message}`;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -162,12 +184,12 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="date"
+                  name="equipment_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date *</FormLabel>
+                      <FormLabel>ID Équipement</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} required />
+                        <Input placeholder="Laissez vide pour génération automatique" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -176,222 +198,10 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="technician" 
+                  name="type" 
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Technicien *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un technicien" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {technicians.map(tech => (
-                            <SelectItem key={tech} value={tech}>{tech}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Organisation */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Organisation</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="division"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Division *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Division commerciale" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="secteur"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Secteur *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Secteur d'activité" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="partenaire"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Partenaire *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nom du partenaire" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="ville"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ville *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une ville" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {cities.map(city => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Client et Point de vente */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Client & Point de vente</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="nom_client"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom client *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nom du client" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="nom_pdv"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom PDV *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nom du point de vente" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tel_barman"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tel barman *</FormLabel>
-                      <FormControl>
-                        <Input type="tel" placeholder="+237 6XX XXX XXX" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="quartier"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quartier *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nom du quartier" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="md:col-span-2">
-                  <FormField
-                    control={form.control}
-                    name="localisation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Localisation *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Adresse complète ou coordonnées GPS" {...field} required />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Équipement technique */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Spécifications techniques</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="serial_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SERIAL NUMBER *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="SAM789456123" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tag_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>TAG NUMBER *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Numéro de tag" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="type_frigo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Type Frigo *</FormLabel>
+                      <FormLabel>Type *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -411,19 +221,20 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="af_nf"
+                  name="brand"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>AF/NF *</FormLabel>
+                      <FormLabel>Marque *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner" />
+                            <SelectValue placeholder="Sélectionner la marque" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="AF">AF</SelectItem>
-                          <SelectItem value="NF">NF</SelectItem>
+                          {brands.map(brand => (
+                            <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -433,12 +244,139 @@ export function AddEquipmentForm({ onSuccess }: AddEquipmentFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="branding"
+                  name="model"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Branding *</FormLabel>
+                      <FormLabel>Modèle</FormLabel>
                       <FormControl>
-                        <Input placeholder="Marque/branding" {...field} required />
+                        <Input placeholder="Ex: FV800" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="serial_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Numéro de série *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SAM789456123" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Statut</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {statusOptions.map(status => (
+                            <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Localisation */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Localisation</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Emplacement *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Adresse ou localisation" {...field} required />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="agency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Agence *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner l'agence" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {cities.map(city => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Maintenance */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Maintenance</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="technician"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Technicien assigné</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un technicien" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {technicians.map(tech => (
+                            <SelectItem key={tech} value={tech}>{tech}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="temperature"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Température (°C)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: -5" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
