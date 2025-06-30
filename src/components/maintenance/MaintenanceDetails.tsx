@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, User, MapPin, Wrench, Calendar, Brain, Edit, CheckCircle } from "lucide-react";
+import { Clock, User, MapPin, Wrench, Calendar, Brain, Edit } from "lucide-react";
 import { toast } from 'sonner';
 import { MaintenanceStatusButton } from './MaintenanceStatusButton';
 
@@ -27,6 +27,7 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState(maintenance?.status || 'planned');
+  const [currentStatus, setCurrentStatus] = useState(maintenance?.status || 'planned');
 
   if (!maintenance) return null;
 
@@ -64,17 +65,20 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
   };
 
   const handleStatusUpdate = () => {
+    setCurrentStatus(newStatus);
     onUpdateStatus(newStatus);
     setIsEditModalOpen(false);
     toast.success(`Statut mis à jour vers: ${getStatusText(newStatus)}`);
   };
 
   const handleStartMaintenance = () => {
+    setCurrentStatus('in-progress');
     onUpdateStatus('in-progress');
     toast.success('Maintenance démarrée');
   };
 
   const handleCompleteMaintenance = () => {
+    setCurrentStatus('completed');
     onUpdateStatus('completed');
     toast.success('Maintenance terminée');
   };
@@ -91,25 +95,25 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              {maintenance.type || maintenance.equipment}
-              <Badge className={getStatusColor(maintenance.status)}>
-                {getStatusText(maintenance.status)}
+        <SheetContent className="w-full sm:w-[500px] sm:max-w-[500px] overflow-y-auto">
+          <SheetHeader className="space-y-3">
+            <SheetTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-left">
+              <span className="break-words">{maintenance.type || maintenance.equipment}</span>
+              <Badge className={getStatusColor(currentStatus)}>
+                {getStatusText(currentStatus)}
               </Badge>
             </SheetTitle>
-            <SheetDescription>
+            <SheetDescription className="text-left">
               ID: {maintenance.id}
             </SheetDescription>
           </SheetHeader>
 
-          <div className="space-y-6 mt-6">
+          <div className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {/* AI Risk Alert */}
             {aiRiskLevel && (
               <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
                 <div className="flex items-center gap-2 text-orange-700">
-                  <Brain className="w-4 h-4" />
+                  <Brain className="w-4 h-4 flex-shrink-0" />
                   <span className="font-medium">Analyse IA</span>
                   <Badge variant="secondary" className="ml-auto">
                     Risque: {aiRiskLevel}%
@@ -121,30 +125,30 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
               </div>
             )}
 
-            {/* Main Info */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Main Info - Responsive Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>{maintenance.scheduledDate || maintenance.date}</span>
+                  <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                  <span className="break-words">{maintenance.scheduledDate || maintenance.date}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span>{maintenance.timeSlot || maintenance.time} ({maintenance.duration || '2h'})</span>
+                  <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                  <span className="break-words">{maintenance.timeSlot || maintenance.time} ({maintenance.duration || '2h'})</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="w-4 h-4 text-gray-500" />
-                  <span>{maintenance.location}</span>
+                  <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                  <span className="break-words">{maintenance.location}</span>
                 </div>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4 text-gray-500" />
-                  <span>{maintenance.technician}</span>
+                  <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                  <span className="break-words">{maintenance.technician}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Wrench className="w-4 h-4 text-gray-500" />
-                  <span>{maintenance.type}</span>
+                  <Wrench className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                  <span className="break-words">{maintenance.type}</span>
                 </div>
                 <div>
                   <Badge className={getPriorityColor(maintenance.priority)}>
@@ -161,20 +165,20 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
             <div>
               <h3 className="font-semibold mb-2">Équipement concerné</h3>
               <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="font-medium">{maintenance.equipment}</p>
-                <p className="text-sm text-gray-600">Client: {maintenance.client}</p>
+                <p className="font-medium break-words">{maintenance.equipment}</p>
+                <p className="text-sm text-gray-600 break-words">Client: {maintenance.client}</p>
               </div>
             </div>
 
-            {/* Status Actions */}
-            <div className="flex gap-2 flex-wrap">
+            {/* Status Actions - Responsive Layout */}
+            <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
               <MaintenanceStatusButton
-                status={maintenance.status}
+                status={currentStatus}
                 onStart={handleStartMaintenance}
                 onComplete={handleCompleteMaintenance}
               />
               
-              <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)} className="w-full sm:w-auto">
                 <Edit className="w-4 h-4 mr-1" />
                 Modifier
               </Button>
@@ -188,10 +192,10 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
               <div className="space-y-3">
                 {history.map((entry, index) => (
                   <div key={index} className="flex gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{entry.action}</p>
-                      <p className="text-xs text-gray-500">{entry.date} - {entry.user}</p>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium break-words">{entry.action}</p>
+                      <p className="text-xs text-gray-500 break-words">{entry.date} - {entry.user}</p>
                     </div>
                   </div>
                 ))}
@@ -203,7 +207,7 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
 
       {/* Modal d'édition de statut */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md mx-4 sm:mx-auto">
           <DialogHeader>
             <DialogTitle>Modifier le statut</DialogTitle>
           </DialogHeader>

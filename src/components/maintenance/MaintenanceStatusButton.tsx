@@ -20,7 +20,7 @@ export function MaintenanceStatusButton({
     return (
       <Button 
         size="sm" 
-        className="bg-orange-600 hover:bg-orange-700"
+        className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
         onClick={onStart}
         disabled={disabled}
       >
@@ -32,7 +32,7 @@ export function MaintenanceStatusButton({
 
   if (status === 'in-progress') {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <Clock className="w-4 h-4 text-orange-600" />
@@ -40,7 +40,7 @@ export function MaintenanceStatusButton({
         </div>
         <Button 
           size="sm" 
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
           onClick={onComplete}
           disabled={disabled}
         >

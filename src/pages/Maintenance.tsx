@@ -73,8 +73,11 @@ export default function Maintenance() {
     }
     
     toast.success(`Statut mis à jour vers: ${newStatus}`);
-    // Ici vous pouvez ajouter la logique pour mettre à jour le statut dans la base de données
-    // refetch();
+    
+    // Forcer la mise à jour de l'affichage
+    setTimeout(() => {
+      refetch();
+    }, 100);
   };
 
   const handleEditMaintenance = (maintenanceId: string) => {
@@ -126,18 +129,32 @@ export default function Maintenance() {
         {/* Statistiques des maintenances */}
         <MaintenanceStatsCard maintenances={transformedMaintenances} />
 
-        <MaintenancePageFilters
-          filterBy={filterBy}
-          technicianFilter={technicianFilter}
-          onFilterByChange={setFilterBy}
-          onTechnicianFilterChange={setTechnicianFilter}
-          onReset={handleResetFilters}
-        />
+        {/* Section Maintenances avec style harmonisé */}
+        <div className="bg-white border border-gray-100 shadow-sm rounded-lg">
+          <div className="bg-gray-50 border-b border-gray-100 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+                <Wrench className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Maintenances</h2>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            <MaintenancePageFilters
+              filterBy={filterBy}
+              technicianFilter={technicianFilter}
+              onFilterByChange={setFilterBy}
+              onTechnicianFilterChange={setTechnicianFilter}
+              onReset={handleResetFilters}
+            />
 
-        <MaintenanceList
-          maintenances={transformedMaintenances}
-          onMaintenanceClick={setSelectedMaintenance}
-        />
+            <MaintenanceList
+              maintenances={transformedMaintenances}
+              onMaintenanceClick={setSelectedMaintenance}
+            />
+          </div>
+        </div>
 
         <div className="flex justify-center pt-6">
           <Button 

@@ -1,9 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Package, RefreshCw, Activity } from "lucide-react";
+import { Package, RefreshCw } from "lucide-react";
 import { EquipmentStats } from '@/components/EquipmentStats';
 import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
@@ -109,23 +107,8 @@ const Equipments = () => {
         <AddEquipmentForm onSuccess={refetch} />
       </AirbnbHeader>
 
-      {/* Statistics épurées */}
-      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="flex items-center gap-3 text-lg">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            Statistiques des équipements
-            <Badge variant="secondary" className="ml-auto text-xs bg-blue-50 text-blue-700 border-blue-200">
-              {filteredEquipments.length} équipements
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <EquipmentStats equipments={filteredEquipments} />
-        </CardContent>
-      </Card>
+      {/* Statistics harmonisées */}
+      <EquipmentStats equipments={filteredEquipments} />
 
       {/* Enhanced Filters */}
       <EquipmentFilters 
