@@ -15,9 +15,19 @@ interface EquipmentMaintenanceModalProps {
 }
 
 export function EquipmentMaintenanceModal({ equipment, isOpen, onClose }: EquipmentMaintenanceModalProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   if (!equipment) return null;
+
+  // Convertir la date d'ajout de l'équipement en objet Date et pointer le calendrier dessus
+  const equipmentAddedDate = new Date(equipment.date);
+  const defaultMonth = equipmentAddedDate;
+
+  React.useEffect(() => {
+    if (isOpen && equipment) {
+      setSelectedDate(equipmentAddedDate);
+    }
+  }, [isOpen, equipment]);
 
   const handleScheduleMaintenance = () => {
     if (!selectedDate) {
@@ -25,7 +35,6 @@ export function EquipmentMaintenanceModal({ equipment, isOpen, onClose }: Equipm
       return;
     }
 
-    // Ici vous pouvez ajouter la logique pour programmer la maintenance
     toast.success(`Maintenance programmée pour le ${selectedDate.toLocaleDateString('fr-FR')}`);
     onClose();
   };
@@ -63,19 +72,25 @@ export function EquipmentMaintenanceModal({ equipment, isOpen, onClose }: Equipm
               <User className="w-4 h-4" />
               <span>Serial: {equipment.serial_number}</span>
             </div>
+
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <CalendarIcon className="w-4 h-4" />
+              <span>Ajouté le: {equipmentAddedDate.toLocaleDateString('fr-FR')}</span>
+            </div>
           </div>
 
-          {/* Calendrier */}
+          {/* Calendrier pointé sur la date d'ajout */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700">
-              Sélectionner une date
+              Sélectionner une date de maintenance
             </label>
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
+              defaultMonth={defaultMonth}
               disabled={(date) => date < new Date()}
-              className="rounded-md border"
+              className="rounded-md border pointer-events-auto"
             />
           </div>
 

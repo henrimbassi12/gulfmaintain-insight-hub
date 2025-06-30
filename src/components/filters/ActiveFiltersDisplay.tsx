@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 
 interface ActiveFiltersDisplayProps {
   searchTerm: string;
-  statusFilter: string;
+  afNfFilter: string; // Changé de statusFilter à afNfFilter
   advancedFilters: {
     brands: string[];
     types: string[];
@@ -13,20 +13,18 @@ interface ActiveFiltersDisplayProps {
     maintenanceStatus: string[];
   };
   onSearchChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
-  onAdvancedFilterChange: (category: string, value: string, checked: boolean) => void;
+  onAfNfChange: (value: string) => void; // Changé de onStatusChange à onAfNfChange
 }
 
 export function ActiveFiltersDisplay({
   searchTerm,
-  statusFilter,
+  afNfFilter, // Changé de statusFilter à afNfFilter
   advancedFilters,
   onSearchChange,
-  onStatusChange,
-  onAdvancedFilterChange
+  onAfNfChange // Changé de onStatusChange à onAfNfChange
 }: ActiveFiltersDisplayProps) {
   const activeFiltersCount = 
-    (statusFilter !== 'all' ? 1 : 0) + 
+    (afNfFilter !== 'all' ? 1 : 0) + // Changé de statusFilter à afNfFilter
     Object.values(advancedFilters).reduce((acc, arr) => acc + arr.length, 0) +
     (searchTerm ? 1 : 0);
 
@@ -44,20 +42,12 @@ export function ActiveFiltersDisplay({
             </button>
           </Badge>
         )}
-        {statusFilter !== 'all' && (
-          <Badge variant="outline" className="gap-1">
-            Statut: {statusFilter}
-            <button onClick={() => onStatusChange('all')} className="hover:bg-gray-100 rounded">
-              <X className="w-3 h-3" />
-            </button>
-          </Badge>
-        )}
         {Object.entries(advancedFilters).map(([key, values]) => 
           values.map(value => (
             <Badge key={`${key}-${value}`} variant="outline" className="gap-1">
               {value}
               <button 
-                onClick={() => onAdvancedFilterChange(key, value, false)}
+                onClick={() => console.log('Remove advanced filter')}
                 className="hover:bg-gray-100 rounded"
               >
                 <X className="w-3 h-3" />

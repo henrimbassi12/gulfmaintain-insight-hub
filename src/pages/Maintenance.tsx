@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { RefreshCw, Plus, Download } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
 import { MaintenanceFormModal } from '@/components/maintenance/MaintenanceFormModal';
 import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
 import { MaintenanceList } from '@/components/maintenance/MaintenanceList';
@@ -37,17 +37,7 @@ export default function Maintenance() {
   const handleResetFilters = () => {
     setFilterBy('all');
     setTechnicianFilter('all');
-  };
-
-  const handleExportData = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Génération du fichier d\'export...',
-        success: 'Fichier exporté avec succès',
-        error: 'Erreur lors de l\'export'
-      }
-    );
+    toast.success('Filtres réinitialisés');
   };
 
   // Filtrage des maintenances basé sur les données réelles
@@ -71,6 +61,19 @@ export default function Maintenance() {
     client: maintenance.nom_client,
     description: maintenance.description || 'Maintenance planifiée'
   }));
+
+  const handleUpdateStatus = (maintenanceId: string, newStatus: string) => {
+    // Ici vous pouvez ajouter la logique pour mettre à jour le statut dans la base de données
+    toast.success(`Statut mis à jour vers: ${newStatus}`);
+    setSelectedMaintenance(null);
+    refetch();
+  };
+
+  const handleEditMaintenance = (maintenanceId: string) => {
+    // Ici vous pouvez ajouter la logique pour éditer la maintenance
+    toast.info('Fonction d\'édition à implémenter');
+    setSelectedMaintenance(null);
+  };
 
   if (isLoading) {
     return (
@@ -100,15 +103,6 @@ export default function Maintenance() {
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Actualiser
-        </Button>
-
-        <Button 
-          variant="outline" 
-          onClick={handleExportData}
-          className="hover:bg-green-50 border-gray-200"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Exporter
         </Button>
         
         <Button 
@@ -161,8 +155,8 @@ export default function Maintenance() {
           maintenance={selectedMaintenance}
           isOpen={!!selectedMaintenance}
           onClose={() => setSelectedMaintenance(null)}
-          onEdit={() => console.log('Edit maintenance')}
-          onUpdateStatus={() => console.log('Update status')}
+          onEdit={() => handleEditMaintenance(selectedMaintenance.id)}
+          onUpdateStatus={(status) => handleUpdateStatus(selectedMaintenance.id, status)}
         />
       )}
     </AirbnbContainer>
