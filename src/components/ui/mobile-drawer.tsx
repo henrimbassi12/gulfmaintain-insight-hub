@@ -20,8 +20,7 @@ import {
   FileText, 
   MapPin, 
   Bot, 
-  Settings, 
-  Users 
+  Settings
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,7 +35,6 @@ const menuItems = [
   { icon: Clock, label: "Historique", href: "/equipment-history" },
   { icon: FileText, label: "Rapports", href: "/reports" },
   { icon: MapPin, label: "Géolocalisation", href: "/geolocation" },
-  // { icon: Bot, label: "Supervision", href: "/supervision" }, // MASQUÉ - Fonctionnalité intégrée au Dashboard
   { icon: Settings, label: "Paramètres", href: "/settings" },
 ];
 
@@ -44,12 +42,6 @@ export function MobileDrawer() {
   const location = useLocation();
   const { userProfile } = useAuth();
   const [open, setOpen] = React.useState(false);
-
-  // Ajouter la gestion des utilisateurs pour les admins
-  const isAdmin = userProfile?.role === 'admin' && userProfile?.account_status === 'approved';
-  const allMenuItems = isAdmin 
-    ? [...menuItems, { icon: Users, label: "Gestion des utilisateurs", href: "/user-management" }]
-    : menuItems;
 
   const isPathActive = (href: string) => location.pathname === href;
 
@@ -73,7 +65,7 @@ export function MobileDrawer() {
         
         <div className="flex-1 overflow-y-auto p-4">
           <nav className="space-y-2">
-            {allMenuItems.map((item) => {
+            {menuItems.map((item) => {
               const isActive = isPathActive(item.href);
               const IconComponent = item.icon;
               return (
