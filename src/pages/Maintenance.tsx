@@ -10,6 +10,7 @@ import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Wrench } from 'lucide-react';
+import { useMaintenances } from '@/hooks/useMaintenances';
 
 export default function Maintenance() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -18,10 +19,12 @@ export default function Maintenance() {
   const [filterBy, setFilterBy] = useState('all');
   const [technicianFilter, setTechnicianFilter] = useState('all');
 
+  const { maintenances, isLoading, refetch } = useMaintenances();
+
   const handleRefresh = () => {
     setRefreshing(true);
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      refetch(),
       {
         loading: 'Actualisation des maintenances...',
         success: 'Maintenances actualisées avec succès',
@@ -47,135 +50,40 @@ export default function Maintenance() {
     );
   };
 
-  // Données de maintenance étendues avec toutes les informations
-  const maintenances = [
-    {
-      id: 'MAINT-001',
-      equipment: 'TAG145 - Frigo Vestfrost INNOVA 1000',
-      type: 'Maintenance préventive',
-      status: 'En cours',
-      technician: 'VOUKENG',
-      scheduledDate: '2024-06-27',
-      timeSlot: '13h30 - 15h00',
-      priority: 'Haute',
-      location: 'Douala Centre',
-      client: 'Bar Le Central',
-      description: 'Maintenance préventive mensuelle',
-      // Informations détaillées
-      division: 'Centre',
-      secteur: 'Bars & Restaurants',
-      partenaire: 'SABC Cameroun',
-      ville: 'Douala',
-      nom_client: 'MBARGA Jean',
-      nom_pdv: 'Bar Le Central',
-      tel_barman: '+237 677 123 456',
-      serial_number: 'VF2024001',
-      tag_number: 'TAG145',
-      quartier: 'Bonanjo',
-      localisation: 'Rue de la République, face pharmacie centrale',
-      type_frigo: 'INNOVA 1000',
-      af_nf: 'AF',
-      branding: 'Coca-Cola',
-      duree_estimee: '2 heures',
-      date_programmee: '2024-06-27'
-    },
-    {
-      id: 'MAINT-002',
-      equipment: 'TAG211 - Frigo Haier SANDEN 500',
-      type: 'Maintenance corrective',
-      status: 'Prévu',
-      technician: 'MBAPBOU Grégoire',
-      scheduledDate: '2024-06-28',
-      timeSlot: '09h00 - 11h00',
-      priority: 'Urgent',
-      location: 'Yaoundé Melen',
-      client: 'Restaurant Chez Marie',
-      description: 'Réparation compresseur défaillant',
-      // Informations détaillées
-      division: 'Centre',
-      secteur: 'Restaurants',
-      partenaire: 'SABC Cameroun',
-      ville: 'Yaoundé',
-      nom_client: 'ATANGANA Marie',
-      nom_pdv: 'Restaurant Chez Marie',
-      tel_barman: '+237 654 987 321',
-      serial_number: 'HR2024015',
-      tag_number: 'TAG211',
-      quartier: 'Melen',
-      localisation: 'Carrefour Melen, à côté de la station Total',
-      type_frigo: 'SANDEN 500',
-      af_nf: 'NF',
-      branding: 'Pepsi',
-      duree_estimee: '3 heures',
-      date_programmee: '2024-06-28'
-    },
-    {
-      id: 'MAINT-003',
-      equipment: 'TAG078 - Frigo Samsung INNOVA 650',
-      type: 'Surveillance Renforcée',
-      status: 'Terminé',
-      technician: 'TCHINDA Constant',
-      scheduledDate: '2024-06-26',
-      timeSlot: '14h00 - 16h00',
-      priority: 'Normale',
-      location: 'Bafoussam Centre',
-      client: 'Bar du Marché',
-      description: 'Surveillance suite à panne récurrente',
-      // Informations détaillées
-      division: 'Ouest',
-      secteur: 'Bars',
-      partenaire: 'SABC Cameroun',
-      ville: 'Bafoussam',
-      nom_client: 'KAMGA Paul',
-      nom_pdv: 'Bar du Marché',
-      tel_barman: '+237 698 456 789',
-      serial_number: 'SM2024008',
-      tag_number: 'TAG078',
-      quartier: 'Centre Ville',
-      localisation: 'Marché central, entrée principale',
-      type_frigo: 'INNOVA 650',
-      af_nf: 'AF',
-      branding: 'Fanta',
-      duree_estimee: '1 heure',
-      date_programmee: '2024-06-26'
-    },
-    {
-      id: 'MAINT-004',
-      equipment: 'TAG152 - Frigo LG SUPER-35',
-      type: 'Investigation Défaillance',
-      status: 'Prévu',
-      technician: 'Cédric',
-      scheduledDate: '2024-06-29',
-      timeSlot: '10h30 - 12h30',
-      priority: 'Normale',
-      location: 'Kribi Plage',
-      client: 'Snack Bar Ocean',
-      description: 'Investigation sur défaillance thermostat',
-      // Informations détaillées
-      division: 'Sud',
-      secteur: 'Snacks',
-      partenaire: 'SABC Cameroun',
-      ville: 'Kribi',
-      nom_client: 'MVONDO Pierre',
-      nom_pdv: 'Snack Bar Ocean',
-      tel_barman: '+237 677 789 123',
-      serial_number: 'LG2024022',
-      tag_number: 'TAG152',
-      quartier: 'Plage',
-      localisation: 'Boulevard de la plage, face hôtel Ilomba',
-      type_frigo: 'SUPER-35',
-      af_nf: 'NF',
-      branding: 'Sprite',
-      duree_estimee: '2 heures',
-      date_programmee: '2024-06-29'
-    }
-  ];
-
+  // Filtrage des maintenances basé sur les données réelles
   const filteredMaintenances = maintenances.filter(maintenance => {
     if (filterBy !== 'all' && maintenance.status !== filterBy) return false;
     if (technicianFilter !== 'all' && maintenance.technician !== technicianFilter) return false;
     return true;
   });
+
+  // Transformation des données pour compatibilité avec MaintenanceList
+  const transformedMaintenances = filteredMaintenances.map(maintenance => ({
+    id: maintenance.report_id,
+    equipment: maintenance.equipment,
+    type: maintenance.type,
+    status: maintenance.status,
+    technician: maintenance.technician,
+    scheduledDate: maintenance.date,
+    timeSlot: '09:00 - 17:00', // Valeur par défaut
+    priority: maintenance.priority || 'Normale',
+    location: maintenance.location,
+    client: maintenance.equipment, // Utiliser equipment comme client pour l'instant
+    description: maintenance.description
+  }));
+
+  if (isLoading) {
+    return (
+      <AirbnbContainer>
+        <div className="flex items-center justify-center h-64">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span className="text-lg text-gray-600">Chargement des maintenances...</span>
+          </div>
+        </div>
+      </AirbnbContainer>
+    );
+  }
 
   return (
     <AirbnbContainer>
@@ -222,11 +130,10 @@ export default function Maintenance() {
         />
 
         <MaintenanceList
-          maintenances={filteredMaintenances}
+          maintenances={transformedMaintenances}
           onMaintenanceClick={setSelectedMaintenance}
         />
 
-        {/* Bouton supplémentaire en bas de page */}
         <div className="flex justify-center pt-6">
           <Button 
             onClick={() => setIsFormModalOpen(true)}
@@ -245,6 +152,7 @@ export default function Maintenance() {
         onSuccess={() => {
           toast.success('Maintenance créée avec succès');
           setIsFormModalOpen(false);
+          refetch(); // Actualiser la liste après création
         }}
       />
 
