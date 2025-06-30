@@ -7,16 +7,16 @@ import { Search } from 'lucide-react';
 
 interface BasicFiltersProps {
   searchTerm: string;
-  statusFilter: string;
+  afNfFilter: string; // Changé de statusFilter à afNfFilter
   onSearchChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
+  onAfNfChange: (value: string) => void; // Changé de onStatusChange à onAfNfChange
 }
 
 export function BasicFilters({ 
   searchTerm, 
-  statusFilter, 
+  afNfFilter, 
   onSearchChange, 
-  onStatusChange 
+  onAfNfChange 
 }: BasicFiltersProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
@@ -37,18 +37,16 @@ export function BasicFilters({
       
       <div>
         <Label className="text-sm font-medium text-gray-700 mb-2 block">
-          Statut
+          AF/NF
         </Label>
-        <Select value={statusFilter} onValueChange={onStatusChange}>
+        <Select value={afNfFilter} onValueChange={onAfNfChange}>
           <SelectTrigger className="h-10">
-            <SelectValue placeholder="Tous les statuts" />
+            <SelectValue placeholder="Tous les types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="operational">Opérationnel</SelectItem>
-            <SelectItem value="maintenance">Maintenance</SelectItem>
-            <SelectItem value="critical">Critique</SelectItem>
-            <SelectItem value="offline">Hors ligne</SelectItem>
+            <SelectItem value="all">Tous les types</SelectItem>
+            <SelectItem value="AF">AF</SelectItem>
+            <SelectItem value="NF">NF</SelectItem>
           </SelectContent>
         </Select>
       </div>

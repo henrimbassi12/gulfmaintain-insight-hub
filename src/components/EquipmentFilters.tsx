@@ -20,7 +20,7 @@ export function EquipmentFilters({
 }: EquipmentFiltersProps) {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [afNfFilter, setAfNfFilter] = useState('all'); // Changé de statusFilter à afNfFilter
   const [advancedFilters, setAdvancedFilters] = useState({
     brands: [] as string[],
     types: [] as string[],
@@ -33,9 +33,9 @@ export function EquipmentFilters({
     onFilterChange('search', value);
   };
 
-  const handleStatusChange = (value: string) => {
-    setStatusFilter(value);
-    onFilterChange('status', value);
+  const handleAfNfChange = (value: string) => { // Changé de handleStatusChange à handleAfNfChange
+    setAfNfFilter(value);
+    onFilterChange('afNf', value); // Changé de 'status' à 'afNf'
   };
 
   const handleAdvancedFilterChange = (category: string, value: string, checked: boolean) => {
@@ -57,7 +57,7 @@ export function EquipmentFilters({
 
   const clearFilters = () => {
     setSearchTerm('');
-    setStatusFilter('all');
+    setAfNfFilter('all'); // Changé de setStatusFilter à setAfNfFilter
     setAdvancedFilters({
       brands: [],
       types: [],
@@ -66,7 +66,7 @@ export function EquipmentFilters({
     });
     
     onFilterChange('search', '');
-    onFilterChange('status', 'all');
+    onFilterChange('afNf', 'all'); // Changé de 'status' à 'afNf'
     onFilterChange('brands', '');
     onFilterChange('types', '');
     onFilterChange('agencies', '');
@@ -76,7 +76,7 @@ export function EquipmentFilters({
   };
 
   const activeFiltersCount = 
-    (statusFilter !== 'all' ? 1 : 0) + 
+    (afNfFilter !== 'all' ? 1 : 0) + // Changé de statusFilter à afNfFilter
     Object.values(advancedFilters).reduce((acc, arr) => acc + arr.length, 0) +
     (searchTerm ? 1 : 0);
 
@@ -93,9 +93,9 @@ export function EquipmentFilters({
             <div className="md:col-span-8">
               <BasicFilters
                 searchTerm={searchTerm}
-                statusFilter={statusFilter}
+                afNfFilter={afNfFilter} // Changé de statusFilter à afNfFilter
                 onSearchChange={handleSearchChange}
-                onStatusChange={handleStatusChange}
+                onAfNfChange={handleAfNfChange} // Changé de onStatusChange à onAfNfChange
               />
             </div>
             
@@ -117,11 +117,10 @@ export function EquipmentFilters({
 
           <ActiveFiltersDisplay
             searchTerm={searchTerm}
-            statusFilter={statusFilter}
+            afNfFilter={afNfFilter} // Changé de statusFilter à afNfFilter
             advancedFilters={advancedFilters}
             onSearchChange={handleSearchChange}
-            onStatusChange={handleStatusChange}
-            onAdvancedFilterChange={handleAdvancedFilterChange}
+            onAfNfChange={handleAfNfChange} // Changé de onStatusChange à onAfNfChange
           />
         </div>
       </CardContent>

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Equipment } from '@/hooks/useEquipments';
 import { EquipmentCard } from './EquipmentCard';
-import { EquipmentExportButton } from './EquipmentExportButton';
 import { Search, Package } from 'lucide-react';
 
 interface EquipmentListProps {
@@ -67,7 +66,6 @@ export function EquipmentList({
               {filteredEquipments.length} équipement{filteredEquipments.length > 1 ? 's' : ''}
             </Badge>
           </div>
-          <EquipmentExportButton equipments={filteredEquipments} />
         </div>
       </CardHeader>
       <CardContent className="p-6">

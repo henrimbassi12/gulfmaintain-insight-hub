@@ -2,8 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Filter, Download, RotateCcw } from 'lucide-react';
-import { toast } from 'sonner';
+import { Filter, RotateCcw } from 'lucide-react';
 
 interface FilterHeaderProps {
   activeFiltersCount: number;
@@ -11,18 +10,6 @@ interface FilterHeaderProps {
 }
 
 export function FilterHeader({ activeFiltersCount, onClearFilters }: FilterHeaderProps) {
-  const exportEquipments = () => {
-    toast.success('Export en cours...', {
-      description: 'Le fichier sera téléchargé dans quelques instants'
-    });
-    
-    setTimeout(() => {
-      toast.success('Export terminé', {
-        description: 'Equipments_export.csv téléchargé avec succès'
-      });
-    }, 2000);
-  };
-
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -35,10 +22,6 @@ export function FilterHeader({ activeFiltersCount, onClearFilters }: FilterHeade
         )}
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={exportEquipments}>
-          <Download className="w-4 h-4 mr-1" />
-          Exporter
-        </Button>
         {activeFiltersCount > 0 && (
           <Button variant="outline" size="sm" onClick={onClearFilters}>
             <RotateCcw className="w-4 h-4 mr-1" />

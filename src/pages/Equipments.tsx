@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, RefreshCw, Activity } from "lucide-react";
+import { Package, RefreshCw, Activity } from "lucide-react";
 import { EquipmentStats } from '@/components/EquipmentStats';
 import { EquipmentFilters } from '@/components/EquipmentFilters';
 import { EquipmentList } from '@/components/EquipmentList';
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 const Equipments = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({
-    status: 'all',
+    afNf: 'all', // Changé de 'status' à 'afNf'
     type: 'all',
     agency: 'all',
     technician: 'all',
@@ -46,9 +46,10 @@ const Equipments = () => {
     setTimeout(() => setRefreshing(false), 1500);
   };
 
-  // Enhanced filtering logic
+  // Enhanced filtering logic avec filtre AF/NF
   const filteredEquipments = useMemo(() => {
     return equipments.filter(equipment => {
+      const matchesAfNf = filters.afNf === 'all' || equipment.af_nf === filters.afNf;
       const matchesType = filters.type === 'all' || equipment.type_frigo.toLowerCase().includes(filters.type.toLowerCase());
       const matchesAgency = filters.agency === 'all' || equipment.division === filters.agency;
       const matchesTechnician = filters.technician === 'all' || equipment.technician === filters.technician;
@@ -70,7 +71,7 @@ const Equipments = () => {
       const selectedAgencies = filters.agencies ? filters.agencies.split(',').filter(Boolean) : [];
       const matchesAgencies = selectedAgencies.length === 0 || selectedAgencies.includes(equipment.division);
 
-      return matchesType && matchesAgency && matchesTechnician && 
+      return matchesAfNf && matchesType && matchesAgency && matchesTechnician && 
              matchesSearch && matchesBrands && matchesTypes && matchesAgencies;
     });
   }, [equipments, filters]);
