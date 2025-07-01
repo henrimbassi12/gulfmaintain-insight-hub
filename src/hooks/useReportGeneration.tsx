@@ -18,7 +18,7 @@ export function useReportGeneration() {
     setIsGenerating(true);
     
     try {
-      toast.loading('Génération du rapport en cours...', { duration: 2000 });
+      toast.loading('Génération du rapport PDF en cours...', { duration: 2000 });
       
       // Simulation de la génération du rapport avec délai
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -122,23 +122,29 @@ export function useReportGeneration() {
       const pdfType = reportType === 'receipt' ? 'receipt' : reportType === 'equipment' ? 'list' : 'report';
       const blob = pdfService.generatePDF(pdfType as any, pdfData);
       
+      // Vérifier que le blob est bien un PDF
+      if (blob.type !== 'application/pdf') {
+        throw new Error('Erreur de génération PDF');
+      }
+      
       // Téléchargement automatique
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `${reportType}-${new Date().toISOString().split('T')[0]}.pdf`;
+      link.setAttribute('type', 'application/pdf');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast.dismiss();
-      toast.success('Rapport généré et téléchargé avec succès !');
+      toast.success('Rapport PDF généré et téléchargé avec succès !');
       
     } catch (error) {
-      console.error('Erreur lors de la génération du rapport:', error);
+      console.error('Erreur lors de la génération du rapport PDF:', error);
       toast.dismiss();
-      toast.error('Erreur lors de la génération du rapport');
+      toast.error('Erreur lors de la génération du rapport PDF');
     } finally {
       setIsGenerating(false);
     }
@@ -146,7 +152,7 @@ export function useReportGeneration() {
 
   const downloadExistingReport = async (report: ReportData) => {
     try {
-      toast.loading('Téléchargement en cours...');
+      toast.loading('Téléchargement du PDF en cours...');
       
       // Simulation du téléchargement
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -164,22 +170,28 @@ export function useReportGeneration() {
         ]
       });
       
+      // Vérifier le type de blob
+      if (blob.type !== 'application/pdf') {
+        throw new Error('Erreur de génération PDF');
+      }
+      
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `${report.title.toLowerCase().replace(/\s+/g, '-')}.pdf`;
+      link.setAttribute('type', 'application/pdf');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast.dismiss();
-      toast.success(`Rapport "${report.title}" téléchargé avec succès !`);
+      toast.success(`Rapport PDF "${report.title}" téléchargé avec succès !`);
       
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
+      console.error('Erreur lors du téléchargement du PDF:', error);
       toast.dismiss();
-      toast.error('Erreur lors du téléchargement du rapport');
+      toast.error('Erreur lors du téléchargement du rapport PDF');
     }
   };
 

@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -72,7 +71,7 @@ export class PDFGenerationService {
       this.addStatsSection(data.stats);
     }
 
-    return this.doc.output('blob');
+    return new Blob([this.doc.output('arraybuffer')], { type: 'application/pdf' });
   }
 
   // Génération d'une liste/tableau
@@ -93,7 +92,7 @@ export class PDFGenerationService {
       this.addSummary(data.summary);
     }
 
-    return this.doc.output('blob');
+    return new Blob([this.doc.output('arraybuffer')], { type: 'application/pdf' });
   }
 
   // Génération d'un reçu (style Orange Money)
@@ -152,7 +151,7 @@ export class PDFGenerationService {
       ]);
     }
 
-    return this.doc.output('blob');
+    return new Blob([this.doc.output('arraybuffer')], { type: 'application/pdf' });
   }
 
   // Méthodes utilitaires
