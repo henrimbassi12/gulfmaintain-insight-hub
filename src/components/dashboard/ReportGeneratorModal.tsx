@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { useReportGeneration } from "@/hooks/useReportGeneration";
 import { FileText, Download, Calendar, BarChart, Receipt, List } from "lucide-react";
+import { toast } from 'sonner';
 
 interface ReportGeneratorModalProps {
   isOpen: boolean;
@@ -74,11 +75,7 @@ export function ReportGeneratorModal({ isOpen, onClose }: ReportGeneratorModalPr
 
   const handleGenerate = async () => {
     if (!selectedReportType) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner un type de rapport",
-        variant: "destructive"
-      });
+      toast.error("Veuillez sélectionner un type de rapport");
       return;
     }
 

@@ -1,6 +1,6 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
+import { formatPredictionMessage } from '@/services/predictionMessageService';
 
 export interface MaintenancePredictionInput {
   equipment_id: string;
@@ -183,8 +183,11 @@ export function useAIPredictions(): UseAIPredictionsReturn {
         created_at: new Date().toISOString(),
       };
       
-      toast.success('Prédiction IA générée avec succès', {
-        description: `Statut prédit: ${prediction.predicted_status} (${prediction.confidence_score}% de confiance)`
+      // Utiliser le nouveau service de formatage pour le message de succès
+      const enrichedMessage = formatPredictionMessage(prediction.predicted_status, prediction.confidence_score);
+      
+      toast.success('🧠 Prédiction IA générée avec succès', {
+        description: `${enrichedMessage.title} - Confiance: ${prediction.confidence_score}%`
       });
 
       return prediction;

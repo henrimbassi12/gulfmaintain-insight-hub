@@ -1,96 +1,120 @@
 
 import React from 'react';
-import { TrendingUp, BarChart3 } from 'lucide-react';
-import { PredictionResult as PredictionResultType } from './types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Brain, TrendingUp, AlertCircle, CheckCircle, Wrench } from "lucide-react";
+import { formatPredictionMessage, getModelPerformanceDetails } from '@/services/predictionMessageService';
 
 interface PredictionResultProps {
-  result: PredictionResultType;
+  predicted_status: string;
+  confidence_score: number;
+  risk_level: 'Faible' | 'Moyen' | 'Élevé';
+  recommendations: string[];
+  probabilities?: Record<string, number>;
 }
 
-export function PredictionResult({ result }: PredictionResultProps) {
-  // Fonction pour formater les noms de statut
-  const formatStatusName = (status: string) => {
-    return status
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase());
+export function PredictionResult({ 
+  predicted_status, 
+  confidence_score, 
+  risk_level, 
+  recommendations,
+  probabilities 
+}: PredictionResultProps) {
+  const enrichedMessage = formatPredictionMessage(predicted_status, confidence_score);
+  const performanceDetails = getModelPerformanceDetails(predicted_status);
+
+  const getStatusIcon = () => {
+    switch (predicted_status) {
+      case 'Entretien_renforce': return <Wrench className="w-5 h-5 text-orange-600" />;
+      case 'Investigation_defaillance': return <AlertCircle className="w-5 h-5 text-red-600" />;
+      case 'Maintenance_preventive': return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case 'Surveillance_renforcee': return <TrendingUp className="w-5 h-5 text-blue-600" />;
+      default: return <Brain className="w-5 h-5 text-purple-600" />;
+    }
   };
 
-  // Trier les probabilités par score décroissant
-  const sortedProbabilities = result.probabilities ? 
-    Object.entries(result.probabilities)
-      .sort(([,a], [,b]) => b - a)
-      .map(([status, probability]) => ({
-        status: formatStatusName(status),
-        probability: Math.round(probability * 100)
-      })) : [];
+  const getRiskColor = (risk: string) => {
+    switch (risk) {
+      case 'Élevé': return 'destructive';
+      case 'Moyen': return 'secondary';
+      case 'Faible': return 'outline';
+      default: return 'default';
+    }
+  };
 
   return (
-    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
-      <div className="flex items-center gap-3 mb-4">
-        <TrendingUp className="w-5 h-5 text-green-600" />
-        <h4 className="font-semibold text-gray-900">Résultat de la Prédiction IA</h4>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div className="bg-white rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500 mb-1">Statut Prédit</p>
-          <p className="text-lg font-bold text-blue-600">{formatStatusName(result.predicted_status)}</p>
+    <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          {getStatusIcon()}
+          {enrichedMessage.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Description du modèle */}
+        <div className="bg-white p-4 rounded-lg border">
+          <p className="text-sm text-gray-700 mb-2">{enrichedMessage.description}</p>
+          <p className="text-sm text-blue-700 font-medium">{enrichedMessage.confidence}</p>
         </div>
-        <div className="bg-white rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500 mb-1">Score de Confiance</p>
-          <p className="text-lg font-bold text-purple-600">{result.confidence_score}%</p>
-        </div>
-        <div className="bg-white rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500 mb-1">Niveau de Risque</p>
-          <p className={`text-lg font-bold ${
-            result.risk_level === 'Élevé' ? 'text-red-600' :
-            result.risk_level === 'Moyen' ? 'text-yellow-600' : 'text-green-600'
-          }`}>
-            {result.risk_level}
-          </p>
-        </div>
-      </div>
 
-      {/* Section des scores de probabilité */}
-      {sortedProbabilities.length > 0 && (
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="w-4 h-4 text-gray-600" />
-            <h5 className="text-sm font-semibold text-gray-900">Scores de Probabilité</h5>
-          </div>
-          <div className="space-y-2">
-            {sortedProbabilities.map((item, index) => (
-              <div key={index} className="bg-white rounded-lg p-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">{item.status}</span>
-                  <span className={`text-sm font-bold ${
-                    index === 0 ? 'text-green-600' : 'text-gray-600'
-                  }`}>
-                    {item.probability}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      index === 0 ? 'bg-green-500' : 'bg-gray-400'
-                    }`}
-                    style={{ width: `${item.probability}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Interprétation */}
+        <div className="bg-white p-4 rounded-lg border">
+          <p className="text-sm text-gray-800 font-medium">{enrichedMessage.interpretation}</p>
         </div>
-      )}
 
-      <div>
-        <h5 className="text-sm font-semibold text-gray-900 mb-2">Recommandations</h5>
-        <div className="space-y-1">
-          {result.recommendations.map((rec, index) => (
-            <p key={index} className="text-xs text-gray-700 bg-white rounded px-2 py-1">• {rec}</p>
-          ))}
+        {/* Recommandation */}
+        {enrichedMessage.recommendation && (
+          <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+            <p className="text-sm text-orange-800">{enrichedMessage.recommendation}</p>
+          </div>
+        )}
+
+        {/* Métriques et badges */}
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" className="bg-white">
+            Confiance: {confidence_score}%
+          </Badge>
+          <Badge variant={getRiskColor(risk_level)}>
+            Risque: {risk_level}
+          </Badge>
+          <Badge variant="secondary">
+            IA: 95.31% précision
+          </Badge>
         </div>
-      </div>
-    </div>
+
+        {/* Détails des performances du modèle */}
+        <div className="bg-gray-50 p-3 rounded-lg border">
+          <h4 className="text-sm font-medium text-gray-900 mb-2">📊 Performances du modèle IA</h4>
+          <pre className="text-xs text-gray-700 whitespace-pre-wrap">{performanceDetails}</pre>
+        </div>
+
+        {/* Probabilités détaillées */}
+        {probabilities && (
+          <div className="bg-white p-4 rounded-lg border">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">🎯 Distribution des probabilités</h4>
+            <div className="space-y-1">
+              {Object.entries(probabilities).map(([status, prob]) => (
+                <div key={status} className="flex justify-between items-center text-xs">
+                  <span className="text-gray-600">{status.replace(/_/g, ' ')}</span>
+                  <span className="text-gray-800 font-medium">{Math.round(prob * 100)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recommandations techniques */}
+        {recommendations.length > 0 && (
+          <div className="bg-white p-4 rounded-lg border">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">💡 Recommandations techniques</h4>
+            <div className="space-y-1">
+              {recommendations.map((rec, index) => (
+                <p key={index} className="text-xs text-gray-700">• {rec}</p>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
