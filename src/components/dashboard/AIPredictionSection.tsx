@@ -148,7 +148,15 @@ export function AIPredictionSection() {
           </div>
         )}
 
-        {result && <PredictionResult result={result} />}
+        {result && (
+          <PredictionResult
+            predicted_status={result.predicted_status}
+            confidence_score={result.confidence_score}
+            risk_level={result.risk_level}
+            recommendations={result.recommendations}
+            probabilities={result.probabilities}
+          />
+        )}
       </CardContent>
     </Card>
   );
