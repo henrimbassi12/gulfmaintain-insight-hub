@@ -63,6 +63,22 @@ export default function Maintenance() {
     description: maintenance.description || 'Maintenance planifiée'
   }));
 
+  // Configuration des libellés pour la page Suivi des tâches
+  const statsConfig = {
+    titles: {
+      total: 'Total des maintenances',
+      planned: 'Tâches planifiées', 
+      inProgress: 'Interventions en cours',
+      completed: 'Tâches terminées'
+    },
+    subtitles: {
+      total: 'Total',
+      planned: 'À venir cette semaine',
+      inProgress: 'En cours',
+      completed: 'Terminées'
+    }
+  };
+
   const handleUpdateStatus = (maintenanceId: string, newStatus: string) => {
     // Mettre à jour le statut de la maintenance sélectionnée
     if (selectedMaintenance && selectedMaintenance.id === maintenanceId) {
@@ -126,8 +142,11 @@ export default function Maintenance() {
       </AirbnbHeader>
 
       <div className="space-y-6">
-        {/* Statistiques des maintenances */}
-        <MaintenanceStatsCard maintenances={transformedMaintenances} />
+        {/* Statistiques des maintenances avec libellés harmonisés */}
+        <MaintenanceStatsCard 
+          maintenances={transformedMaintenances} 
+          config={statsConfig}
+        />
 
         {/* Section Maintenances avec style harmonisé */}
         <div className="bg-white border border-gray-100 shadow-sm rounded-lg">

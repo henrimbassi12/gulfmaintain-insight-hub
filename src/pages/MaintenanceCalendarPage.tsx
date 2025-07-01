@@ -44,6 +44,7 @@ export default function MaintenanceCalendarPage() {
     scheduledDate: maintenance.date_programmee
   }));
 
+  // Statistiques avec libellés pour la page Calendrier
   const stats = {
     total: transformedMaintenances.length,
     completed: transformedMaintenances.filter(m => m.status === 'Terminée').length,
@@ -78,7 +79,7 @@ export default function MaintenanceCalendarPage() {
         </div>
       </AirbnbHeader>
 
-      {/* Statistiques du planning */}
+      {/* Statistiques du planning avec libellés harmonisés */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100">
           <CardTitle className="flex items-center gap-3 text-lg">
@@ -103,11 +104,12 @@ export default function MaintenanceCalendarPage() {
             </div>
             <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-100">
               <p className="text-2xl font-bold text-orange-600 mb-1">{stats.inProgress}</p>
-              <p className="text-sm text-gray-600">En cours</p>
+              <p className="text-sm text-gray-600">Actuellement en cours</p>
             </div>
             <div className="text-center p-4 bg-red-50 rounded-lg border border-red-100">
               <p className="text-2xl font-bold text-red-600 mb-1">{stats.delays}</p>
               <p className="text-sm text-gray-600">Priorité haute</p>
+              <p className="text-xs text-red-500 mt-1">Urgences à exécuter rapidement</p>
             </div>
           </div>
         </CardContent>
@@ -130,9 +132,14 @@ export default function MaintenanceCalendarPage() {
             
             <TabsContent value="tasks" className="space-y-4">
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Tâches planifiées ({transformedMaintenances.length})
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Tâches planifiées ({transformedMaintenances.length})
+                  </h3>
+                  <p className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                    À venir cette semaine
+                  </p>
+                </div>
                 <div className="space-y-2">
                   {isLoading ? (
                     <div className="flex items-center justify-center py-8">

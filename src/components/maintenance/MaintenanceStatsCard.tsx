@@ -6,9 +6,23 @@ import { TrendingUp, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface MaintenanceStatsCardProps {
   maintenances: any[];
+  config?: {
+    titles: {
+      total: string;
+      planned: string;
+      inProgress: string;
+      completed: string;
+    };
+    subtitles: {
+      total: string;
+      planned: string;
+      inProgress: string;
+      completed: string;
+    };
+  };
 }
 
-export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps) {
+export function MaintenanceStatsCard({ maintenances, config }: MaintenanceStatsCardProps) {
   const stats = React.useMemo(() => {
     const total = maintenances.length;
     const planned = maintenances.filter(m => m.status === 'planned' || m.status === 'prevu').length;
@@ -18,6 +32,24 @@ export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps
     
     return { total, planned, inProgress, completed, urgent };
   }, [maintenances]);
+
+  // Configuration par défaut si aucune n'est fournie
+  const defaultConfig = {
+    titles: {
+      total: 'Total',
+      planned: 'Planifiées',
+      inProgress: 'En cours',
+      completed: 'Terminées'
+    },
+    subtitles: {
+      total: 'Total',
+      planned: 'Planifiées',
+      inProgress: 'En cours',
+      completed: 'Terminées'
+    }
+  };
+
+  const finalConfig = config || defaultConfig;
 
   return (
     <Card className="bg-white border border-gray-100 shadow-sm">
@@ -36,7 +68,7 @@ export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
             <p className="text-2xl font-bold text-blue-600 mb-1">{stats.total}</p>
-            <p className="text-sm text-gray-600">Total</p>
+            <p className="text-sm text-gray-600">{finalConfig.titles.total}</p>
           </div>
           
           <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-100">
@@ -44,7 +76,8 @@ export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps
               <Clock className="w-4 h-4 text-orange-600" />
               <p className="text-2xl font-bold text-orange-600">{stats.planned}</p>
             </div>
-            <p className="text-sm text-gray-600">Planifiées</p>
+            <p className="text-sm text-gray-600">{finalConfig.titles.planned}</p>
+            <p className="text-xs text-orange-500 mt-1">{finalConfig.subtitles.planned}</p>
           </div>
           
           <div className="text-center p-4 bg-green-50 rounded-lg border border-green-100">
@@ -52,7 +85,7 @@ export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <p className="text-2xl font-bold text-green-600">{stats.inProgress}</p>
             </div>
-            <p className="text-sm text-gray-600">En cours</p>
+            <p className="text-sm text-gray-600">{finalConfig.titles.inProgress}</p>
           </div>
           
           <div className="text-center p-4 bg-emerald-50 rounded-lg border border-emerald-100">
@@ -60,7 +93,7 @@ export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps
               <CheckCircle className="w-4 h-4 text-emerald-600" />
               <p className="text-2xl font-bold text-emerald-600">{stats.completed}</p>
             </div>
-            <p className="text-sm text-gray-600">Terminées</p>
+            <p className="text-sm text-gray-600">{finalConfig.titles.completed}</p>
           </div>
         </div>
         
@@ -71,6 +104,7 @@ export function MaintenanceStatsCard({ maintenances }: MaintenanceStatsCardProps
               <span className="text-sm font-medium text-red-700">
                 {stats.urgent} maintenance{stats.urgent > 1 ? 's' : ''} urgente{stats.urgent > 1 ? 's' : ''}
               </span>
+              <span className="text-xs text-red-500 ml-2">Urgences à exécuter rapidement</span>
             </div>
           </div>
         )}
