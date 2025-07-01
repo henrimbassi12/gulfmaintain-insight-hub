@@ -54,8 +54,8 @@ export default function MaintenanceCalendarPage() {
   return (
     <AirbnbContainer>
       <AirbnbHeader
-        title="Maintenance & Planning"
-        subtitle="Gestion des tâches et planification"
+        title="Calendrier des maintenances"
+        subtitle="Planification et gestion des maintenances"
         icon={Calendar}
       >
         <div className="flex flex-col gap-2 w-full">

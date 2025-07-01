@@ -39,18 +39,16 @@ export function AppSidebar() {
   const location = useLocation();
   const { user, userProfile } = useAuth();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isMaintenanceMenuOpen, setIsMaintenanceMenuOpen] = useState(true);
 
   // Menu principal (navigation rapide)
   const primaryMenuItems = [
     { icon: BarChart3, label: "Tableau de bord", href: "/dashboard" },
     { icon: Package, label: "Équipements", href: "/equipments" },
-    { icon: Wrench, label: "Maintenance", href: "/maintenance", subItems: [
-      { icon: Calendar, label: "Planning", href: "/planning" }
-    ]},
     { icon: MessageCircle, label: "Messages", href: "/messages" },
   ];
 
-  // Menu secondaire (dans "Plus") - sans gestion des utilisateurs
+  // Menu secondaire (dans "Plus")
   const secondaryMenuItems = [
     { icon: Clock, label: "Historique", href: "/equipment-history" },
     { icon: FileText, label: "Rapports", href: "/reports" },
@@ -81,64 +79,8 @@ export function AppSidebar() {
         <SidebarMenu>
           {/* Menu principal */}
           {primaryMenuItems.map((item) => {
-            const isActive = isPathActive(item.href) || (item.label === "Maintenance" && isMaintenanceActive);
+            const isActive = isPathActive(item.href);
             
-            if (item.subItems) {
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <Collapsible>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton isActive={isActive} size="lg" className="w-full">
-                        <div className="flex items-center gap-3 w-full">
-                          <item.icon className={cn(
-                            "w-5 h-5 md:w-4 md:h-4",
-                            isActive ? "text-blue-600" : "text-gray-500 dark:text-gray-400"
-                          )} />
-                          <span className={cn(
-                            "font-medium text-sm md:text-sm flex-1 text-left group-data-[collapsible=icon]:hidden",
-                            isActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
-                          )}>
-                            {item.label}
-                          </span>
-                          <ChevronRight className="w-4 h-4 text-gray-400 group-data-[collapsible=icon]:hidden" />
-                        </div>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="ml-6 mt-1 group-data-[collapsible=icon]:hidden">
-                      <div className="flex flex-col gap-1">
-                        <Link 
-                          to={item.href}
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
-                            isPathActive(item.href) 
-                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
-                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          )}
-                        >
-                          Liste des tâches
-                        </Link>
-                        {item.subItems.map((subItem) => (
-                          <Link 
-                            key={subItem.href}
-                            to={subItem.href}
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
-                              isPathActive(subItem.href) 
-                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
-                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            )}
-                          >
-                            <subItem.icon className="w-4 h-4" />
-                            {subItem.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
-              );
-            }
-
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={isActive} size="lg">
@@ -158,6 +100,63 @@ export function AppSidebar() {
               </SidebarMenuItem>
             );
           })}
+
+          {/* Section Gestion des maintenances */}
+          <SidebarMenuItem>
+            <Collapsible open={isMaintenanceMenuOpen} onOpenChange={setIsMaintenanceMenuOpen}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton isActive={isMaintenanceActive} size="lg" className="w-full">
+                  <div className="flex items-center gap-3 w-full">
+                    <Wrench className={cn(
+                      "w-5 h-5 md:w-4 md:h-4",
+                      isMaintenanceActive ? "text-blue-600" : "text-gray-500 dark:text-gray-400"
+                    )} />
+                    <span className={cn(
+                      "font-medium text-sm md:text-sm flex-1 text-left group-data-[collapsible=icon]:hidden",
+                      isMaintenanceActive ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
+                    )}>
+                      Gestion des maintenances
+                    </span>
+                    <div className="group-data-[collapsible=icon]:hidden">
+                      {isMaintenanceMenuOpen ? (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="ml-6 mt-1 group-data-[collapsible=icon]:hidden">
+                <div className="flex flex-col gap-1">
+                  <Link 
+                    to="/maintenance"
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+                      isPathActive("/maintenance") 
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    )}
+                  >
+                    <Wrench className="w-4 h-4" />
+                    Tâches de maintenance
+                  </Link>
+                  <Link 
+                    to="/planning"
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+                      isPathActive("/planning") 
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" 
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    )}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Vue planning
+                  </Link>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
 
           {/* Menu "Plus" */}
           <SidebarMenuItem>

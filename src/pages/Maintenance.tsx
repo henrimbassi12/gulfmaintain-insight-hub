@@ -102,7 +102,7 @@ export default function Maintenance() {
   return (
     <AirbnbContainer>
       <AirbnbHeader
-        title="Maintenance"
+        title="Suivi des tâches de maintenance"
         subtitle={`Gestion et suivi de ${maintenances.length} maintenance${maintenances.length > 1 ? 's' : ''} planifiée${maintenances.length > 1 ? 's' : ''}${filteredMaintenances.length !== maintenances.length ? ` (${filteredMaintenances.length} affichée${filteredMaintenances.length > 1 ? 's' : ''})` : ''}`}
         icon={Wrench}
       >
@@ -136,7 +136,7 @@ export default function Maintenance() {
               <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
                 <Wrench className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Maintenances</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Tâches de maintenance</h2>
             </div>
           </div>
           
