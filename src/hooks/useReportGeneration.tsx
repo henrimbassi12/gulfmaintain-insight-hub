@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { PDFGenerationService } from '@/services/pdfGenerationService';
 
 interface ReportData {
   title: string;
@@ -13,24 +14,119 @@ interface ReportData {
 export function useReportGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateReport = async (reportType: string = 'general') => {
+  const generateReport = async (reportType: string = 'general', reportData?: any) => {
     setIsGenerating(true);
     
     try {
       toast.loading('Génération du rapport en cours...', { duration: 2000 });
       
-      // Simulation de la génération du rapport
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Simulation de la génération du rapport avec délai
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Création d'un blob PDF simulé
-      const pdfContent = generatePDFContent(reportType);
-      const blob = new Blob([pdfContent], { type: 'application/pdf' });
+      const pdfService = new PDFGenerationService();
+      
+      // Préparer les données selon le type de rapport
+      let pdfData;
+      
+      switch (reportType) {
+        case 'maintenance':
+          pdfData = {
+            title: 'Rapport de Maintenance',
+            subtitle: 'GulfMaintain - Suivi des interventions',
+            sections: [
+              {
+                title: 'Résumé Exécutif',
+                type: 'text',
+                content: 'Ce rapport présente un aperçu complet des activités de maintenance effectuées durant la période sélectionnée. Il inclut les statistiques clés, les interventions réalisées et les recommandations pour l\'optimisation future.'
+              },
+              {
+                title: 'Statistiques des Interventions',
+                type: 'table',
+                content: {
+                  headers: ['Type', 'Nombre', 'Durée Moyenne', 'Coût Total'],
+                  rows: [
+                    ['Maintenance Préventive', '15', '2h30', '45,000 F CFA'],
+                    ['Réparation Urgente', '8', '4h15', '120,000 F CFA'],
+                    ['Contrôle de Routine', '22', '1h45', '33,000 F CFA']
+                  ]
+                }
+              }
+            ],
+            stats: {
+              'Total Interventions': 45,
+              'Temps Moyen': '2h47min',
+              'Taux de Succès': '94%',
+              'Coût Total': '198,000 F CFA'
+            }
+          };
+          break;
+          
+        case 'equipment':
+          pdfData = {
+            title: 'Inventaire des Équipements',
+            sections: [
+              {
+                title: 'Liste des Équipements',
+                type: 'table',
+                content: {
+                  headers: ['Type', 'N° Série', 'Localisation', 'État', 'Dernière Maintenance'],
+                  rows: [
+                    ['INNOVA 420', 'INN42015', 'AKWA - Bar Central', 'Bon', '15/06/2025'],
+                    ['SANDEN 300', 'SAN30089', 'BONABERI - Restaurant', 'Moyen', '12/06/2025'],
+                    ['SUPER-35', 'SUP35001', 'DOUALA - Café', 'Excellent', '20/06/2025']
+                  ]
+                }
+              }
+            ],
+            summary: `Total: ${reportData?.equipments?.length || 45} équipements recensés. Dernière mise à jour: ${new Date().toLocaleDateString('fr-FR')}`
+          };
+          break;
+          
+        case 'receipt':
+          pdfData = {
+            title: 'Reçu d\'Intervention',
+            type: 'Maintenance préventive',
+            technician: {
+              name: reportData?.technician || 'VOUKENG',
+              phone: '6 55 16 15 63'
+            },
+            intervention: {
+              id: `INT${Date.now().toString().slice(-6)}`,
+              date: new Date().toLocaleDateString('fr-FR'),
+              duration: reportData?.duration || '2h30',
+              cost: reportData?.cost || '25,000 F CFA'
+            },
+            equipment: {
+              type: reportData?.equipment || 'INNOVA 420',
+              serial: reportData?.serial || 'INN420156',
+              location: reportData?.location || 'AKWA - Bar Central'
+            }
+          };
+          break;
+          
+        default:
+          pdfData = {
+            title: 'Rapport Général',
+            subtitle: 'GulfMaintain - Vue d\'ensemble',
+            sections: [
+              {
+                title: 'Introduction',
+                type: 'text',
+                content: 'Ce rapport général présente l\'état actuel du système de maintenance et les principaux indicateurs de performance.'
+              }
+            ]
+          };
+      }
+      
+      // Générer le PDF
+      const pdfType = reportType === 'receipt' ? 'receipt' : reportType === 'equipment' ? 'list' : 'report';
+      const blob = pdfService.generatePDF(pdfType as any, pdfData);
       
       // Téléchargement automatique
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `rapport-${reportType}-${new Date().toISOString().split('T')[0]}.pdf`;
+      link.download = `${reportType}-${new Date().toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -55,9 +151,18 @@ export function useReportGeneration() {
       // Simulation du téléchargement
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Création du fichier simulé
-      const content = generateReportContent(report);
-      const blob = new Blob([content], { type: 'application/pdf' });
+      // Utiliser le nouveau service PDF
+      const pdfService = new PDFGenerationService();
+      const blob = pdfService.generatePDF('report', {
+        title: report.title,
+        sections: [
+          {
+            title: 'Contenu du rapport',
+            type: 'text',
+            content: `Ce rapport "${report.title}" a été généré le ${report.date}. Type: ${report.type}, Statut: ${report.status}.`
+          }
+        ]
+      });
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -83,84 +188,4 @@ export function useReportGeneration() {
     downloadExistingReport,
     isGenerating
   };
-}
-
-function generatePDFContent(reportType: string): string {
-  return `%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
-
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/MediaBox [0 0 612 792]
-/Contents 4 0 R
-/Resources <<
-/Font <<
-/F1 5 0 R
->>
->>
->>
-endobj
-
-4 0 obj
-<<
-/Length 200
->>
-stream
-BT
-/F1 12 Tf
-50 750 Td
-(GulfMaintain - Rapport ${reportType}) Tj
-0 -20 Td
-(Date: ${new Date().toLocaleDateString('fr-FR')}) Tj
-0 -20 Td
-(Ce rapport a été généré automatiquement.) Tj
-0 -40 Td
-(Contenu du rapport de maintenance...) Tj
-ET
-endstream
-endobj
-
-5 0 obj
-<<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica
->>
-endobj
-
-xref
-0 6
-0000000000 65535 f 
-0000000010 00000 n 
-0000000079 00000 n 
-0000000136 00000 n 
-0000000271 00000 n 
-0000000535 00000 n 
-trailer
-<<
-/Size 6
-/Root 1 0 R
->>
-startxref
-634
-%%EOF`;
-}
-
-function generateReportContent(report: ReportData): string {
-  return generatePDFContent(report.type);
 }
