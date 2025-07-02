@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Zap, TrendingUp } from "lucide-react";
 import { PredictionFormFields } from './prediction/PredictionFormFields';
-import { PredictionResult } from './prediction/PredictionResult';
+import { EnrichedPredictionResult } from './prediction/EnrichedPredictionResult';
 import { PredictionData } from './prediction/types';
 import { usePredictionApi } from './prediction/usePredictionApi';
 
@@ -55,10 +55,12 @@ export function AIPredictionSection() {
   };
 
   const handlePredict = async () => {
+    console.log('🚀 Lancement de la prédiction IA...');
     await predict(formData);
   };
 
   const handleReset = () => {
+    console.log('🔄 Réinitialisation du formulaire');
     setFormData({
       taux_remplissage_pct: '',
       temperature_c: '',
@@ -149,7 +151,7 @@ export function AIPredictionSection() {
         )}
 
         {result && (
-          <PredictionResult
+          <EnrichedPredictionResult
             predicted_status={result.predicted_status}
             confidence_score={result.confidence_score}
             risk_level={result.risk_level}
