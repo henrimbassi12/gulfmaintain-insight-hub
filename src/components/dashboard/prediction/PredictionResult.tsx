@@ -47,38 +47,43 @@ export function PredictionResult({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           {getStatusIcon()}
-          {enrichedMessage.title}
+          Résultat de la Prédiction IA
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Message enrichi principal */}
+        {/* Message enrichi principal - Format exact demandé */}
         <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <div className="space-y-4">
-            {/* Description du modèle */}
-            <div className="text-sm text-gray-700 leading-relaxed">
+          {/* Titre avec émoji */}
+          <div className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            🧠 {enrichedMessage.title}
+          </div>
+          
+          {/* Description enrichie */}
+          <div className="space-y-4 text-sm leading-relaxed">
+            <div className="text-gray-700">
               {enrichedMessage.description}
             </div>
             
-            {/* Confiance */}
-            <div className="text-sm text-blue-700 font-medium bg-blue-50 p-3 rounded-lg">
-              {enrichedMessage.confidence}
+            {/* Confiance avec émoji */}
+            <div className="text-blue-700 font-medium bg-blue-50 p-3 rounded-lg">
+              📊 {enrichedMessage.confidence}
             </div>
             
-            {/* Interprétation */}
-            <div className="text-sm text-gray-800 font-medium bg-gray-50 p-3 rounded-lg">
-              {enrichedMessage.interpretation}
+            {/* Interprétation avec émoji */}
+            <div className="text-gray-800 font-medium bg-gray-50 p-3 rounded-lg">
+              🔍 {enrichedMessage.interpretation}
             </div>
             
-            {/* Recommandation spécifique */}
+            {/* Recommandation spécifique avec émoji */}
             {enrichedMessage.recommendation && (
-              <div className="text-sm text-orange-800 bg-orange-50 p-3 rounded-lg border border-orange-200">
+              <div className="text-orange-800 bg-orange-50 p-3 rounded-lg border border-orange-200">
                 {enrichedMessage.recommendation}
               </div>
             )}
           </div>
         </div>
 
-        {/* Détails des performances du modèle */}
+        {/* Détails des performances du modèle avec émoji */}
         <div className="bg-white p-4 rounded-lg border shadow-sm">
           <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
             📊 Performances du modèle IA
@@ -88,7 +93,7 @@ export function PredictionResult({
           </div>
         </div>
 
-        {/* Badges de métriques */}
+        {/* Badges de métriques avec émojis */}
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="bg-white border-green-200 text-green-700">
             🎯 Confiance: {confidence_score}%
@@ -101,7 +106,7 @@ export function PredictionResult({
           </Badge>
         </div>
 
-        {/* Distribution des probabilités */}
+        {/* Distribution des probabilités avec émoji */}
         {probabilities && (
           <div className="bg-white p-4 rounded-lg border shadow-sm">
             <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
@@ -130,7 +135,7 @@ export function PredictionResult({
           </div>
         )}
 
-        {/* Recommandations techniques */}
+        {/* Recommandations techniques avec émoji */}
         {recommendations.length > 0 && (
           <div className="bg-white p-4 rounded-lg border shadow-sm">
             <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
