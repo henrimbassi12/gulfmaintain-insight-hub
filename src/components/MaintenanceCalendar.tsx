@@ -68,7 +68,7 @@ export function MaintenanceCalendar() {
     e.preventDefault();
   };
 
-  const const handleDrop = (e: React.DragEvent, newDate: Date) => {
+  const handleDrop = (e: React.DragEvent, newDate: Date) => {
     e.preventDefault();
     if (draggedEvent) {
       updateEvent(draggedEvent.id, { date: newDate });
