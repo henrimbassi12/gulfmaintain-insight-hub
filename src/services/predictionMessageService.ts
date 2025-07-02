@@ -21,23 +21,23 @@ export function formatPredictionMessage(
   predictedClass: string, 
   confidenceScore?: number
 ): EnrichedPredictionMessage {
-  console.log('🔍 formatPredictionMessage called with:', { predictedClass, confidenceScore });
+  console.log('🔍 SERVICE formatPredictionMessage - Début du traitement:', { predictedClass, confidenceScore });
   
   const metrics = MODEL_METRICS[predictedClass as keyof typeof MODEL_METRICS];
   const displayName = predictedClass.replace(/_/g, ' ');
   
-  console.log('📊 Metrics found:', metrics);
-  console.log('🏷️ Display name:', displayName);
+  console.log('📊 SERVICE - Métriques trouvées:', metrics);
+  console.log('🏷️ SERVICE - Nom d\'affichage:', displayName);
   
   if (!metrics) {
-    console.log('⚠️ No metrics found, using default message');
+    console.log('⚠️ SERVICE - Aucune métrique trouvée, utilisation du message par défaut');
     const defaultMessage = {
       title: `Prédiction IA : ${displayName}`,
       description: `Basée sur un modèle d'intelligence artificielle avec une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%.`,
       confidence: `Confiance : ${confidenceScore || 85}%`,
       interpretation: `Il est probable que le statut post-entretien soit : **${displayName}**.`
     };
-    console.log('📤 Default message created:', defaultMessage);
+    console.log('📤 SERVICE - Message par défaut créé:', defaultMessage);
     return defaultMessage;
   }
 
@@ -69,18 +69,18 @@ export function formatPredictionMessage(
     recommendation
   };
   
-  console.log('✅ Enriched message created:', enrichedMessage);
+  console.log('✅ SERVICE - Message enrichi créé avec succès:', enrichedMessage);
   return enrichedMessage;
 }
 
 export function getModelPerformanceDetails(predictedClass: string): string {
-  console.log('🔍 getModelPerformanceDetails called with:', predictedClass);
+  console.log('🔍 SERVICE getModelPerformanceDetails - Traitement pour:', predictedClass);
   
   const metrics = MODEL_METRICS[predictedClass as keyof typeof MODEL_METRICS];
   
   if (!metrics) {
     const defaultDetails = `Performances du modèle : Précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%`;
-    console.log('📤 Default performance details:', defaultDetails);
+    console.log('📤 SERVICE - Détails par défaut des performances:', defaultDetails);
     return defaultDetails;
   }
 
@@ -90,6 +90,6 @@ export function getModelPerformanceDetails(predictedClass: string): string {
 - F1-Score : ${Math.round(metrics.f1 * 100)}%
 - Échantillons d'entraînement : ${metrics.support}`;
 
-  console.log('📤 Performance details created:', performanceDetails);
+  console.log('📤 SERVICE - Détails des performances créés:', performanceDetails);
   return performanceDetails;
 }
