@@ -20,8 +20,19 @@ export function PredictionResult({
   recommendations,
   probabilities 
 }: PredictionResultProps) {
+  console.log('🧠 PredictionResult props received:', { 
+    predicted_status, 
+    confidence_score, 
+    risk_level, 
+    recommendations,
+    probabilities 
+  });
+
   const enrichedMessage = formatPredictionMessage(predicted_status, confidence_score);
   const performanceDetails = getModelPerformanceDetails(predicted_status);
+
+  console.log('✨ Enriched message generated:', enrichedMessage);
+  console.log('📊 Performance details generated:', performanceDetails);
 
   const getStatusIcon = () => {
     switch (predicted_status) {
@@ -51,6 +62,14 @@ export function PredictionResult({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* DÉBOGAGE - Message enrichi brut */}
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+          <h4 className="font-bold text-yellow-800 mb-2">🐛 DÉBOGAGE - Message enrichi :</h4>
+          <pre className="text-xs text-yellow-700 whitespace-pre-wrap">
+            {JSON.stringify(enrichedMessage, null, 2)}
+          </pre>
+        </div>
+
         {/* Message enrichi principal - Format exact demandé */}
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           {/* Titre avec émoji */}

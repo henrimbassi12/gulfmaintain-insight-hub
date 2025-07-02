@@ -21,16 +21,24 @@ export function formatPredictionMessage(
   predictedClass: string, 
   confidenceScore?: number
 ): EnrichedPredictionMessage {
+  console.log('🔍 formatPredictionMessage called with:', { predictedClass, confidenceScore });
+  
   const metrics = MODEL_METRICS[predictedClass as keyof typeof MODEL_METRICS];
   const displayName = predictedClass.replace(/_/g, ' ');
   
+  console.log('📊 Metrics found:', metrics);
+  console.log('🏷️ Display name:', displayName);
+  
   if (!metrics) {
-    return {
-      title: `🧠 Prédiction IA : ${displayName}`,
+    console.log('⚠️ No metrics found, using default message');
+    const defaultMessage = {
+      title: `Prédiction IA : ${displayName}`,
       description: `Basée sur un modèle d'intelligence artificielle avec une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%.`,
       confidence: `Confiance : ${confidenceScore || 85}%`,
       interpretation: `Il est probable que le statut post-entretien soit : **${displayName}**.`
     };
+    console.log('📤 Default message created:', defaultMessage);
+    return defaultMessage;
   }
 
   const precision = Math.round(metrics.precision * 100);
@@ -53,25 +61,35 @@ export function formatPredictionMessage(
       break;
   }
 
-  return {
-    title: `🧠 Prédiction IA : ${displayName}`,
+  const enrichedMessage = {
+    title: `Prédiction IA : ${displayName}`,
     description: `Basée sur un modèle d'intelligence artificielle affichant une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%, cette prédiction repose sur l'analyse de plusieurs critères critiques observés lors des maintenances précédentes.`,
-    confidence: `📊 Confiance élevée : le modèle affiche une précision de ${precision}% pour cette catégorie spécifique, avec un rappel de ${recall}% et un score F1 de ${f1Score}%.`,
-    interpretation: `🔍 Interprétation : Il est fortement probable que le statut post-entretien soit : **${displayName}**.`,
+    confidence: `Confiance élevée : le modèle affiche une précision de ${precision}% pour cette catégorie spécifique, avec un rappel de ${recall}% et un score F1 de ${f1Score}%.`,
+    interpretation: `Interprétation : Il est fortement probable que le statut post-entretien soit : **${displayName}**.`,
     recommendation
   };
+  
+  console.log('✅ Enriched message created:', enrichedMessage);
+  return enrichedMessage;
 }
 
 export function getModelPerformanceDetails(predictedClass: string): string {
+  console.log('🔍 getModelPerformanceDetails called with:', predictedClass);
+  
   const metrics = MODEL_METRICS[predictedClass as keyof typeof MODEL_METRICS];
   
   if (!metrics) {
-    return `Performances du modèle : Précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%`;
+    const defaultDetails = `Performances du modèle : Précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%`;
+    console.log('📤 Default performance details:', defaultDetails);
+    return defaultDetails;
   }
 
-  return `➡️ Pour la classe « ${predictedClass.replace(/_/g, ' ')} », les performances du modèle sont :
+  const performanceDetails = `➡️ Pour la classe « ${predictedClass.replace(/_/g, ' ')} », les performances du modèle sont :
 - Précision : ${Math.round(metrics.precision * 100)}%
 - Rappel : ${Math.round(metrics.recall * 100)}%
 - F1-Score : ${Math.round(metrics.f1 * 100)}%
 - Échantillons d'entraînement : ${metrics.support}`;
+
+  console.log('📤 Performance details created:', performanceDetails);
+  return performanceDetails;
 }
