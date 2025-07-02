@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useMaintenanceCalendar } from '@/hooks/useMaintenanceCalendar';
+import { MaintenanceEventModal } from '@/components/calendar/MaintenanceEventModal';
 
 export function MaintenanceCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [draggedEvent, setDraggedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  
   const { toast } = useToast();
   const { events, isLoading, updateEvent } = useMaintenanceCalendar();
 
@@ -19,6 +23,23 @@ export function MaintenanceCalendar() {
     return events.filter(event => 
       event.date.toDateString() === date.toDateString()
     );
+  };
+
+  const handleViewDetails = (event: any) => {
+    setSelectedEvent(event);
+    setModalMode('view');
+    setIsEventModalOpen(true);
+  };
+
+  const handleEditEvent = (event: any) => {
+    setSelectedEvent(event);
+    setModalMode('edit');
+    setIsEventModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsEventModalOpen(false);
+    setSelectedEvent(null);
   };
 
   const getTypeColor = (type: string) => {
@@ -47,7 +68,7 @@ export function MaintenanceCalendar() {
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, newDate: Date) => {
+  const const handleDrop = (e: React.DragEvent, newDate: Date) => {
     e.preventDefault();
     if (draggedEvent) {
       updateEvent(draggedEvent.id, { date: newDate });
@@ -99,11 +120,10 @@ export function MaintenanceCalendar() {
     return slots;
   };
 
-  // Fonction pour obtenir les dates de la semaine courante
   const getWeekDates = (startDate: Date) => {
     const week = [];
     const start = new Date(startDate);
-    start.setDate(start.getDate() - start.getDay() + 1); // Commencer par lundi
+    start.setDate(start.getDate() - start.getDay() + 1);
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
@@ -232,144 +252,163 @@ export function MaintenanceCalendar() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
-      {/* Header avec navigation responsive */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-          Calendrier de maintenance
-        </h2>
-        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="flex bg-gray-100 rounded-lg p-1 flex-1 sm:flex-none">
-            {(['month', 'week', 'day'] as const).map((v) => (
-              <Button
-                key={v}
-                variant={view === v ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setView(v)}
-                className="text-xs sm:text-sm flex-1 sm:flex-none"
-              >
-                {v === 'month' ? 'Mois' : v === 'week' ? 'Semaine' : 'Jour'}
-              </Button>
-            ))}
+    <>
+      <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            Calendrier de maintenance
+          </h2>
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex bg-gray-100 rounded-lg p-1 flex-1 sm:flex-none">
+              {(['month', 'week', 'day'] as const).map((v) => (
+                <Button
+                  key={v}
+                  variant={view === v ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setView(v)}
+                  className="text-xs sm:text-sm flex-1 sm:flex-none"
+                >
+                  {v === 'month' ? 'Mois' : v === 'week' ? 'Semaine' : 'Jour'}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation Calendar selon la vue */}
-      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 w-full max-w-full overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="flex items-center gap-3 text-base sm:text-lg">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            Vue {view === 'month' ? 'mensuelle' : view === 'week' ? 'hebdomadaire' : 'journalière'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 sm:p-6 w-full max-w-full overflow-hidden">
-          {view === 'month' && renderMonthView()}
-          {view === 'week' && renderWeekView()}
-          {view === 'day' && renderDayView()}
-        </CardContent>
-      </Card>
+        <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 w-full max-w-full overflow-hidden">
+          <CardHeader className="bg-gray-50 border-b border-gray-100">
+            <CardTitle className="flex items-center gap-3 text-base sm:text-lg">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              Vue {view === 'month' ? 'mensuelle' : view === 'week' ? 'hebdomadaire' : 'journalière'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6 w-full max-w-full overflow-hidden">
+            {view === 'month' && renderMonthView()}
+            {view === 'week' && renderWeekView()}
+            {view === 'day' && renderDayView()}
+          </CardContent>
+        </Card>
 
-      {/* Légende des priorités simplifiée */}
-      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardHeader className="bg-gray-50 border-b border-gray-100">
-          <CardTitle className="flex items-center gap-3 text-base sm:text-lg">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-600 rounded-xl flex items-center justify-center">
-              <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            Légende des priorités
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 sm:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
-            <div className="flex items-center gap-3 p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full"></div>
-              <span className="font-medium text-red-800 text-sm sm:text-base">Priorité Critique</span>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 sm:p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-yellow-500 rounded-full"></div>
-              <span className="font-medium text-yellow-800 text-sm sm:text-base">Priorité Moyenne</span>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
-              <span className="font-medium text-green-800 text-sm sm:text-base">Priorité Faible</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tâches du jour - Section responsive avec plus d'espace */}
-      {selectedDate && (
         <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
           <CardHeader className="bg-gray-50 border-b border-gray-100">
             <CardTitle className="flex items-center gap-3 text-base sm:text-lg">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-600 rounded-xl flex items-center justify-center">
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-600 rounded-xl flex items-center justify-center">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-sm sm:text-base">
-                Tâches du jour - {selectedDate.toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </span>
+              Légende des priorités
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="space-y-4">
-              {getEventsByDate(selectedDate).map(event => (
-                <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
-                  <div className="flex flex-col sm:flex-row justify-between items-start mb-3 gap-2">
-                    <h4 className="font-medium text-sm sm:text-base">{event.title}</h4>
-                    <Badge className={`${getTypeColor(event.type)} text-xs`}>
-                      {event.type === 'preventive' ? 'Préventif' :
-                       event.type === 'corrective' ? 'Correctif' : 'Inspection'}
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-                    <div>
-                      <span className="text-gray-500">Équipement:</span>
-                      <div className="font-medium">{event.equipment}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Technicien:</span>
-                      <div className="font-medium">{event.technician}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Horaire:</span>
-                      <div className="font-medium">{event.startTime} - {event.endTime}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Lieu:</span>
-                      <div className="font-medium">{event.location}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                    <Button size="sm" variant="outline" className="text-xs">Modifier</Button>
-                    <Button size="sm" className="text-xs">Voir détails</Button>
-                  </div>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
+              <div className="flex items-center gap-3 p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full"></div>
+                <span className="font-medium text-red-800 text-sm sm:text-base">Priorité Critique</span>
+              </div>
               
-              {getEventsByDate(selectedDate).length === 0 && (
-                <div className="text-center text-gray-500 py-12">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg">Aucune tâche planifiée pour cette date</p>
-                  <p className="text-sm text-gray-400 mt-2">Les tâches apparaîtront ici une fois planifiées</p>
-                </div>
-              )}
+              <div className="flex items-center gap-3 p-3 sm:p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-yellow-500 rounded-full"></div>
+                <span className="font-medium text-yellow-800 text-sm sm:text-base">Priorité Moyenne</span>
+              </div>
+              
+              <div className="flex items-center gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full"></div>
+                <span className="font-medium text-green-800 text-sm sm:text-base">Priorité Faible</span>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
-    </div>
+
+        {selectedDate && (
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardHeader className="bg-gray-50 border-b border-gray-100">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-600 rounded-xl flex items-center justify-center">
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <span className="text-sm sm:text-base">
+                  Tâches du jour - {selectedDate.toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-6">
+              <div className="space-y-4">
+                {getEventsByDate(selectedDate).map(event => (
+                  <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
+                    <div className="flex flex-col sm:flex-row justify-between items-start mb-3 gap-2">
+                      <h4 className="font-medium text-sm sm:text-base">{event.title}</h4>
+                      <Badge className={`${getTypeColor(event.type)} text-xs`}>
+                        {event.type === 'preventive' ? 'Préventif' :
+                         event.type === 'corrective' ? 'Correctif' : 'Inspection'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                      <div>
+                        <span className="text-gray-500">Équipement:</span>
+                        <div className="font-medium">{event.equipment}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Technicien:</span>
+                        <div className="font-medium">{event.technician}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Horaire:</span>
+                        <div className="font-medium">{event.startTime} - {event.endTime}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Lieu:</span>
+                        <div className="font-medium">{event.location}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-xs"
+                        onClick={() => handleEditEvent(event)}
+                      >
+                        Modifier
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => handleViewDetails(event)}
+                      >
+                        Voir détails
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {getEventsByDate(selectedDate).length === 0 && (
+                  <div className="text-center text-gray-500 py-12">
+                    <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">Aucune tâche planifiée pour cette date</p>
+                    <p className="text-sm text-gray-400 mt-2">Les tâches apparaîtront ici une fois planifiées</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <MaintenanceEventModal
+        event={selectedEvent}
+        isOpen={isEventModalOpen}
+        onClose={handleCloseModal}
+        onUpdate={updateEvent}
+        mode={modalMode}
+      />
+    </>
   );
 }

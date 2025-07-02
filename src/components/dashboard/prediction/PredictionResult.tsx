@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Brain, TrendingUp, AlertCircle, CheckCircle, Wrench } from "lucide-react";
-import { formatPredictionMessage, getModelPerformanceDetails } from '@/services/predictionMessageService';
+import { formatPredictionMessage } from '@/services/predictionMessageService';
 
 interface PredictionResultProps {
   predicted_status: string;
@@ -29,20 +29,8 @@ export function PredictionResult({
   });
 
   const enrichedMessage = formatPredictionMessage(predicted_status, confidence_score);
-  const performanceDetails = getModelPerformanceDetails(predicted_status);
 
   console.log('✨ Enriched message generated:', enrichedMessage);
-  console.log('📊 Performance details generated:', performanceDetails);
-
-  const getStatusIcon = () => {
-    switch (predicted_status) {
-      case 'Entretien_renforce': return <Wrench className="w-5 h-5 text-orange-600" />;
-      case 'Investigation_defaillance': return <AlertCircle className="w-5 h-5 text-red-600" />;
-      case 'Maintenance_preventive': return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'Surveillance_renforcee': return <TrendingUp className="w-5 h-5 text-blue-600" />;
-      default: return <Brain className="w-5 h-5 text-purple-600" />;
-    }
-  };
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
@@ -57,55 +45,15 @@ export function PredictionResult({
     <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          {getStatusIcon()}
-          🧠 Résultat de la Prédiction IA
+          <Brain className="w-5 h-5 text-purple-600" />
+          Résultat de la Prédiction IA
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Message enrichi principal - NOUVEAU FORMAT */}
+        {/* Message enrichi formaté selon vos spécifications */}
         <div className="bg-white p-6 rounded-lg border-2 border-purple-200 shadow-lg">
-          {/* Titre avec émoji */}
-          <div className="text-xl font-bold text-purple-900 mb-4 flex items-center gap-2">
-            🧠 {enrichedMessage.title}
-          </div>
-          
-          {/* Description enrichie */}
-          <div className="space-y-4 text-sm leading-relaxed">
-            {/* Description générale */}
-            <div className="text-gray-800 bg-gray-50 p-4 rounded-lg border-l-4 border-l-purple-500">
-              📝 <strong>Description :</strong><br />
-              {enrichedMessage.description}
-            </div>
-            
-            {/* Confiance avec émoji et style */}
-            <div className="text-blue-800 font-semibold bg-blue-50 p-4 rounded-lg border-l-4 border-l-blue-500">
-              📊 <strong>Niveau de confiance :</strong><br />
-              {enrichedMessage.confidence}
-            </div>
-            
-            {/* Interprétation avec émoji et style */}
-            <div className="text-green-800 font-semibold bg-green-50 p-4 rounded-lg border-l-4 border-l-green-500">
-              🔍 <strong>Interprétation :</strong><br />
-              <div dangerouslySetInnerHTML={{ __html: enrichedMessage.interpretation }} />
-            </div>
-            
-            {/* Recommandation spécifique avec émoji et style */}
-            {enrichedMessage.recommendation && (
-              <div className="text-orange-800 bg-orange-50 p-4 rounded-lg border-l-4 border-l-orange-500">
-                <strong>💡 Recommandation spécifique :</strong><br />
-                {enrichedMessage.recommendation}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Détails des performances du modèle avec émoji */}
-        <div className="bg-white p-4 rounded-lg border shadow-sm">
-          <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-            📊 Performances du modèle IA
-          </h4>
-          <div className="text-sm text-gray-700 whitespace-pre-line leading-relaxed bg-gray-50 p-3 rounded border-l-4 border-l-gray-400">
-            {performanceDetails}
+          <div className="whitespace-pre-line text-sm leading-relaxed">
+            {enrichedMessage.formattedResult}
           </div>
         </div>
 

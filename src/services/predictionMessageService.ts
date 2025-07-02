@@ -15,6 +15,7 @@ export interface EnrichedPredictionMessage {
   confidence: string;
   interpretation: string;
   recommendation?: string;
+  formattedResult: string;
 }
 
 export function formatPredictionMessage(
@@ -35,7 +36,8 @@ export function formatPredictionMessage(
       title: `Prédiction IA : ${displayName}`,
       description: `Basée sur un modèle d'intelligence artificielle avec une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%.`,
       confidence: `Confiance : ${confidenceScore || 85}%`,
-      interpretation: `Il est probable que le statut post-entretien soit : **${displayName}**.`
+      interpretation: `Il est probable que le statut post-entretien soit : **${displayName}**.`,
+      formattedResult: `🧠 Prédiction IA : ${displayName}\n\nCe résultat est basé sur un modèle IA entraîné avec une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%.\n\n✅ Statut prédit : ${displayName}.`
     };
     console.log('📤 SERVICE - Message par défaut créé:', defaultMessage);
     return defaultMessage;
@@ -46,27 +48,50 @@ export function formatPredictionMessage(
   const f1Score = Math.round(metrics.f1 * 100);
 
   let recommendation = '';
+  let emoji = '🧠';
+  
   switch (predictedClass) {
     case 'Entretien_renforce':
       recommendation = '🔧 Action requise : Planifier un entretien renforcé pour optimiser les performances de l\'équipement.';
+      emoji = '🔧';
       break;
     case 'Investigation_defaillance':
       recommendation = '🔍 Investigation nécessaire : Effectuer un diagnostic approfondi pour identifier les causes de défaillance.';
+      emoji = '🔍';
       break;
     case 'Maintenance_preventive':
       recommendation = '✅ Maintenance préventive recommandée : Suivre le programme de maintenance standard.';
+      emoji = '✅';
       break;
     case 'Surveillance_renforcee':
       recommendation = '👁️ Surveillance renforcée : Augmenter la fréquence de contrôle pour anticiper tout défaut critique.';
+      emoji = '👁️';
       break;
   }
 
+  // Format enrichi selon vos spécifications
+  const formattedResult = `${emoji} Prédiction IA : ${displayName}
+
+🧠 Basée sur un modèle d'intelligence artificielle affichant une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%, cette prédiction repose sur l'analyse de plusieurs critères critiques observés lors des maintenances précédentes.
+
+📊 Confiance élevée : le modèle affiche une précision de ${precision}% pour cette catégorie spécifique ("${displayName}"), avec un rappel de ${recall}% et un score F1 de ${f1Score}%.
+
+🔍 Interprétation : Il est fortement probable que le statut post-entretien soit : **${displayName}**.
+
+➡️ Pour la classe « ${displayName} », les performances du modèle sont :
+- Précision : ${precision}%
+- Rappel : ${recall}%
+- F1-Score : ${f1Score}%
+
+${recommendation}`;
+
   const enrichedMessage = {
-    title: `Prédiction IA : ${displayName}`,
+    title: `${emoji} Prédiction IA : ${displayName}`,
     description: `Basée sur un modèle d'intelligence artificielle affichant une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%, cette prédiction repose sur l'analyse de plusieurs critères critiques observés lors des maintenances précédentes.`,
     confidence: `Confiance élevée : le modèle affiche une précision de ${precision}% pour cette catégorie spécifique, avec un rappel de ${recall}% et un score F1 de ${f1Score}%.`,
-    interpretation: `Interprétation : Il est fortement probable que le statut post-entretien soit : **${displayName}**.`,
-    recommendation
+    interpretation: `Il est fortement probable que le statut post-entretien soit : **${displayName}**.`,
+    recommendation,
+    formattedResult
   };
   
   console.log('✅ SERVICE - Message enrichi créé avec succès:', enrichedMessage);
