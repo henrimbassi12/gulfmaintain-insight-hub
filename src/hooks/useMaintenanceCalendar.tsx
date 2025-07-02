@@ -27,25 +27,56 @@ export function useMaintenanceCalendar() {
       setIsLoading(true);
       setError(null);
       
-      // Récupération des rapports de maintenance pour créer les événements
+      console.log('🔄 Récupération des maintenances planifiées...');
+      
+      // Récupération des maintenances planifiées
+      const { data: plannedMaintenances, error: plannedError } = await supabase
+        .from('planned_maintenances')
+        .select('*')
+        .order('date_programmee', { ascending: true });
+
+      if (plannedError) {
+        throw plannedError;
+      }
+
+      console.log('📋 Maintenances planifiées récupérées:', plannedMaintenances?.length || 0);
+
+      // Transformation des maintenances planifiées en événements de calendrier
+      const plannedEvents: MaintenanceEvent[] = (plannedMaintenances || []).map(maintenance => ({
+        id: maintenance.id,
+        title: `${maintenance.type_maintenance} - ${maintenance.serial_number}`,
+        equipment: `${maintenance.type_frigo} - ${maintenance.serial_number}`,
+        technician: maintenance.technician_assigne,
+        date: new Date(maintenance.date_programmee),
+        startTime: '09:00', // Valeur par défaut
+        endTime: '17:00', // Valeur par défaut
+        type: maintenance.type_maintenance.toLowerCase().includes('préventive') ? 'preventive' : 
+              maintenance.type_maintenance.toLowerCase().includes('corrective') ? 'corrective' : 'inspection',
+        priority: maintenance.priorite === 'high' ? 'high' : 
+                 maintenance.priorite === 'medium' ? 'medium' : 'low',
+        status: 'planned',
+        location: `${maintenance.ville} - ${maintenance.quartier}`
+      }));
+
+      // Récupération des rapports de maintenance pour créer les événements historiques
       const { data: maintenanceReports, error: reportsError } = await supabase
         .from('maintenance_reports')
         .select('*')
         .order('date', { ascending: true });
 
       if (reportsError) {
-        throw reportsError;
+        console.warn('⚠️ Erreur lors de la récupération des rapports:', reportsError);
       }
 
       // Transformation des rapports en événements de calendrier
-      const calendarEvents: MaintenanceEvent[] = (maintenanceReports || []).map(report => ({
-        id: report.id,
+      const reportEvents: MaintenanceEvent[] = (maintenanceReports || []).map(report => ({
+        id: `report-${report.id}`,
         title: `${report.type} - ${report.equipment}`,
         equipment: report.equipment,
         technician: report.technician,
         date: new Date(report.date),
-        startTime: '09:00', // Valeur par défaut
-        endTime: '17:00', // Valeur par défaut
+        startTime: '09:00',
+        endTime: '17:00',
         type: report.type === 'Préventive' ? 'preventive' : 
               report.type === 'Corrective' ? 'corrective' : 'inspection',
         priority: report.status === 'Terminé' ? 'low' : 
@@ -55,9 +86,12 @@ export function useMaintenanceCalendar() {
         location: report.location
       }));
 
-      setEvents(calendarEvents);
+      // Combiner les événements planifiés et les rapports
+      const allEvents = [...plannedEvents, ...reportEvents];
       
-      console.log(`✅ Récupération planning: ${calendarEvents.length} événements`);
+      setEvents(allEvents);
+      
+      console.log(`✅ Récupération planning: ${allEvents.length} événements (${plannedEvents.length} planifiés, ${reportEvents.length} rapports)`);
     } catch (error) {
       console.error('❌ Erreur lors de la récupération du planning:', error);
       setError('Erreur lors de la récupération du planning');
@@ -107,22 +141,40 @@ export function useMaintenanceCalendar() {
 
   const updateEvent = useCallback(async (eventId: string, updates: Partial<MaintenanceEvent>) => {
     try {
-      const { error } = await supabase
-        .from('maintenance_reports')
-        .update({
-          equipment: updates.equipment,
-          technician: updates.technician,
-          location: updates.location,
-          type: updates.type === 'preventive' ? 'Préventive' :
-                updates.type === 'corrective' ? 'Corrective' : 'Inspection',
-          status: updates.status === 'completed' ? 'Terminé' :
-                 updates.status === 'in-progress' ? 'En cours' : 'Planifié',
-          date: updates.date?.toISOString().split('T')[0],
-          description: updates.title
-        })
-        .eq('id', eventId);
+      if (eventId.startsWith('report-')) {
+        // Mise à jour d'un rapport de maintenance
+        const realId = eventId.replace('report-', '');
+        const { error } = await supabase
+          .from('maintenance_reports')
+          .update({
+            equipment: updates.equipment,
+            technician: updates.technician,
+            location: updates.location,
+            type: updates.type === 'preventive' ? 'Préventive' :
+                  updates.type === 'corrective' ? 'Corrective' : 'Inspection',
+            status: updates.status === 'completed' ? 'Terminé' :
+                   updates.status === 'in-progress' ? 'En cours' : 'Planifié',
+            date: updates.date?.toISOString().split('T')[0],
+            description: updates.title
+          })
+          .eq('id', realId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Mise à jour d'une maintenance planifiée
+        const { error } = await supabase
+          .from('planned_maintenances')
+          .update({
+            date_programmee: updates.date?.toISOString().split('T')[0],
+            technician_assigne: updates.technician,
+            type_maintenance: updates.type === 'preventive' ? 'Maintenance préventive' :
+                            updates.type === 'corrective' ? 'Maintenance corrective' : 'Inspection',
+            priorite: updates.priority
+          })
+          .eq('id', eventId);
+
+        if (error) throw error;
+      }
 
       toast.success('Événement mis à jour');
       fetchEvents(); // Actualiser la liste
@@ -136,8 +188,25 @@ export function useMaintenanceCalendar() {
   useEffect(() => {
     fetchEvents();
 
-    // Mise en place de l'écoute en temps réel
-    const channel = supabase
+    // Mise en place de l'écoute en temps réel pour les maintenances planifiées
+    const plannedChannel = supabase
+      .channel('planned_maintenances_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'planned_maintenances'
+        },
+        (payload) => {
+          console.log('📡 Changement détecté dans planned_maintenances:', payload);
+          fetchEvents(); // Actualiser les données
+        }
+      )
+      .subscribe();
+
+    // Mise en place de l'écoute en temps réel pour les rapports de maintenance
+    const reportsChannel = supabase
       .channel('maintenance_reports_changes')
       .on(
         'postgres_changes',
@@ -154,7 +223,8 @@ export function useMaintenanceCalendar() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(plannedChannel);
+      supabase.removeChannel(reportsChannel);
     };
   }, [fetchEvents]);
 

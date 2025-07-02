@@ -12,6 +12,7 @@ import { CalendarIcon, Clock } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { usePlannedMaintenances } from '@/hooks/usePlannedMaintenances';
 
 interface CreateInterventionModalProps {
   isOpen: boolean;
@@ -37,10 +38,18 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
     sector: '',
     partner: '',
     city: '',
-    afnf: ''
+    afnf: '',
+    nomClient: '',
+    nomPdv: '',
+    telBarman: '',
+    quartier: '',
+    typefrigo: '',
+    branding: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { createMaintenance } = usePlannedMaintenances();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.serialNumber || !formData.type || !formData.technician || !taskDate) {
@@ -48,33 +57,72 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
       return;
     }
 
-    console.log('Nouvelle tâche:', {
-      ...formData,
-      taskDate
-    });
+    try {
+      console.log('📝 Création de la maintenance avec les données:', {
+        ...formData,
+        taskDate
+      });
 
-    toast.success('Tâche programmée avec succès');
-    onClose();
-    setFormData({
-      names: '',
-      barmanNumber: '',
-      serialNumber: '',
-      tagNumber: '',
-      type: '',
-      technician: '',
-      priority: 'medium',
-      location: '',
-      description: '',
-      estimatedDuration: '',
-      timeSlot: '',
-      division: '',
-      sector: '',
-      partner: '',
-      city: '',
-      afnf: ''
-    });
-    setTaskDate(undefined);
-    onSuccess?.();
+      // Créer la maintenance planifiée
+      await createMaintenance({
+        type_maintenance: formData.type,
+        priorite: formData.priority,
+        duree_estimee: formData.estimatedDuration || '2h',
+        date_programmee: format(taskDate, 'yyyy-MM-dd'),
+        date_creation: format(new Date(), 'yyyy-MM-dd'),
+        technician_assigne: formData.technician,
+        division: formData.division,
+        secteur: formData.sector,
+        partenaire: formData.partner,
+        ville: formData.city,
+        nom_client: formData.nomClient || 'Client non spécifié',
+        nom_pdv: formData.nomPdv || 'PDV non spécifié',
+        tel_barman: formData.telBarman || formData.barmanNumber || '',
+        quartier: formData.quartier || 'Non spécifié',
+        localisation: formData.location || 'Non spécifié',
+        serial_number: formData.serialNumber,
+        tag_number: formData.tagNumber || '',
+        type_frigo: formData.typefrigo || 'Standard',
+        af_nf: formData.afnf || 'NF',
+        branding: formData.branding || 'Standard',
+        description: formData.description
+      });
+
+      toast.success('Tâche programmée avec succès dans le planning');
+      onClose();
+      
+      // Réinitialiser le formulaire
+      setFormData({
+        names: '',
+        barmanNumber: '',
+        serialNumber: '',
+        tagNumber: '',
+        type: '',
+        technician: '',
+        priority: 'medium',
+        location: '',
+        description: '',
+        estimatedDuration: '',
+        timeSlot: '',
+        division: '',
+        sector: '',
+        partner: '',
+        city: '',
+        afnf: '',
+        nomClient: '',
+        nomPdv: '',
+        telBarman: '',
+        quartier: '',
+        typefrigo: '',
+        branding: ''
+      });
+      setTaskDate(undefined);
+      
+      onSuccess?.();
+    } catch (error) {
+      console.error('❌ Erreur lors de la création de la maintenance:', error);
+      toast.error('Erreur lors de la programmation de la tâche');
+    }
   };
 
   return (
@@ -135,6 +183,29 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
             </div>
           </div>
 
+          {/* Informations client */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nomClient">Nom Client</Label>
+              <Input
+                id="nomClient"
+                value={formData.nomClient}
+                onChange={(e) => setFormData({...formData, nomClient: e.target.value})}
+                placeholder="Nom du client"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nomPdv">Nom PDV</Label>
+              <Input
+                id="nomPdv"
+                value={formData.nomPdv}
+                onChange={(e) => setFormData({...formData, nomPdv: e.target.value})}
+                placeholder="Nom du point de vente"
+              />
+            </div>
+          </div>
+
           {/* Troisième ligne - Type et technicien */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -144,10 +215,10 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                   <SelectValue placeholder="Sélectionner le type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="reparation">Réparation</SelectItem>
-                  <SelectItem value="installation">Installation</SelectItem>
-                  <SelectItem value="deplacement">Déplacement</SelectItem>
+                  <SelectItem value="Maintenance préventive">Maintenance préventive</SelectItem>
+                  <SelectItem value="Maintenance corrective">Maintenance corrective</SelectItem>
+                  <SelectItem value="Installation">Installation</SelectItem>
+                  <SelectItem value="Déplacement">Déplacement</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -225,6 +296,16 @@ export function CreateInterventionModal({ isOpen, onClose, onSuccess }: CreateIn
                 placeholder="Ex: Douala"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="quartier">Quartier</Label>
+            <Input
+              id="quartier"
+              value={formData.quartier}
+              onChange={(e) => setFormData({...formData, quartier: e.target.value})}
+              placeholder="Ex: Bonanjo"
+            />
           </div>
 
           {/* Cinquième ligne - Date et détails */}

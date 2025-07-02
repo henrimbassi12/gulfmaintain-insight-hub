@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Zap, TrendingUp } from "lucide-react";
 import { PredictionFormFields } from './prediction/PredictionFormFields';
-import { EnrichedPredictionResult } from './prediction/EnrichedPredictionResult';
 import { PredictionData } from './prediction/types';
 import { usePredictionApi } from './prediction/usePredictionApi';
 
@@ -151,13 +149,15 @@ export function AIPredictionSection() {
         )}
 
         {result && (
-          <EnrichedPredictionResult
-            predicted_status={result.predicted_status}
-            confidence_score={result.confidence_score}
-            risk_level={result.risk_level}
-            recommendations={result.recommendations}
-            probabilities={result.probabilities}
-          />
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-medium text-blue-800 mb-2">Résultat de la prédiction</h4>
+            <p className="text-blue-700 text-sm">
+              Statut prédit: {result.predicted_status}
+            </p>
+            <p className="text-blue-700 text-sm">
+              Niveau de confiance: {result.confidence_score}%
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
