@@ -6,12 +6,13 @@ import { EquipmentTester } from '@/components/equipments/EquipmentTester';
 import { MaintenanceTester } from '@/components/maintenance/MaintenanceTester';
 import { MessagesTester } from '@/components/messages/MessagesTester';
 import { HistoryTester } from '@/components/history/HistoryTester';
+import { ReportsTester } from '@/components/reports/ReportsTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock } from 'lucide-react';
+import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock, FileText } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history'>('history');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history' | 'reports'>('reports');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -83,6 +84,14 @@ const TestPage = () => {
                 <Clock className="w-4 h-4" />
                 Tests Historique
               </Button>
+              <Button
+                onClick={() => setActiveTest('reports')}
+                variant={activeTest === 'reports' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Tests Rapports
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -94,6 +103,7 @@ const TestPage = () => {
         {activeTest === 'maintenance' && <MaintenanceTester />}
         {activeTest === 'messages' && <MessagesTester />}
         {activeTest === 'history' && <HistoryTester />}
+        {activeTest === 'reports' && <ReportsTester />}
       </div>
     </div>
   );
