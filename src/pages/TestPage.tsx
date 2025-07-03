@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { AuthTester } from '@/components/auth/AuthTester';
 import { DashboardTester } from '@/components/dashboard/DashboardTester';
+import { EquipmentTester } from '@/components/equipments/EquipmentTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube } from 'lucide-react';
+import { User, Activity, TestTube, Package } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard'>('auth');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments'>('equipments');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -30,7 +31,7 @@ const TestPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button
                 onClick={() => setActiveTest('auth')}
                 variant={activeTest === 'auth' ? 'default' : 'outline'}
@@ -47,6 +48,14 @@ const TestPage = () => {
                 <Activity className="w-4 h-4" />
                 Tests Dashboard
               </Button>
+              <Button
+                onClick={() => setActiveTest('equipments')}
+                variant={activeTest === 'equipments' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <Package className="w-4 h-4" />
+                Tests Équipements
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -54,6 +63,7 @@ const TestPage = () => {
         {/* Contenu des tests */}
         {activeTest === 'auth' && <AuthTester />}
         {activeTest === 'dashboard' && <DashboardTester />}
+        {activeTest === 'equipments' && <EquipmentTester />}
       </div>
     </div>
   );
