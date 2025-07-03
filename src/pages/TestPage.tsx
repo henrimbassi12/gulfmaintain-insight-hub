@@ -7,12 +7,13 @@ import { MaintenanceTester } from '@/components/maintenance/MaintenanceTester';
 import { MessagesTester } from '@/components/messages/MessagesTester';
 import { HistoryTester } from '@/components/history/HistoryTester';
 import { ReportsTester } from '@/components/reports/ReportsTester';
+import { GeolocationTester } from '@/components/geolocation/GeolocationTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock, FileText } from 'lucide-react';
+import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock, FileText, MapPin } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history' | 'reports'>('reports');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history' | 'reports' | 'geolocation'>('geolocation');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -92,6 +93,14 @@ const TestPage = () => {
                 <FileText className="w-4 h-4" />
                 Tests Rapports
               </Button>
+              <Button
+                onClick={() => setActiveTest('geolocation')}
+                variant={activeTest === 'geolocation' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <MapPin className="w-4 h-4" />
+                Tests Géolocalisation
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -104,6 +113,7 @@ const TestPage = () => {
         {activeTest === 'messages' && <MessagesTester />}
         {activeTest === 'history' && <HistoryTester />}
         {activeTest === 'reports' && <ReportsTester />}
+        {activeTest === 'geolocation' && <GeolocationTester />}
       </div>
     </div>
   );
