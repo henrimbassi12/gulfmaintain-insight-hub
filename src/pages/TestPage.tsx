@@ -5,12 +5,13 @@ import { DashboardTester } from '@/components/dashboard/DashboardTester';
 import { EquipmentTester } from '@/components/equipments/EquipmentTester';
 import { MaintenanceTester } from '@/components/maintenance/MaintenanceTester';
 import { MessagesTester } from '@/components/messages/MessagesTester';
+import { HistoryTester } from '@/components/history/HistoryTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube, Package, Wrench, MessageCircle } from 'lucide-react';
+import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages'>('messages');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history'>('history');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -74,6 +75,14 @@ const TestPage = () => {
                 <MessageCircle className="w-4 h-4" />
                 Tests Messages
               </Button>
+              <Button
+                onClick={() => setActiveTest('history')}
+                variant={activeTest === 'history' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <Clock className="w-4 h-4" />
+                Tests Historique
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -84,6 +93,7 @@ const TestPage = () => {
         {activeTest === 'equipments' && <EquipmentTester />}
         {activeTest === 'maintenance' && <MaintenanceTester />}
         {activeTest === 'messages' && <MessagesTester />}
+        {activeTest === 'history' && <HistoryTester />}
       </div>
     </div>
   );
