@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -23,6 +22,7 @@ import EquipmentHistoryPage from '@/pages/EquipmentHistoryPage';
 import PendingApproval from '@/pages/PendingApproval';
 import Welcome from '@/pages/Welcome';
 import NotFound from '@/pages/NotFound';
+import TestPage from '@/pages/TestPage';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -39,6 +39,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/pending-approval" element={<PendingApproval />} />
+                <Route path="/test" element={<TestPage />} />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
