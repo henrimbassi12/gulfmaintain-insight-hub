@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,14 +10,6 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          // Configurer la persistance de session selon "Se souvenir de moi"
-          ...(rememberMe && { 
-            data: { 
-              remember_me: true 
-            } 
-          })
-        }
       });
       
       if (error) {
