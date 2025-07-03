@@ -4,12 +4,13 @@ import { AuthTester } from '@/components/auth/AuthTester';
 import { DashboardTester } from '@/components/dashboard/DashboardTester';
 import { EquipmentTester } from '@/components/equipments/EquipmentTester';
 import { MaintenanceTester } from '@/components/maintenance/MaintenanceTester';
+import { MessagesTester } from '@/components/messages/MessagesTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube, Package, Wrench } from 'lucide-react';
+import { User, Activity, TestTube, Package, Wrench, MessageCircle } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance'>('maintenance');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages'>('messages');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -65,6 +66,14 @@ const TestPage = () => {
                 <Wrench className="w-4 h-4" />
                 Tests Maintenance
               </Button>
+              <Button
+                onClick={() => setActiveTest('messages')}
+                variant={activeTest === 'messages' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Tests Messages
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -74,6 +83,7 @@ const TestPage = () => {
         {activeTest === 'dashboard' && <DashboardTester />}
         {activeTest === 'equipments' && <EquipmentTester />}
         {activeTest === 'maintenance' && <MaintenanceTester />}
+        {activeTest === 'messages' && <MessagesTester />}
       </div>
     </div>
   );
