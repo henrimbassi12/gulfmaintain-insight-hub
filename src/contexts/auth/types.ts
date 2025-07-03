@@ -10,6 +10,7 @@ export interface AuthContextType {
   signUp: (email: string, password: string, fullName?: string, role?: string) => Promise<{ error: any }>;
   signInWithOAuth: (provider: 'google' | 'facebook' | 'linkedin_oidc') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
 }
 
