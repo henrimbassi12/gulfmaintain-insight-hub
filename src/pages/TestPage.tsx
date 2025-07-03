@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import { AuthTester } from '@/components/auth/AuthTester';
 import { DashboardTester } from '@/components/dashboard/DashboardTester';
 import { EquipmentTester } from '@/components/equipments/EquipmentTester';
+import { MaintenanceTester } from '@/components/maintenance/MaintenanceTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube, Package } from 'lucide-react';
+import { User, Activity, TestTube, Package, Wrench } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments'>('equipments');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance'>('maintenance');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -56,6 +57,14 @@ const TestPage = () => {
                 <Package className="w-4 h-4" />
                 Tests Équipements
               </Button>
+              <Button
+                onClick={() => setActiveTest('maintenance')}
+                variant={activeTest === 'maintenance' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <Wrench className="w-4 h-4" />
+                Tests Maintenance
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -64,6 +73,7 @@ const TestPage = () => {
         {activeTest === 'auth' && <AuthTester />}
         {activeTest === 'dashboard' && <DashboardTester />}
         {activeTest === 'equipments' && <EquipmentTester />}
+        {activeTest === 'maintenance' && <MaintenanceTester />}
       </div>
     </div>
   );
