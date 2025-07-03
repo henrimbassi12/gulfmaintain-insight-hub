@@ -1,15 +1,22 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) => {
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
-      console.log('🔐 Tentative de connexion pour:', email);
+      console.log('🔐 Tentative de connexion pour:', email, { rememberMe });
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          // Configurer la persistance de session selon "Se souvenir de moi"
+          ...(rememberMe && { 
+            data: { 
+              remember_me: true 
+            } 
+          })
+        }
       });
       
       if (error) {
@@ -38,6 +45,16 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
         return { error };
       } else if (data.user && data.session) {
         console.log('✅ Connexion réussie avec session');
+        
+        // Configurer la durée de session selon "Se souvenir de moi"
+        if (rememberMe) {
+          // Étendre la durée de session à 30 jours
+          localStorage.setItem('supabase.remember_me', 'true');
+        } else {
+          // Session normale (expire à la fermeture du navigateur)
+          localStorage.removeItem('supabase.remember_me');
+        }
+        
         toast({
           title: "Connexion réussie",
           description: "Vous êtes maintenant connecté",
@@ -152,6 +169,7 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      localStorage.removeItem('supabase.remember_me');
       toast({
         title: "Déconnexion réussie",
         description: "À bientôt !",
@@ -167,25 +185,30 @@ export const createAuthService = (toast: ReturnType<typeof useToast>['toast']) =
 
   const resetPassword = async (email: string) => {
     try {
+      console.log('🔄 Demande de réinitialisation de mot de passe pour:', email);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
+        console.error('❌ Erreur réinitialisation:', error);
         toast({
           title: "Erreur",
-          description: error.message,
+          description: "Impossible d'envoyer l'email de réinitialisation. Vérifiez votre adresse email.",
           variant: "destructive",
         });
         return { error };
       }
 
+      console.log('✅ Email de réinitialisation envoyé');
       toast({
         title: "Email envoyé",
-        description: "Vérifiez votre email pour réinitialiser votre mot de passe",
+        description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe",
       });
       return { error: null };
     } catch (error: any) {
+      console.error('❌ Erreur catch resetPassword:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'envoyer l'email de réinitialisation",
