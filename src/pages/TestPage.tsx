@@ -8,12 +8,13 @@ import { MessagesTester } from '@/components/messages/MessagesTester';
 import { HistoryTester } from '@/components/history/HistoryTester';
 import { ReportsTester } from '@/components/reports/ReportsTester';
 import { GeolocationTester } from '@/components/geolocation/GeolocationTester';
+import { SettingsTester } from '@/components/settings/SettingsTester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock, FileText, MapPin } from 'lucide-react';
+import { User, Activity, TestTube, Package, Wrench, MessageCircle, Clock, FileText, MapPin, Settings } from 'lucide-react';
 
 const TestPage = () => {
-  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history' | 'reports' | 'geolocation'>('geolocation');
+  const [activeTest, setActiveTest] = useState<'auth' | 'dashboard' | 'equipments' | 'maintenance' | 'messages' | 'history' | 'reports' | 'geolocation' | 'settings'>('settings');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -101,6 +102,14 @@ const TestPage = () => {
                 <MapPin className="w-4 h-4" />
                 Tests Géolocalisation
               </Button>
+              <Button
+                onClick={() => setActiveTest('settings')}
+                variant={activeTest === 'settings' ? 'default' : 'outline'}
+                className="flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Tests Paramètres
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -114,6 +123,7 @@ const TestPage = () => {
         {activeTest === 'history' && <HistoryTester />}
         {activeTest === 'reports' && <ReportsTester />}
         {activeTest === 'geolocation' && <GeolocationTester />}
+        {activeTest === 'settings' && <SettingsTester />}
       </div>
     </div>
   );
