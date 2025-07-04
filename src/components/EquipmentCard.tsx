@@ -6,13 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Equipment } from '@/hooks/useEquipments';
 import { EquipmentDetailsModal } from './EquipmentDetailsModal';
 import { EquipmentMaintenanceModal } from './EquipmentMaintenanceModal';
+import { EquipmentEditModal } from './EquipmentEditModal';
 import { 
   MapPin, 
   Calendar,
   User,
   Phone,
   Settings,
-  Building
+  Building,
+  Edit
 } from 'lucide-react';
 
 interface EquipmentCardProps {
@@ -22,6 +24,7 @@ interface EquipmentCardProps {
 export function EquipmentCard({ equipment }: EquipmentCardProps) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR');
@@ -93,11 +96,18 @@ export function EquipmentCard({ equipment }: EquipmentCardProps) {
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex-1"
               onClick={() => setShowDetailsModal(true)}
             >
               <Settings className="w-4 h-4 mr-1" />
               Détails
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowEditModal(true)}
+            >
+              <Edit className="w-4 h-4 mr-1" />
+              Modifier
             </Button>
             <Button 
               variant="outline" 
@@ -120,6 +130,12 @@ export function EquipmentCard({ equipment }: EquipmentCardProps) {
         equipment={equipment}
         isOpen={showMaintenanceModal}
         onClose={() => setShowMaintenanceModal(false)}
+      />
+
+      <EquipmentEditModal
+        equipment={equipment}
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
       />
     </>
   );
