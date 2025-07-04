@@ -111,7 +111,6 @@ export function useEquipments() {
       setEquipments(prev => prev.map(equipment => 
         equipment.id === id ? typedEquipment : equipment
       ));
-      toast.success('Équipement mis à jour avec succès');
       return typedEquipment;
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour de l\'équipement:', error);
