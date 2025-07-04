@@ -33,11 +33,11 @@ export function formatPredictionMessage(
   if (!metrics) {
     console.log('⚠️ SERVICE - Aucune métrique trouvée, utilisation du message par défaut');
     const defaultMessage = {
-      title: `Prédiction IA : ${displayName}`,
-      description: `Basée sur un modèle d'intelligence artificielle avec une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%.`,
+      title: `🧠 Résultat IA : ${displayName}`,
+      description: `Ce statut est prédit selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.`,
       confidence: `Confiance : ${confidenceScore || 85}%`,
       interpretation: `Il est probable que le statut post-entretien soit : **${displayName}**.`,
-      formattedResult: `🧠 Prédiction IA : ${displayName}\n\nCe résultat est basé sur un modèle IA entraîné avec une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%.\n\n✅ Statut prédit : ${displayName}.`
+      formattedResult: `🧠 Résultat IA : ${displayName}\n\nCe statut est prédit selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.\n\n✅ Statut prédit : ${displayName}.`
     };
     console.log('📤 SERVICE - Message par défaut créé:', defaultMessage);
     return defaultMessage;
@@ -45,51 +45,47 @@ export function formatPredictionMessage(
 
   const precision = Math.round(metrics.precision * 100);
   const recall = Math.round(metrics.recall * 100);
-  const f1Score = Math.round(metrics.f1 * 100);
+  const f1Score = (metrics.f1 * 100).toFixed(0);
 
   let recommendation = '';
   let emoji = '🧠';
+  let statusTitle = '';
   
   switch (predictedClass) {
     case 'Entretien_renforce':
-      recommendation = '🔧 Action requise : Planifier un entretien renforcé pour optimiser les performances de l\'équipement.';
+      statusTitle = 'Entretien renforcé';
+      recommendation = '🔧 Il est recommandé de planifier un entretien renforcé pour optimiser les performances de cet équipement.';
       emoji = '🔧';
       break;
     case 'Investigation_defaillance':
-      recommendation = '🔍 Investigation nécessaire : Effectuer un diagnostic approfondi pour identifier les causes de défaillance.';
+      statusTitle = 'Investigation défaillance';
+      recommendation = '🔍 Il est recommandé d\'effectuer une investigation approfondie pour identifier les causes de défaillance.';
       emoji = '🔍';
       break;
     case 'Maintenance_preventive':
-      recommendation = '✅ Maintenance préventive recommandée : Suivre le programme de maintenance standard.';
+      statusTitle = 'Maintenance préventive';
+      recommendation = '✅ Il est recommandé de suivre le programme de maintenance préventive standard.';
       emoji = '✅';
       break;
     case 'Surveillance_renforcee':
-      recommendation = '👁️ Surveillance renforcée : Augmenter la fréquence de contrôle pour anticiper tout défaut critique.';
+      statusTitle = 'Surveillance renforcée';
+      recommendation = '👁️ Il est recommandé de renforcer la surveillance de cet équipement pour anticiper tout défaut critique.';
       emoji = '👁️';
       break;
   }
 
-  // Format enrichi selon vos spécifications
-  const formattedResult = `${emoji} Prédiction IA : ${displayName}
+  // Nouveau format selon vos spécifications
+  const formattedResult = `${emoji} Résultat IA : ${statusTitle}
 
-🧠 Basée sur un modèle d'intelligence artificielle affichant une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%, cette prédiction repose sur l'analyse de plusieurs critères critiques observés lors des maintenances précédentes.
+Ce statut est prédit avec une précision de ${precision} %, un rappel de ${recall} % et un F1-score de ${f1Score} %, selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.
 
-📊 Confiance élevée : le modèle affiche une précision de ${precision}% pour cette catégorie spécifique ("${displayName}"), avec un rappel de ${recall}% et un score F1 de ${f1Score}%.
-
-🔍 Interprétation : Il est fortement probable que le statut post-entretien soit : **${displayName}**.
-
-➡️ Pour la classe « ${displayName} », les performances du modèle sont :
-- Précision : ${precision}%
-- Rappel : ${recall}%
-- F1-Score : ${f1Score}%
-
-${recommendation}`;
+👉 ${recommendation.replace(/^[🔧🔍✅👁️]\s/, '')}`;
 
   const enrichedMessage = {
-    title: `${emoji} Prédiction IA : ${displayName}`,
-    description: `Basée sur un modèle d'intelligence artificielle affichant une précision globale de ${Math.round(GLOBAL_ACCURACY * 100)}%, cette prédiction repose sur l'analyse de plusieurs critères critiques observés lors des maintenances précédentes.`,
-    confidence: `Confiance élevée : le modèle affiche une précision de ${precision}% pour cette catégorie spécifique, avec un rappel de ${recall}% et un score F1 de ${f1Score}%.`,
-    interpretation: `Il est fortement probable que le statut post-entretien soit : **${displayName}**.`,
+    title: `${emoji} Résultat IA : ${statusTitle}`,
+    description: `Ce statut est prédit avec une précision de ${precision} %, un rappel de ${recall} % et un F1-score de ${f1Score} %, selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.`,
+    confidence: `Confiance élevée : précision ${precision}%, rappel ${recall}%, F1-score ${f1Score}%`,
+    interpretation: `Il est fortement probable que le statut post-entretien soit : **${statusTitle}**.`,
     recommendation,
     formattedResult
   };
