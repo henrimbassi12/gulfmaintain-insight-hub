@@ -117,9 +117,28 @@ export default function Maintenance() {
 
   const handleUpdateMaintenance = async (id: string, updates: any) => {
     try {
-      await updateMaintenance(id, updates);
+      const updatedMaintenance = await updateMaintenance(id, updates);
+      
+      // Mettre à jour la maintenance sélectionnée avec les nouvelles données
+      if (selectedMaintenance && selectedMaintenance.id === id) {
+        const transformedUpdated = {
+          id: updatedMaintenance.id,
+          equipment: `${updatedMaintenance.type_frigo} - ${updatedMaintenance.serial_number}`,
+          type: updatedMaintenance.type_maintenance,
+          status: updatedMaintenance.description?.includes('En cours') ? 'in-progress' : 
+                  updatedMaintenance.description?.includes('Terminé') ? 'completed' : 'planned',
+          technician: updatedMaintenance.technician_assigne,
+          scheduledDate: updatedMaintenance.date_programmee,
+          timeSlot: updatedMaintenance.duree_estimee,
+          priority: updatedMaintenance.priorite,
+          location: `${updatedMaintenance.ville} - ${updatedMaintenance.quartier}`,
+          client: updatedMaintenance.nom_client,
+          description: updatedMaintenance.description || 'Maintenance planifiée'
+        };
+        setSelectedMaintenance(transformedUpdated);
+      }
+      
       setIsEditModalOpen(false);
-      setSelectedMaintenance(null);
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
     }

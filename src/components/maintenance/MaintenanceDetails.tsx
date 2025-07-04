@@ -86,11 +86,68 @@ const MaintenanceDetails: React.FC<MaintenanceDetailsProps> = ({
   const aiRiskLevel = maintenance.equipment === 'FR-2024-012' ? 83 : 
                      maintenance.equipment === 'FR-2024-045' ? 67 : null;
 
-  const history = [
-    { date: '2024-01-28 14:30', action: 'Intervention créée', user: 'Système' },
-    { date: '2024-01-28 15:45', action: 'Technicien assigné', user: 'Manager' },
-    { date: '2024-01-29 09:00', action: 'Intervention démarrée', user: maintenance.technician },
-  ];
+  // Génération dynamique de l'historique basé sur les données réelles
+  const generateHistory = () => {
+    const history = [];
+    const now = new Date();
+    const currentTime = now.toLocaleString('fr-FR', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+
+    // Intervention créée (utilise la date de création si disponible)
+    history.push({
+      date: maintenance.created_at ? new Date(maintenance.created_at).toLocaleString('fr-FR', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }) : currentTime,
+      action: 'Intervention créée',
+      user: 'Système'
+    });
+
+    // Technicien assigné
+    if (maintenance.technician) {
+      history.push({
+        date: maintenance.updated_at ? new Date(maintenance.updated_at).toLocaleString('fr-FR', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }) : currentTime,
+        action: 'Technicien assigné',
+        user: 'Manager'
+      });
+    }
+
+    // Intervention démarrée (si le statut est en cours)
+    if (currentStatus === 'in-progress') {
+      history.push({
+        date: currentTime,
+        action: 'Intervention démarrée',
+        user: maintenance.technician || 'Technicien'
+      });
+    }
+
+    // Intervention terminée (si le statut est terminé)
+    if (currentStatus === 'completed') {
+      history.push({
+        date: currentTime,
+        action: 'Intervention terminée',
+        user: maintenance.technician || 'Technicien'
+      });
+    }
+
+    return history;
+  };
+
+  const history = generateHistory();
 
   return (
     <>
