@@ -168,9 +168,9 @@ export default function Maintenance() {
           variant="outline" 
           onClick={handleRefresh}
           disabled={refreshing}
-          className={`${refreshing ? 'animate-spin' : ''} hover:bg-blue-50 border-gray-200`}
+          className="hover:bg-blue-50 border-gray-200"
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Actualiser
         </Button>
         

@@ -12,6 +12,7 @@ interface ModernButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  iconClassName?: string;
 }
 
 export function ModernButton({ 
@@ -21,7 +22,8 @@ export function ModernButton({
   size = 'md',
   onClick,
   disabled,
-  className
+  className,
+  iconClassName
 }: ModernButtonProps) {
   const baseClasses = "transition-all duration-200 font-medium rounded-xl shadow-sm hover:shadow-lg";
   
@@ -49,7 +51,7 @@ export function ModernButton({
         className
       )}
     >
-      {Icon && <Icon className="w-4 h-4 mr-2" />}
+      {Icon && <Icon className={cn("w-4 h-4 mr-2", iconClassName)} />}
       {children}
     </Button>
   );

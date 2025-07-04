@@ -124,10 +124,12 @@ export default function MaintenanceCalendarPage() {
     try {
       const updatedMaintenance = await updateMaintenance(id, updates);
       
-      // Mettre à jour la maintenance sélectionnée
+      // Mettre à jour la maintenance sélectionnée avec TOUS les champs
       if (selectedMaintenance && selectedMaintenance.id === id) {
         const transformedUpdated = {
-          id: updatedMaintenance.id,
+          // Garder tous les champs originaux
+          ...updatedMaintenance,
+          // Ajouter les champs transformés pour la compatibilité
           equipment: `${updatedMaintenance.type_frigo} - ${updatedMaintenance.serial_number}`,
           type: updatedMaintenance.type_maintenance,
           status: updatedMaintenance.description?.includes('En cours') ? 'in-progress' : 
@@ -163,7 +165,8 @@ export default function MaintenanceCalendarPage() {
             onClick={handleRefresh}
             disabled={refreshing}
             icon={RefreshCw}
-            className={refreshing ? 'animate-spin' : ''}
+            className=""
+            iconClassName={refreshing ? 'animate-spin' : ''}
           >
             Actualiser
           </ModernButton>
