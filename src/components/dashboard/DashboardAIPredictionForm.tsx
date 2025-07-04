@@ -10,6 +10,7 @@ import { Brain, Calculator, TrendingUp, Zap, ChevronDown, ChevronUp } from 'luci
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { formatPredictionMessage } from '@/services/predictionMessageService';
 
 interface PredictionData {
   taux_remplissage: string;
@@ -95,14 +96,17 @@ export function DashboardAIPredictionForm() {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      const statuses = ['Maintenance_preventive', 'Surveillance_renforcee', 'Entretien_renforce', 'Investigation_defaillance'];
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
       const mockResult: PredictionResult = {
-        predicted_status: Math.random() > 0.5 ? 'Succès total' : 'Nécessite intervention',
+        predicted_status: randomStatus,
         confidence_score: Math.round(80 + Math.random() * 15),
         risk_level: Math.random() > 0.7 ? 'Élevé' : Math.random() > 0.4 ? 'Moyen' : 'Faible',
         recommendations: [
-          'Maintenance renforcée conseillée',
-          'Surveillance de la température requise',
-          'Vérification du système de refroidissement'
+          'Vérification des composants électriques',
+          'Contrôle de la température',
+          'Inspection des joints d\'étanchéité'
         ]
       };
 
@@ -387,43 +391,54 @@ export function DashboardAIPredictionForm() {
             </form>
 
             {/* Résultat de la prédiction */}
-            {predictionResult && (
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6 mt-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                  <h4 className="text-lg font-bold text-gray-900">Résultat de la Prédiction IA</h4>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="bg-white rounded-lg p-3 border">
-                    <p className="text-sm text-gray-600">Statut Prédit</p>
-                    <p className="text-lg font-bold text-blue-600">{predictionResult.predicted_status}</p>
+            {predictionResult && (() => {
+              const enrichedMessage = formatPredictionMessage(predictionResult.predicted_status, predictionResult.confidence_score);
+              return (
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <TrendingUp className="w-6 h-6 text-purple-600" />
+                    <h4 className="text-lg font-bold text-gray-900">Résultat de la Prédiction IA</h4>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border">
-                    <p className="text-sm text-gray-600">Confiance</p>
-                    <p className="text-lg font-bold text-purple-600">{predictionResult.confidence_score}%</p>
+                  
+                  {/* Message enrichi formaté selon vos spécifications */}
+                  <div className="bg-white p-6 rounded-lg border-2 border-purple-200 shadow-lg mb-4">
+                    <div className="whitespace-pre-line text-sm leading-relaxed">
+                      {enrichedMessage.formattedResult}
+                    </div>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border">
-                    <p className="text-sm text-gray-600">Niveau de Risque</p>
-                    <p className={`text-lg font-bold ${
-                      predictionResult.risk_level === 'Élevé' ? 'text-red-600' :
-                      predictionResult.risk_level === 'Moyen' ? 'text-yellow-600' : 'text-green-600'
-                    }`}>
-                      {predictionResult.risk_level}
-                    </p>
-                  </div>
-                </div>
 
-                <div>
-                  <h5 className="font-semibold text-gray-900 mb-2">Recommandations</h5>
-                  <div className="space-y-1">
-                    {predictionResult.recommendations.map((rec, index) => (
-                      <p key={index} className="text-sm text-gray-700">• {rec}</p>
-                    ))}
+                  {/* Badges de métriques */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="outline" className="bg-white border-green-200 text-green-700">
+                      🎯 Confiance: {predictionResult.confidence_score}%
+                    </Badge>
+                    <Badge variant="outline" className="bg-white border-yellow-200 text-yellow-700">
+                      ⚠️ Risque: {predictionResult.risk_level}
+                    </Badge>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                      🤖 IA: 95.31% précision
+                    </Badge>
                   </div>
+
+                  {/* Recommandations techniques additionnelles */}
+                  {predictionResult.recommendations.length > 0 && (
+                    <div className="bg-white p-4 rounded-lg border shadow-sm">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                        💡 Recommandations techniques additionnelles
+                      </h4>
+                      <div className="space-y-2">
+                        {predictionResult.recommendations.map((rec, index) => (
+                          <div key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                            <span className="text-blue-500 mt-1">•</span>
+                            <span>{rec}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
