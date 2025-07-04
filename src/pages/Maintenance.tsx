@@ -51,19 +51,29 @@ export default function Maintenance() {
   });
 
   // Transformation des données pour compatibilité avec MaintenanceList
-  const transformedMaintenances = filteredMaintenances.map(maintenance => ({
-    id: maintenance.id,
-    equipment: `${maintenance.type_frigo} - ${maintenance.serial_number}`,
-    type: maintenance.type_maintenance,
-    status: 'planned', // Statut par défaut car c'est une planification
-    technician: maintenance.technician_assigne,
-    scheduledDate: maintenance.date_programmee,
-    timeSlot: maintenance.duree_estimee,
-    priority: maintenance.priorite,
-    location: `${maintenance.ville} - ${maintenance.quartier}`,
-    client: maintenance.nom_client,
-    description: maintenance.description || 'Maintenance planifiée'
-  }));
+  const transformedMaintenances = filteredMaintenances.map(maintenance => {
+    // Déterminer le statut basé sur la description ou un champ statut 
+    let status = 'planned';
+    if (maintenance.description?.includes('En cours')) {
+      status = 'in-progress';
+    } else if (maintenance.description?.includes('Terminé')) {
+      status = 'completed';
+    }
+    
+    return {
+      id: maintenance.id,
+      equipment: `${maintenance.type_frigo} - ${maintenance.serial_number}`,
+      type: maintenance.type_maintenance,
+      status: status,
+      technician: maintenance.technician_assigne,
+      scheduledDate: maintenance.date_programmee,
+      timeSlot: maintenance.duree_estimee,
+      priority: maintenance.priorite,
+      location: `${maintenance.ville} - ${maintenance.quartier}`,
+      client: maintenance.nom_client,
+      description: maintenance.description || 'Maintenance planifiée'
+    };
+  });
 
   // Configuration des libellés pour la page Suivi des tâches
   const statsConfig = {

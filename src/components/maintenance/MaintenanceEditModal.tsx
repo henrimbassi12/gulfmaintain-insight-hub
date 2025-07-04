@@ -148,6 +148,90 @@ export function MaintenanceEditModal({
           </div>
 
           <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Informations équipement</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type_frigo">Type de frigo</Label>
+                <Input
+                  id="type_frigo"
+                  value={formData.type_frigo || ''}
+                  onChange={(e) => handleInputChange('type_frigo', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="serial_number">Numéro de série</Label>
+                <Input
+                  id="serial_number"
+                  value={formData.serial_number || ''}
+                  onChange={(e) => handleInputChange('serial_number', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tag_number">Numéro de tag</Label>
+                <Input
+                  id="tag_number"
+                  value={formData.tag_number || ''}
+                  onChange={(e) => handleInputChange('tag_number', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="af_nf">AF/NF</Label>
+                <Select 
+                  value={formData.af_nf || ''} 
+                  onValueChange={(value) => handleInputChange('af_nf', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AF">AF</SelectItem>
+                    <SelectItem value="NF">NF</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="branding">Branding</Label>
+                <Input
+                  id="branding"
+                  value={formData.branding || ''}
+                  onChange={(e) => handleInputChange('branding', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="division">Division</Label>
+                <Input
+                  id="division"
+                  value={formData.division || ''}
+                  onChange={(e) => handleInputChange('division', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="secteur">Secteur</Label>
+                <Input
+                  id="secteur"
+                  value={formData.secteur || ''}
+                  onChange={(e) => handleInputChange('secteur', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="partenaire">Partenaire</Label>
+                <Input
+                  id="partenaire"
+                  value={formData.partenaire || ''}
+                  onChange={(e) => handleInputChange('partenaire', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold">Localisation</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -165,6 +249,15 @@ export function MaintenanceEditModal({
                   id="quartier"
                   value={formData.quartier || ''}
                   onChange={(e) => handleInputChange('quartier', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="localisation">Localisation précise</Label>
+                <Input
+                  id="localisation"
+                  value={formData.localisation || ''}
+                  onChange={(e) => handleInputChange('localisation', e.target.value)}
                 />
               </div>
 
