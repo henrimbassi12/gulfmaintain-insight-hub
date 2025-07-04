@@ -84,6 +84,64 @@ export function usePlannedMaintenances() {
     }
   }, []);
 
+  const updateMaintenance = useCallback(async (id: string, updates: Partial<PlannedMaintenance>) => {
+    try {
+      const { data, error } = await supabase
+        .from('planned_maintenances')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setMaintenances(prev => prev.map(maintenance => 
+        maintenance.id === id ? data : maintenance
+      ));
+      return data;
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour de la maintenance:', error);
+      toast.error('Erreur lors de la mise à jour de la maintenance');
+      throw error;
+    }
+  }, []);
+
+  const updateMaintenanceStatus = useCallback(async (id: string, status: string) => {
+    try {
+      // Pour les maintenances planifiées, on peut ajouter un champ status si nécessaire
+      // Pour l'instant, on met à jour la description pour indiquer le statut
+      const statusText = status === 'in-progress' ? 'En cours' : 
+                        status === 'completed' ? 'Terminé' : 'Planifié';
+      
+      const { data, error } = await supabase
+        .from('planned_maintenances')
+        .update({ 
+          description: `Statut: ${statusText}`,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setMaintenances(prev => prev.map(maintenance => 
+        maintenance.id === id ? data : maintenance
+      ));
+      
+      toast.success(`Maintenance ${statusText.toLowerCase()}`);
+      return data;
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour du statut:', error);
+      toast.error('Erreur lors de la mise à jour du statut');
+      throw error;
+    }
+  }, []);
+
   useEffect(() => {
     fetchMaintenances();
 
@@ -133,5 +191,7 @@ export function usePlannedMaintenances() {
     error,
     refetch,
     createMaintenance,
+    updateMaintenance,
+    updateMaintenanceStatus,
   };
 }

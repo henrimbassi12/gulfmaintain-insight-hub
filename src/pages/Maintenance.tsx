@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { RefreshCw, Plus } from 'lucide-react';
 import { MaintenanceFormModal } from '@/components/maintenance/MaintenanceFormModal';
 import MaintenanceDetails from '@/components/maintenance/MaintenanceDetails';
+import { MaintenanceEditModal } from '@/components/maintenance/MaintenanceEditModal';
 import { MaintenanceList } from '@/components/maintenance/MaintenanceList';
 import { MaintenancePageFilters } from '@/components/maintenance/MaintenancePageFilters';
 import { MaintenanceStatsCard } from '@/components/maintenance/MaintenanceStatsCard';
@@ -15,12 +16,13 @@ import { usePlannedMaintenances } from '@/hooks/usePlannedMaintenances';
 
 export default function Maintenance() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [filterBy, setFilterBy] = useState('all');
   const [technicianFilter, setTechnicianFilter] = useState('all');
 
-  const { maintenances, isLoading, refetch } = usePlannedMaintenances();
+  const { maintenances, isLoading, refetch, updateMaintenance, updateMaintenanceStatus } = usePlannedMaintenances();
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -79,27 +81,38 @@ export default function Maintenance() {
     }
   };
 
-  const handleUpdateStatus = (maintenanceId: string, newStatus: string) => {
-    // Mettre à jour le statut de la maintenance sélectionnée
-    if (selectedMaintenance && selectedMaintenance.id === maintenanceId) {
-      setSelectedMaintenance({
-        ...selectedMaintenance,
-        status: newStatus
-      });
+  const handleUpdateStatus = async (maintenanceId: string, newStatus: string) => {
+    try {
+      await updateMaintenanceStatus(maintenanceId, newStatus);
+      
+      // Mettre à jour le statut de la maintenance sélectionnée
+      if (selectedMaintenance && selectedMaintenance.id === maintenanceId) {
+        setSelectedMaintenance({
+          ...selectedMaintenance,
+          status: newStatus
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
     }
-    
-    toast.success(`Statut mis à jour vers: ${newStatus}`);
-    
-    // Forcer la mise à jour de l'affichage
-    setTimeout(() => {
-      refetch();
-    }, 100);
   };
 
   const handleEditMaintenance = (maintenanceId: string) => {
-    // Ici vous pouvez ajouter la logique pour éditer la maintenance
-    toast.info('Fonction d\'édition à implémenter');
-    setSelectedMaintenance(null);
+    const maintenance = maintenances.find(m => m.id === maintenanceId);
+    if (maintenance) {
+      setSelectedMaintenance(maintenance);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  const handleUpdateMaintenance = async (id: string, updates: any) => {
+    try {
+      await updateMaintenance(id, updates);
+      setIsEditModalOpen(false);
+      setSelectedMaintenance(null);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+    }
   };
 
   if (isLoading) {
@@ -206,6 +219,16 @@ export default function Maintenance() {
           onUpdateStatus={(status) => handleUpdateStatus(selectedMaintenance.id, status)}
         />
       )}
+
+      <MaintenanceEditModal
+        maintenance={selectedMaintenance}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedMaintenance(null);
+        }}
+        onUpdate={handleUpdateMaintenance}
+      />
     </AirbnbContainer>
   );
 }
