@@ -196,7 +196,7 @@ export default function Settings() {
             onClick={handleRefresh}
             disabled={refreshing}
             icon={RefreshCw}
-            className={refreshing ? 'animate-spin' : ''}
+            iconClassName={refreshing ? 'animate-spin' : ''}
           >
             Actualiser
           </ModernButton>

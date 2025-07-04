@@ -122,14 +122,17 @@ export default function MaintenanceCalendarPage() {
 
   const handleUpdateMaintenance = async (id: string, updates: any) => {
     try {
+      console.log('🔄 Mise à jour maintenance avec:', updates);
       const updatedMaintenance = await updateMaintenance(id, updates);
+      console.log('✅ Maintenance mise à jour:', updatedMaintenance);
       
       // Mettre à jour la maintenance sélectionnée avec TOUS les champs
       if (selectedMaintenance && selectedMaintenance.id === id) {
         const transformedUpdated = {
-          // Garder tous les champs originaux
+          // Garder tous les champs originaux de la base de données
+          ...selectedMaintenance,
           ...updatedMaintenance,
-          // Ajouter les champs transformés pour la compatibilité
+          // Ajouter les champs transformés pour la compatibilité d'affichage
           equipment: `${updatedMaintenance.type_frigo} - ${updatedMaintenance.serial_number}`,
           type: updatedMaintenance.type_maintenance,
           status: updatedMaintenance.description?.includes('En cours') ? 'in-progress' : 
@@ -143,12 +146,15 @@ export default function MaintenanceCalendarPage() {
           description: updatedMaintenance.description || 'Maintenance planifiée'
         };
         setSelectedMaintenance(transformedUpdated);
+        console.log('🔄 Maintenance sélectionnée mise à jour:', transformedUpdated);
       }
       
       setIsEditModalOpen(false);
       refetch(); // Actualiser la liste
+      toast.success('Maintenance mise à jour avec succès');
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
+      console.error('❌ Erreur lors de la mise à jour:', error);
+      toast.error('Erreur lors de la mise à jour de la maintenance');
     }
   };
 

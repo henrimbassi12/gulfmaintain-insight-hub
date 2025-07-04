@@ -130,7 +130,7 @@ export default function Messages() {
               onClick={handleRefresh}
               disabled={isLoading}
               icon={RefreshCw}
-              className={isLoading ? 'animate-spin' : ''}
+              iconClassName={isLoading ? 'animate-spin' : ''}
             >
               Actualiser
             </ModernButton>

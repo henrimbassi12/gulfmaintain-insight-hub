@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EquipmentHistory } from '@/components/EquipmentHistory';
 import { Clock, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,10 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { toast } from 'sonner';
 
 export default function EquipmentHistoryPage() {
+  const [refreshing, setRefreshing] = useState(false);
+
   const handleRefresh = () => {
+    setRefreshing(true);
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 1000)),
       {
@@ -16,6 +19,7 @@ export default function EquipmentHistoryPage() {
         error: 'Erreur lors de l\'actualisation'
       }
     );
+    setTimeout(() => setRefreshing(false), 1500);
   };
 
   return (
@@ -45,9 +49,10 @@ export default function EquipmentHistoryPage() {
                 <Button 
                   variant="outline" 
                   onClick={handleRefresh}
+                  disabled={refreshing}
                   className="hover:bg-orange-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                   Actualiser
                 </Button>
               </div>
@@ -69,8 +74,9 @@ export default function EquipmentHistoryPage() {
               variant="outline"
               size="sm"
               onClick={handleRefresh}
+              disabled={refreshing}
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </div>
