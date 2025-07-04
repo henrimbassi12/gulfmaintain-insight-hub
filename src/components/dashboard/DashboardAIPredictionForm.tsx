@@ -76,6 +76,23 @@ export function DashboardAIPredictionForm() {
     setIsLoading(true);
 
     try {
+      // Validation des données obligatoires
+      const requiredFields = [
+        'taux_remplissage', 'temperature', 'tension', 
+        'intensite_avant_entretien', 'technicien_gfi', 'division',
+        'secteur', 'ville', 'type_frigo'
+      ];
+      
+      const missingFields = requiredFields.filter(field => 
+        !formData[field as keyof PredictionData] || 
+        formData[field as keyof PredictionData].toString().trim() === ''
+      );
+
+      if (missingFields.length > 0) {
+        toast.error(`Données manquantes : ${missingFields.join(', ')}. Veuillez remplir tous les champs obligatoires.`);
+        return;
+      }
+
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const mockResult: PredictionResult = {

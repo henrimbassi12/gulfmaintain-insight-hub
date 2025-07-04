@@ -24,6 +24,22 @@ export function usePredictionApi() {
     try {
       console.log('🤖 Envoi de la prédiction IA:', formData);
 
+      // Validation des données obligatoires
+      const requiredFields = [
+        'taux_remplissage_pct', 'temperature_c', 'tension_v', 
+        'intensite_avant_entretien_a', 'technicien_gfi', 'division',
+        'secteur', 'ville', 'type_frigo'
+      ];
+      
+      const missingFields = requiredFields.filter(field => 
+        !formData[field as keyof PredictionData] || 
+        formData[field as keyof PredictionData].toString().trim() === ''
+      );
+
+      if (missingFields.length > 0) {
+        throw new Error(`Données manquantes : ${missingFields.join(', ')}. Veuillez remplir tous les champs obligatoires.`);
+      }
+
       // Simulation d'appel API - remplacer par votre vraie API
       await new Promise(resolve => setTimeout(resolve, 2000));
 

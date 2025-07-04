@@ -47,6 +47,7 @@ export function AIPredictionSection() {
   });
 
   const { predict, isLoading, result, error } = usePredictionApi();
+  const [localError, setError] = useState<string | null>(null);
 
   const handleInputChange = (field: keyof PredictionData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -54,6 +55,24 @@ export function AIPredictionSection() {
 
   const handlePredict = async () => {
     console.log('🚀 Lancement de la prédiction IA...');
+    
+    // Validation des données obligatoires
+    const requiredFields = [
+      'taux_remplissage_pct', 'temperature_c', 'tension_v', 
+      'intensite_avant_entretien_a', 'technicien_gfi', 'division',
+      'secteur', 'ville', 'type_frigo'
+    ];
+    
+    const missingFields = requiredFields.filter(field => 
+      !formData[field as keyof PredictionData] || 
+      formData[field as keyof PredictionData].toString().trim() === ''
+    );
+
+    if (missingFields.length > 0) {
+      setError(`Données manquantes : ${missingFields.join(', ')}. Veuillez remplir tous les champs obligatoires.`);
+      return;
+    }
+    
     await predict(formData);
   };
 
@@ -142,9 +161,9 @@ export function AIPredictionSection() {
           </Button>
         </div>
 
-        {error && (
+        {(error || localError) && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm">Erreur: {error}</p>
+            <p className="text-red-700 text-sm">Erreur: {error || localError}</p>
           </div>
         )}
 
