@@ -17,6 +17,7 @@ interface PasswordResetModalProps {
 }
 
 export function PasswordResetModal({ isOpen, onClose }: PasswordResetModalProps) {
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -28,9 +29,12 @@ export function PasswordResetModal({ isOpen, onClose }: PasswordResetModalProps)
     setIsLoading(true);
 
     try {
-      // Simuler l'envoi d'email de réinitialisation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setIsSuccess(true);
+      const { error: resetError } = await resetPassword(email);
+      if (resetError) {
+        setError('Impossible d\'envoyer l\'email de réinitialisation. Vérifiez votre adresse email.');
+      } else {
+        setIsSuccess(true);
+      }
     } catch (error: any) {
       setError('Une erreur est survenue. Veuillez réessayer.');
     } finally {
