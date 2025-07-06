@@ -3,35 +3,38 @@ import { FileText, RefreshCw, Filter } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
-import { ReportsHeader } from '@/components/reports/ReportsHeader';
 import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
-import { RecentReports } from '@/components/reports/RecentReports';
+import { ReportsList } from '@/components/reports/ReportsList';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
 import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
 import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
 import { MovementForm } from '@/components/forms/MovementForm';
 import { RepairForm } from '@/components/forms/RepairForm';
 import { DepotScheduleForm } from '@/components/forms/DepotScheduleForm';
+import { useReports } from '@/hooks/useReports';
+import { useAuth } from '@/contexts/AuthContext';
+import { PermissionCheck } from '@/components/auth/PermissionCheck';
 import { toast } from 'sonner';
 import { Wrench, Settings } from 'lucide-react';
 
 export default function Reports() {
+  const { userProfile } = useAuth();
+  const { reports, isLoading, refetch, updateReport, deleteReport } = useReports();
   const [refreshing, setRefreshing] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedForm, setSelectedForm] = useState<{type: string, title: string} | null>(null);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Actualisation des rapports...',
-        success: 'Rapports actualisés avec succès',
-        error: 'Erreur lors de l\'actualisation'
-      }
-    );
-    setTimeout(() => setRefreshing(false), 1500);
+    try {
+      await refetch();
+      toast.success('Rapports actualisés avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de l\'actualisation');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleCreateForm = (formId: string) => {
@@ -54,8 +57,8 @@ export default function Reports() {
     // Ici on pourrait sauvegarder les données dans la base de données
   };
 
-  // Données d'exemple pour les rapports - types corrigés
-  const sampleReports = [
+  // Données d'exemple pour les statistiques
+  const sampleReportsStats = [
     {
       id: 1,
       title: 'Rapport de maintenance préventive',
@@ -123,12 +126,21 @@ export default function Reports() {
       </AirbnbHeader>
 
       <div className="space-y-8">
-        <ReportsStats reports={sampleReports} />
-        <AvailableForms 
-          reportForms={sampleReportForms} 
-          onCreateForm={handleCreateForm}
+        <ReportsStats reports={sampleReportsStats} />
+        
+        <PermissionCheck allowedRoles={['admin', 'manager', 'technician']}>
+          <AvailableForms 
+            reportForms={sampleReportForms} 
+            onCreateForm={handleCreateForm}
+          />
+        </PermissionCheck>
+        
+        <ReportsList 
+          reports={reports}
+          onUpdateReport={updateReport}
+          onDeleteReport={deleteReport}
+          isLoading={isLoading}
         />
-        <RecentReports reports={sampleReports} />
       </div>
 
       <ReportFilterModal
