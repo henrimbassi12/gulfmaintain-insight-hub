@@ -3,6 +3,7 @@ import { FileText, RefreshCw, Filter } from 'lucide-react';
 import { AirbnbContainer } from '@/components/ui/airbnb-container';
 import { AirbnbHeader } from '@/components/ui/airbnb-header';
 import { ModernButton } from '@/components/ui/modern-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
 import { ReportsList } from '@/components/reports/ReportsList';
@@ -20,7 +21,7 @@ import { Wrench, Settings } from 'lucide-react';
 
 export default function Reports() {
   const { userProfile } = useAuth();
-  const { reports, isLoading, refetch, updateReport, deleteReport } = useReports();
+  const { reports, isLoading, refetch, updateReport, deleteReport, createReport } = useReports();
   const [refreshing, setRefreshing] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedForm, setSelectedForm] = useState<{type: string, title: string} | null>(null);
@@ -52,9 +53,39 @@ export default function Reports() {
     });
   };
 
-  const handleSaveForm = (data: any) => {
-    console.log('Données sauvegardées:', data);
-    // Ici on pourrait sauvegarder les données dans la base de données
+  const handleSaveForm = async (data: any) => {
+    try {
+      // Créer un rapport de maintenance à partir des données du formulaire
+      const reportData = {
+        report_id: `MAINT-${Date.now()}`,
+        equipment: data.equipment || data.nom_equipment || 'Équipement non spécifié',
+        equipment_brand: data.marque || data.brand || null,
+        equipment_model: data.modele || data.model || null,
+        equipment_serial_number: data.serial_number || data.numero_serie || null,
+        technician: userProfile?.full_name || 'Technicien non spécifié',
+        assigned_technician: data.technician_assigne || data.assigned_technician || null,
+        type: data.type_maintenance || data.type || 'Préventive' as const,
+        priority: data.priorite || data.priority || 'medium' as const,
+        status: data.statut || data.status || 'Planifié' as const,
+        date: data.date_intervention || data.date || new Date().toISOString().split('T')[0],
+        duration: data.duree || data.duration || '2h',
+        description: data.description_travaux || data.description || 'Maintenance effectuée',
+        notes: data.notes || data.observations || null,
+        location: data.lieu || data.location || 'Location non spécifiée',
+        region: data.region || 'Littoral',
+        cost: data.cout || data.cost || 0,
+        completion_percentage: data.pourcentage_completion || 0,
+        next_maintenance_date: data.prochaine_maintenance || null,
+        parts_used: data.pieces_utilisees || data.parts_used || []
+      };
+
+      await createReport(reportData);
+      setSelectedForm(null);
+      toast.success('Rapport créé avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la création du rapport:', error);
+      toast.error('Erreur lors de la création du rapport');
+    }
   };
 
   // Données d'exemple pour les statistiques
@@ -125,7 +156,8 @@ export default function Reports() {
         </div>
       </AirbnbHeader>
 
-      <div className="space-y-8">
+      <ScrollArea className="flex-1">
+        <div className="space-y-8">
         <ReportsStats reports={sampleReportsStats} />
         
         <PermissionCheck allowedRoles={['admin', 'manager', 'technician']}>
@@ -141,7 +173,8 @@ export default function Reports() {
           onDeleteReport={deleteReport}
           isLoading={isLoading}
         />
-      </div>
+        </div>
+      </ScrollArea>
 
       <ReportFilterModal
         isOpen={isFilterModalOpen}
