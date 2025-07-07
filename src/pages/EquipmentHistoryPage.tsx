@@ -11,15 +11,8 @@ export default function EquipmentHistoryPage() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Actualisation de l\'historique...',
-        success: 'Historique actualisé avec succès',
-        error: 'Erreur lors de l\'actualisation'
-      }
-    );
-    setTimeout(() => setRefreshing(false), 1500);
+    // Actualiser automatiquement en rechargeant la page
+    window.location.reload();
   };
 
   return (

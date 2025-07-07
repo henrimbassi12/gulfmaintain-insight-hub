@@ -1,118 +1,71 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, Search, Filter, X, Wrench, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Activity, Search, Filter, X, Wrench, AlertTriangle, CheckCircle, Clock, Eye, Download, Edit, Trash2 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
-
-interface HistoryEntry {
-  id: string;
-  equipmentId: string;
-  equipmentName: string;
-  action: string;
-  technician: string;
-  date: string;
-  status: 'completed' | 'pending' | 'failed';
-  details: string;
-  cost: string;
-  duration: string;
-  location: string;
-}
-
-const mockHistory: HistoryEntry[] = [
-  {
-    id: '1',
-    equipmentId: 'EQ001',
-    equipmentName: 'Réfrigérateur Commercial A1',
-    action: 'Maintenance préventive',
-    technician: 'Jean Dupont',
-    date: '2024-01-15',
-    status: 'completed',
-    details: 'Vérification du système de refroidissement, nettoyage des condenseurs',
-    cost: '45,000 FCFA',
-    duration: '2h 30min',
-    location: 'Douala - Zone Industrielle'
-  },
-  {
-    id: '2',
-    equipmentId: 'EQ002',
-    equipmentName: 'Climatiseur Bureau B2',
-    action: 'Réparation',
-    technician: 'Marie Ngono',
-    date: '2024-01-14',
-    status: 'completed',
-    details: 'Remplacement du compresseur défaillant',
-    cost: '125,000 FCFA',
-    duration: '4h 15min',
-    location: 'Yaoundé - Centre-ville'
-  },
-  {
-    id: '3',
-    equipmentId: 'EQ003',
-    equipmentName: 'Groupe électrogène C3',
-    action: 'Installation',
-    technician: 'Paul Kamdem',
-    date: '2024-01-13',
-    status: 'pending',
-    details: 'Installation et configuration initiale',
-    cost: '89,500 FCFA',
-    duration: '6h 00min',
-    location: 'Bafoussam - Industrial'
-  },
-  {
-    id: '4',
-    equipmentId: 'EQ004',
-    equipmentName: 'Système CVC D4',
-    action: 'Diagnostic',
-    technician: 'Sophie Tchounga',
-    date: '2024-01-12',
-    status: 'failed',
-    details: 'Diagnostic complet du système de ventilation',
-    cost: '32,000 FCFA',
-    duration: '1h 45min',
-    location: 'Douala - Bonabéri'
-  }
-];
+import { useReports } from '@/hooks/useReports';
+import { useAuth } from '@/contexts/AuthContext';
+import { PermissionCheck } from '@/components/auth/PermissionCheck';
+import { ReportDetailsModal } from '@/components/reports/ReportDetailsModal';
+import { ReportEditModal } from '@/components/reports/ReportEditModal';
+import { EquipmentHistoryExport } from '@/components/EquipmentHistoryExport';
+import { MaintenanceReport } from '@/types/maintenance';
+import { toast } from 'sonner';
 
 export function EquipmentHistory() {
+  const { userProfile } = useAuth();
+  const { reports, isLoading, updateReport, deleteReport } = useReports();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [actionFilter, setActionFilter] = useState('');
-  const [filteredHistory, setFilteredHistory] = useState(mockHistory);
+  const [filteredReports, setFilteredReports] = useState<MaintenanceReport[]>([]);
+  const [selectedReport, setSelectedReport] = useState<MaintenanceReport | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  React.useEffect(() => {
-    let filtered = mockHistory;
+  useEffect(() => {
+    let filtered = reports;
 
     if (searchTerm) {
-      filtered = filtered.filter(entry =>
-        entry.equipmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.action.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(report =>
+        report.equipment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (statusFilter) {
-      filtered = filtered.filter(entry => entry.status === statusFilter);
+      const statusMap: Record<string, string> = {
+        'completed': 'Terminé',
+        'pending': 'En cours',
+        'planned': 'Planifié'
+      };
+      filtered = filtered.filter(report => report.status === statusMap[statusFilter]);
     }
 
     if (actionFilter) {
-      filtered = filtered.filter(entry => entry.action === actionFilter);
+      filtered = filtered.filter(report => report.type === actionFilter);
     }
 
-    setFilteredHistory(filtered);
-  }, [searchTerm, statusFilter, actionFilter]);
+    // Trier par date décroissante
+    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    setFilteredReports(filtered);
+  }, [reports, searchTerm, statusFilter, actionFilter]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'Terminé':
         return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'pending':
+      case 'En cours':
         return <Clock className="w-4 h-4 text-yellow-600" />;
-      case 'failed':
-        return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      case 'Planifié':
+        return <AlertTriangle className="w-4 h-4 text-blue-600" />;
       default:
         return <Activity className="w-4 h-4 text-gray-600" />;
     }
@@ -120,14 +73,46 @@ export function EquipmentHistory() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'Terminé':
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Terminé</Badge>;
-      case 'pending':
+      case 'En cours':
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">En cours</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Échec</Badge>;
+      case 'Planifié':
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Planifié</Badge>;
       default:
         return <Badge variant="secondary">Inconnu</Badge>;
+    }
+  };
+
+  const handleViewReport = (report: MaintenanceReport) => {
+    setSelectedReport(report);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleEditReport = (report: MaintenanceReport) => {
+    setSelectedReport(report);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteReport = async (report: MaintenanceReport) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le rapport ${report.report_id} ?`)) {
+      try {
+        await deleteReport(report.id);
+        toast.success('Rapport supprimé avec succès');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression du rapport');
+      }
+    }
+  };
+
+  const handleUpdateReport = async (id: string, updates: Partial<MaintenanceReport>) => {
+    try {
+      await updateReport(id, updates);
+      setIsEditModalOpen(false);
+      setSelectedReport(null);
+      toast.success('Rapport mis à jour avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour du rapport');
     }
   };
 
@@ -139,6 +124,21 @@ export function EquipmentHistory() {
 
   const hasActiveFilters = searchTerm || statusFilter || actionFilter;
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white border border-gray-100 shadow-sm">
+          <CardContent className="p-6">
+            <div className="text-center py-12">
+              <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300 animate-spin" />
+              <h3 className="text-lg font-medium mb-2">Chargement de l'historique...</h3>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Filtres */}
@@ -148,18 +148,24 @@ export function EquipmentHistory() {
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Filter className="w-4 h-4 text-white" />
             </div>
-            Filtres
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="ml-auto text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-4 h-4 mr-1" />
-                Effacer
-              </Button>
-            )}
+            Filtres et Actions
+            <div className="ml-auto flex items-center gap-2">
+              <EquipmentHistoryExport 
+                reports={filteredReports} 
+                className="text-xs" 
+              />
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Effacer
+                </Button>
+              )}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
@@ -181,7 +187,7 @@ export function EquipmentHistory() {
               <SelectContent>
                 <SelectItem value="completed">Terminé</SelectItem>
                 <SelectItem value="pending">En cours</SelectItem>
-                <SelectItem value="failed">Échec</SelectItem>
+                <SelectItem value="planned">Planifié</SelectItem>
               </SelectContent>
             </Select>
 
@@ -190,10 +196,9 @@ export function EquipmentHistory() {
                 <SelectValue placeholder="Filtrer par action" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Maintenance préventive">Maintenance préventive</SelectItem>
-                <SelectItem value="Réparation">Réparation</SelectItem>
-                <SelectItem value="Installation">Installation</SelectItem>
-                <SelectItem value="Diagnostic">Diagnostic</SelectItem>
+                <SelectItem value="Préventive">Préventive</SelectItem>
+                <SelectItem value="Corrective">Corrective</SelectItem>
+                <SelectItem value="Urgente">Urgente</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -211,12 +216,12 @@ export function EquipmentHistory() {
               <span>Historique des Interventions</span>
             </div>
             <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-              {filteredHistory.length} résultat{filteredHistory.length > 1 ? 's' : ''}
+              {filteredReports.length} résultat{filteredReports.length > 1 ? 's' : ''}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {filteredHistory.length === 0 ? (
+          {filteredReports.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <h3 className="text-lg font-medium mb-2">Aucun résultat trouvé</h3>
@@ -224,45 +229,80 @@ export function EquipmentHistory() {
             </div>
           ) : (
             <div className="divide-y">
-              {filteredHistory.map((entry, index) => (
-                <div key={entry.id} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
+              {filteredReports.map((report, index) => (
+                <div key={report.id} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 md:gap-4 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        {getStatusIcon(entry.status)}
+                        {getStatusIcon(report.status)}
                         <Wrench className="w-4 h-4 text-gray-400" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                           <h3 className="font-semibold text-gray-900 truncate text-sm md:text-base">
-                            {entry.equipmentName}
+                            {report.equipment}
                           </h3>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="text-xs">
-                              {entry.equipmentId}
+                              {report.report_id}
                             </Badge>
-                            {getStatusBadge(entry.status)}
+                            {getStatusBadge(report.status)}
                           </div>
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs md:text-sm text-gray-600 mb-3">
-                          <div><strong>Action:</strong> {entry.action}</div>
-                          <div><strong>Technicien:</strong> {entry.technician}</div>
-                          <div><strong>Date:</strong> {new Date(entry.date).toLocaleDateString('fr-FR')}</div>
-                          <div><strong>Durée:</strong> {entry.duration}</div>
-                          <div><strong>Lieu:</strong> {entry.location}</div>
-                          <div><strong>Coût:</strong> <span className="font-medium text-blue-600">{entry.cost}</span></div>
+                          <div><strong>Type:</strong> {report.type}</div>
+                          <div><strong>Technicien:</strong> {report.technician}</div>
+                          <div><strong>Date:</strong> {new Date(report.date).toLocaleDateString('fr-FR')}</div>
+                          <div><strong>Durée:</strong> {report.duration}</div>
+                          <div><strong>Lieu:</strong> {report.location}</div>
+                          <div><strong>Coût:</strong> <span className="font-medium text-blue-600">{report.cost.toLocaleString('fr-FR')} FCFA</span></div>
                         </div>
                         
-                        <p className="text-gray-700 text-xs md:text-sm bg-gray-50 p-3 rounded-lg">
-                          {entry.details}
+                        <p className="text-gray-700 text-xs md:text-sm bg-gray-50 p-3 rounded-lg mb-3">
+                          {report.description}
                         </p>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewReport(report)}
+                            className="text-xs"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Voir détails
+                          </Button>
+
+                          <PermissionCheck allowedRoles={['admin']}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditReport(report)}
+                              className="text-xs"
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Modifier
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteReport(report)}
+                              className="text-xs text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Supprimer
+                            </Button>
+                          </PermissionCheck>
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  {index < filteredHistory.length - 1 && (
+                  {index < filteredReports.length - 1 && (
                     <Separator className="mt-4" />
                   )}
                 </div>
@@ -271,6 +311,28 @@ export function EquipmentHistory() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <ReportDetailsModal
+        report={selectedReport}
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedReport(null);
+        }}
+      />
+
+      <PermissionCheck allowedRoles={['admin']}>
+        <ReportEditModal
+          report={selectedReport}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedReport(null);
+          }}
+          onSave={handleUpdateReport}
+        />
+      </PermissionCheck>
     </div>
   );
 }

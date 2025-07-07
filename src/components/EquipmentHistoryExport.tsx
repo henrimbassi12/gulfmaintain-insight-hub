@@ -3,60 +3,70 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from 'sonner';
+import { useReports } from '@/hooks/useReports';
+import { MaintenanceReport } from '@/types/maintenance';
 
 interface EquipmentHistoryExportProps {
   equipmentId?: string;
   className?: string;
+  reports?: MaintenanceReport[];
 }
 
-export function EquipmentHistoryExport({ equipmentId = 'FR-2024-089', className }: EquipmentHistoryExportProps) {
+export function EquipmentHistoryExport({ equipmentId, className, reports: passedReports }: EquipmentHistoryExportProps) {
+  const { reports: allReports } = useReports();
+  const reports = passedReports || allReports;
+
   const handleExportHistory = () => {
-    // Données simulées d'historique
+    // Filtrer par équipement si un ID est fourni
+    const filteredReports = equipmentId 
+      ? reports.filter(report => report.equipment.includes(equipmentId) || report.report_id.includes(equipmentId))
+      : reports;
+
+    // Transformer les données pour l'export
     const historyData = {
-      equipment_id: equipmentId,
+      equipment_id: equipmentId || 'ALL_EQUIPMENT',
       export_date: new Date().toISOString(),
-      history: [
-        {
-          id: '1',
-          date: '2024-01-28T10:30:00Z',
-          type: 'maintenance',
-          title: 'Maintenance préventive trimestrielle',
-          description: 'Nettoyage complet, vérification des joints, contrôle de température',
-          technician: 'CÉDRIC MBARGA',
-          duration: '2h 30min',
-          cost: 350,
-          parts: ['Filtre air', 'Joint étanchéité'],
-          status: 'completed'
-        },
-        {
-          id: '2',
-          date: '2024-01-20T14:15:00Z',
-          type: 'repair',
-          title: 'Réparation thermostat défaillant',
-          description: 'Remplacement du thermostat principal suite à dysfonctionnement',
-          technician: 'MBAPBOU GRÉGOIRE',
-          duration: '1h 45min',
-          cost: 125,
-          parts: ['Thermostat digital'],
-          status: 'completed'
-        },
-        {
-          id: '3',
-          date: '2024-01-15T08:00:00Z',
-          type: 'installation',
-          title: 'Installation initiale',
-          description: 'Installation et mise en service du réfrigérateur professionnel',
-          technician: 'VOUKENG JULES',
-          duration: '3h 00min',
-          cost: 200,
-          status: 'completed'
-        }
-      ],
+      total_reports: filteredReports.length,
+      history: filteredReports.map(report => ({
+        id: report.id,
+        report_id: report.report_id,
+        date: report.date,
+        type: report.type,
+        equipment: report.equipment,
+        equipment_brand: report.equipment_brand,
+        equipment_model: report.equipment_model,
+        equipment_serial_number: report.equipment_serial_number,
+        technician: report.technician,
+        assigned_technician: report.assigned_technician,
+        duration: report.duration,
+        description: report.description,
+        notes: report.notes,
+        location: report.location,
+        region: report.region,
+        status: report.status,
+        priority: report.priority,
+        cost: report.cost,
+        completion_percentage: report.completion_percentage,
+        parts_used: report.parts_used,
+        next_maintenance_date: report.next_maintenance_date,
+        created_at: report.created_at,
+        updated_at: report.updated_at
+      })),
       summary: {
-        total_interventions: 3,
-        total_cost: 675,
-        average_duration: '2h 25min',
-        last_maintenance: '2024-01-28'
+        total_interventions: filteredReports.length,
+        total_cost: filteredReports.reduce((sum, report) => sum + Number(report.cost), 0),
+        average_cost: filteredReports.length > 0 
+          ? filteredReports.reduce((sum, report) => sum + Number(report.cost), 0) / filteredReports.length 
+          : 0,
+        completed_reports: filteredReports.filter(r => r.status === 'Terminé').length,
+        pending_reports: filteredReports.filter(r => r.status === 'En cours').length,
+        planned_reports: filteredReports.filter(r => r.status === 'Planifié').length,
+        latest_intervention: filteredReports.length > 0 
+          ? Math.max(...filteredReports.map(r => new Date(r.date).getTime()))
+          : null,
+        regions: [...new Set(filteredReports.map(r => r.region))],
+        technicians: [...new Set(filteredReports.map(r => r.technician))],
+        equipment_types: [...new Set(filteredReports.map(r => r.equipment))]
       }
     };
 
@@ -66,27 +76,53 @@ export function EquipmentHistoryExport({ equipmentId = 'FR-2024-089', className 
     
     // Export CSV pour l'historique
     const csvHeaders = [
+      'ID Rapport',
       'Date',
       'Type',
-      'Titre',
-      'Description',
+      'Équipement',
+      'Marque',
+      'Modèle',
+      'N° Série',
       'Technicien',
+      'Technicien Assigné',
       'Durée',
-      'Coût',
-      'Pièces',
-      'Statut'
+      'Description',
+      'Notes',
+      'Lieu',
+      'Région',
+      'Statut',
+      'Priorité',
+      'Coût (FCFA)',
+      'Avancement (%)',
+      'Pièces Utilisées',
+      'Prochaine Maintenance',
+      'Créé le',
+      'Modifié le'
     ];
     
-    const csvRows = historyData.history.map(event => [
-      new Date(event.date).toLocaleDateString('fr-FR'),
-      event.type,
-      event.title,
-      event.description,
-      event.technician,
-      event.duration,
-      event.cost || '',
-      event.parts?.join('; ') || '',
-      event.status
+    const csvRows = historyData.history.map(report => [
+      report.report_id,
+      new Date(report.date).toLocaleDateString('fr-FR'),
+      report.type,
+      report.equipment,
+      report.equipment_brand || '',
+      report.equipment_model || '',
+      report.equipment_serial_number || '',
+      report.technician,
+      report.assigned_technician || '',
+      report.duration,
+      report.description,
+      report.notes || '',
+      report.location,
+      report.region,
+      report.status,
+      report.priority || '',
+      report.cost,
+      report.completion_percentage || '',
+      report.parts_used?.join('; ') || '',
+      report.next_maintenance_date ? new Date(report.next_maintenance_date).toLocaleDateString('fr-FR') : '',
+      new Date(report.created_at).toLocaleDateString('fr-FR'),
+      new Date(report.updated_at).toLocaleDateString('fr-FR')
     ]);
     
     const csvContent = [
@@ -98,12 +134,13 @@ export function EquipmentHistoryExport({ equipmentId = 'FR-2024-089', className 
     
     // Télécharger les fichiers
     const date = new Date().toISOString().split('T')[0];
+    const filePrefix = equipmentId ? `historique-${equipmentId}` : 'historique-complet';
     
     // JSON
     const jsonUrl = URL.createObjectURL(jsonBlob);
     const jsonLink = document.createElement('a');
     jsonLink.href = jsonUrl;
-    jsonLink.download = `historique-${equipmentId}-${date}.json`;
+    jsonLink.download = `${filePrefix}-${date}.json`;
     document.body.appendChild(jsonLink);
     jsonLink.click();
     document.body.removeChild(jsonLink);
@@ -113,13 +150,14 @@ export function EquipmentHistoryExport({ equipmentId = 'FR-2024-089', className 
     const csvUrl = URL.createObjectURL(csvBlob);
     const csvLink = document.createElement('a');
     csvLink.href = csvUrl;
-    csvLink.download = `historique-${equipmentId}-${date}.csv`;
+    csvLink.download = `${filePrefix}-${date}.csv`;
     document.body.appendChild(csvLink);
     csvLink.click();
     document.body.removeChild(csvLink);
     URL.revokeObjectURL(csvUrl);
 
-    toast.success(`Historique de ${equipmentId} exporté (JSON + CSV)`);
+    const exportedCount = historyData.history.length;
+    toast.success(`${exportedCount} rapport(s) d'historique exporté(s) (JSON + CSV)`);
   };
 
   return (
