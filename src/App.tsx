@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { MainLayout } from '@/components/MainLayout';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
@@ -42,52 +43,79 @@ function App() {
                 <Route path="/test" element={<TestPage />} />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <MainLayout>
+                      <Dashboard />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/equipments" element={
                   <ProtectedRoute>
-                    <Equipments />
+                    <MainLayout>
+                      <Equipments />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/maintenance" element={
                   <ProtectedRoute>
-                    <Maintenance />
+                    <MainLayout>
+                      <Maintenance />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/maintenance-calendar" element={
                   <ProtectedRoute>
-                    <MaintenanceCalendarPage />
+                    <MainLayout>
+                      <MaintenanceCalendarPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/planning" element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <MaintenanceCalendarPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/reports" element={
                   <ProtectedRoute>
-                    <Reports />
+                    <MainLayout>
+                      <Reports />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/settings" element={
                   <ProtectedRoute>
-                    <Settings />
+                    <MainLayout>
+                      <Settings />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/messages" element={
                   <ProtectedRoute>
-                    <Messages />
+                    <MainLayout>
+                      <Messages />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/geolocation" element={
                   <ProtectedRoute>
-                    <GeolocationPage />
+                    <MainLayout>
+                      <GeolocationPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/supervision" element={
                   <ProtectedRoute>
-                    <Supervision />
+                    <MainLayout>
+                      <Supervision />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="/equipment-history" element={
                   <ProtectedRoute>
-                    <EquipmentHistoryPage />
+                    <MainLayout>
+                      <EquipmentHistoryPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />
