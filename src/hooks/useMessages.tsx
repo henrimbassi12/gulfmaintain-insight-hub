@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,7 +36,7 @@ export interface ConversationWithParticipant extends Conversation {
   is_archived?: boolean;
 }
 
-// Noms des membres de l'équipe - UNIQUEMENT ceux-ci sont autorisés
+// Noms des membres de l'équipe autorisés
 const AUTHORIZED_TEAM_MEMBERS = [
   { name: 'CÉDRIC', role: 'technician' },
   { name: 'MBAPBOU GRÉGOIRE', role: 'manager' },
@@ -45,18 +44,6 @@ const AUTHORIZED_TEAM_MEMBERS = [
   { name: 'TCHINDA CONSTANT', role: 'admin' },
   { name: 'NDJOKO IV', role: 'technician' },
   { name: 'NDOUMBE ETIA', role: 'manager' }
-];
-
-// Messages d'exemple pour les conversations
-const SAMPLE_MESSAGES = [
-  "L'équipement de réfrigération est maintenant opérationnel",
-  "Maintenance programmée pour demain matin",
-  "Problème résolu sur le site de Douala",
-  "Rapport de maintenance envoyé",
-  "Intervention terminée avec succès",
-  "Équipement en panne sur le site principal",
-  "Vérification des niveaux de gaz effectuée",
-  "Remplacement des filtres nécessaire"
 ];
 
 export function useMessages() {
@@ -68,90 +55,7 @@ export function useMessages() {
   const [isLoading, setIsLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Fonction pour générer des conversations stables
-  const generateStableConversations = (): ConversationWithParticipant[] => {
-    const userEmail = user?.email || 'unknown';
-    const storageKey = `conversations_${userEmail}`;
-    const archivedKey = `archived_conversations_${userEmail}`;
-    
-    // Récupérer les conversations archivées
-    const archivedIds = JSON.parse(localStorage.getItem(archivedKey) || '[]');
-    
-    // Vérifier si on a déjà des conversations en cache
-    const cachedConversations = localStorage.getItem(storageKey);
-    if (cachedConversations) {
-      try {
-        const parsed = JSON.parse(cachedConversations);
-        console.log('📱 Conversations récupérées du cache');
-        return parsed.filter((conv: ConversationWithParticipant) => !archivedIds.includes(conv.id));
-      } catch (error) {
-        console.error('Erreur parsing cache conversations:', error);
-      }
-    }
-
-    // Générer des conversations stables
-    const stableConversations = AUTHORIZED_TEAM_MEMBERS.map((member, index) => {
-      const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}`;
-      const lastMessageTime = new Date(Date.now() - (index + 1) * 86400000 * 2).toISOString();
-      
-      return {
-        id: conversationId,
-        name: `Conversation avec ${member.name}`,
-        created_at: new Date(Date.now() - Math.random() * 86400000 * 30).toISOString(),
-        updated_at: lastMessageTime,
-        participant: {
-          id: `participant-${member.name.toLowerCase().replace(/\s+/g, '-')}`,
-          conversation_id: conversationId,
-          user_name: member.name,
-          user_role: member.role,
-          avatar_url: null,
-          is_online: Math.random() > 0.4,
-          created_at: new Date().toISOString()
-        },
-        lastMessage: {
-          id: `msg-last-${conversationId}`,
-          conversation_id: conversationId,
-          sender_name: member.name,
-          content: SAMPLE_MESSAGES[index % SAMPLE_MESSAGES.length],
-          is_me: false,
-          created_at: lastMessageTime
-        },
-        unreadCount: Math.random() > 0.6 ? Math.floor(Math.random() * 3) + 1 : 0
-      };
-    });
-
-    // Sauvegarder en cache
-    localStorage.setItem(storageKey, JSON.stringify(stableConversations));
-    console.log('💾 Conversations sauvegardées en cache');
-    
-    return stableConversations.filter(conv => !archivedIds.includes(conv.id));
-  };
-
-  const generateSampleMessages = (conversationId: string): Message[] => {
-    const conversation = [...conversations, ...archivedConversations].find(c => c.id === conversationId);
-    if (!conversation) return [];
-
-    const messageCount = Math.floor(Math.random() * 8) + 3; // 3-10 messages
-    const messages: Message[] = [];
-    const participantName = conversation.participant?.user_name || 'Utilisateur';
-    
-    for (let i = 0; i < messageCount; i++) {
-      const isMe = Math.random() > 0.6; // 40% de chance que ce soit moi
-      const messageTime = new Date(Date.now() - (messageCount - i) * 2400000); // Messages espacés de 40min
-      
-      messages.push({
-        id: `msg-${conversationId}-${i + 1}`,
-        conversation_id: conversationId,
-        sender_name: isMe ? (userProfile?.full_name || user?.email || 'Moi') : participantName,
-        content: SAMPLE_MESSAGES[Math.floor(Math.random() * SAMPLE_MESSAGES.length)],
-        is_me: isMe,
-        created_at: messageTime.toISOString()
-      });
-    }
-    
-    return messages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  };
-
+  // Fonction pour récupérer les conversations depuis Supabase
   const fetchConversations = async () => {
     if (!user) {
       setConversations([]);
@@ -161,78 +65,143 @@ export function useMessages() {
 
     try {
       console.log('🔄 Récupération des conversations...');
-      
-      // Utiliser des conversations stables
-      const stableConversations = generateStableConversations();
-      
-      // Trier par date de dernier message (plus récent en premier)
-      const sortedConversations = stableConversations.sort((a, b) => {
-        const timeA = new Date(a.lastMessage?.created_at || a.updated_at).getTime();
-        const timeB = new Date(b.lastMessage?.created_at || b.updated_at).getTime();
-        return timeB - timeA;
-      });
-      
-      setConversations(sortedConversations);
-      
-      // Charger les conversations archivées
-      const userEmail = user.email || 'unknown';
-      const archivedKey = `archived_conversations_${userEmail}`;
-      const archivedIds = JSON.parse(localStorage.getItem(archivedKey) || '[]');
-      
-      if (archivedIds.length > 0) {
-        const allConversations = AUTHORIZED_TEAM_MEMBERS.map((member, index) => {
-          const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}`;
-          const lastMessageTime = new Date(Date.now() - (index + 1) * 86400000 * 2).toISOString();
-          
-          return {
-            id: conversationId,
-            name: `Conversation avec ${member.name}`,
-            created_at: new Date(Date.now() - Math.random() * 86400000 * 30).toISOString(),
-            updated_at: lastMessageTime,
-            participant: {
-              id: `participant-${member.name.toLowerCase().replace(/\s+/g, '-')}`,
-              conversation_id: conversationId,
-              user_name: member.name,
-              user_role: member.role,
-              avatar_url: null,
-              is_online: Math.random() > 0.4,
-              created_at: new Date().toISOString()
-            },
-            lastMessage: {
-              id: `msg-last-${conversationId}`,
-              conversation_id: conversationId,
-              sender_name: member.name,
-              content: SAMPLE_MESSAGES[index % SAMPLE_MESSAGES.length],
-              is_me: false,
-              created_at: lastMessageTime
-            },
-            unreadCount: 0,
-            is_archived: true
-          };
-        });
-        
-        const archived = allConversations.filter(conv => archivedIds.includes(conv.id));
-        setArchivedConversations(archived);
+
+      // Récupérer les conversations
+      const { data: conversationsData, error: conversationsError } = await supabase
+        .from('conversations')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (conversationsError) {
+        throw conversationsError;
       }
+
+      // Récupérer les participants pour chaque conversation
+      const conversationsWithParticipants: ConversationWithParticipant[] = await Promise.all(
+        (conversationsData || []).map(async (conv) => {
+          // Récupérer le participant
+          const { data: participantData } = await supabase
+            .from('conversation_participants')
+            .select('*')
+            .eq('conversation_id', conv.id)
+            .single();
+
+          // Récupérer le dernier message
+          const { data: lastMessageData } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          // Compter les messages non lus (approximation - on peut améliorer avec un système de read_at)
+          const { count: unreadCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conv.id)
+            .eq('is_me', false)
+            .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+          return {
+            ...conv,
+            participant: participantData || undefined,
+            lastMessage: lastMessageData || undefined,
+            unreadCount: unreadCount || 0,
+            is_archived: false
+          };
+        })
+      );
+
+      setConversations(conversationsWithParticipants);
       
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des conversations:', error);
-      toast.error('Erreur lors du chargement des conversations');
+      
+      // En cas d'erreur, initialiser avec les membres de l'équipe par défaut
+      await initializeDefaultConversations();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchMessages = async (conversationId: string) => {
+  // Initialiser les conversations par défaut avec les membres de l'équipe
+  const initializeDefaultConversations = async () => {
     try {
-      console.log('📨 Récupération des messages pour:', conversationId);
-      const sampleMessages = generateSampleMessages(conversationId);
-      setMessages(sampleMessages);
+      console.log('🔧 Initialisation des conversations par défaut...');
+      
+      for (const member of AUTHORIZED_TEAM_MEMBERS) {
+        // Vérifier si la conversation existe déjà
+        const { data: existingConv } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('name', `Conversation avec ${member.name}`)
+          .single();
+
+        if (existingConv) continue;
+
+        // Créer la conversation
+        const { data: newConv, error: convError } = await supabase
+          .from('conversations')
+          .insert({
+            name: `Conversation avec ${member.name}`
+          })
+          .select()
+          .single();
+
+        if (convError) {
+          console.error('Erreur création conversation:', convError);
+          continue;
+        }
+
+        // Créer le participant
+        const { error: participantError } = await supabase
+          .from('conversation_participants')
+          .insert({
+            conversation_id: newConv.id,
+            user_name: member.name,
+            user_role: member.role,
+            is_online: Math.random() > 0.5
+          });
+
+        if (participantError) {
+          console.error('Erreur création participant:', participantError);
+        }
+      }
+
+      // Recharger les conversations après initialisation
+      await fetchConversations();
+      
     } catch (error) {
-      console.error('❌ Erreur lors de la récupération des messages:', error);
+      console.error('❌ Erreur lors de l\'initialisation:', error);
+      toast.error('Erreur lors de l\'initialisation des conversations');
     }
   };
 
+  // Récupérer les messages d'une conversation
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      console.log('📨 Récupération des messages pour:', conversationId);
+      
+      const { data: messagesData, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      setMessages(messagesData || []);
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des messages:', error);
+      toast.error('Erreur lors du chargement des messages');
+    }
+  };
+
+  // Envoyer un message
   const sendMessage = async (conversationId: string, content: string) => {
     if (!user || !userProfile) {
       toast.error('Vous devez être connecté pour envoyer un message');
@@ -244,46 +213,43 @@ export function useMessages() {
       
       const senderName = userProfile.full_name || user.email || 'Utilisateur';
       
-      const newMessage: Message = {
-        id: `msg-${Date.now()}`,
-        conversation_id: conversationId,
-        sender_name: senderName,
-        content,
-        is_me: true,
-        created_at: new Date().toISOString()
-      };
+      // Insérer le message dans Supabase
+      const { data: newMessage, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_name: senderName,
+          content,
+          is_me: true
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
 
       // Ajouter le message localement
       setMessages(prev => [...prev, newMessage]);
       
-      // Mettre à jour la conversation pour la remonter en haut
-      setConversations(prev => {
-        const updated = prev.map(conv => {
-          if (conv.id === conversationId) {
-            return {
-              ...conv,
-              lastMessage: newMessage,
-              updated_at: new Date().toISOString()
-            };
-          }
-          return conv;
-        });
-        
-        // Trier à nouveau par date de dernier message
-        return updated.sort((a, b) => {
-          const timeA = new Date(a.lastMessage?.created_at || a.updated_at).getTime();
-          const timeB = new Date(b.lastMessage?.created_at || b.updated_at).getTime();
-          return timeB - timeA;
-        });
-      });
+      // Mettre à jour la conversation
+      await supabase
+        .from('conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+      
+      // Rafraîchir les conversations pour mettre à jour l'ordre
+      await fetchConversations();
       
       toast.success('Message envoyé');
+      
     } catch (error) {
       console.error('❌ Erreur lors de l\'envoi du message:', error);
       toast.error('Erreur lors de l\'envoi du message');
     }
   };
 
+  // Créer une nouvelle conversation
   const createNewConversation = async (memberName: string) => {
     try {
       const member = AUTHORIZED_TEAM_MEMBERS.find(m => m.name === memberName);
@@ -292,39 +258,86 @@ export function useMessages() {
         return;
       }
 
-      const conversationId = `conv-${member.name.toLowerCase().replace(/\s+/g, '-')}-new-${Date.now()}`;
-      
-      const newConversation: ConversationWithParticipant = {
-        id: conversationId,
-        name: `Conversation avec ${member.name}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        participant: {
-          id: `participant-${member.name.toLowerCase().replace(/\s+/g, '-')}`,
-          conversation_id: conversationId,
+      // Vérifier si la conversation existe déjà
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('name', `Conversation avec ${member.name}`)
+        .single();
+
+      if (existingConv) {
+        toast.info('Une conversation avec ce membre existe déjà');
+        setSelectedConversationId(existingConv.id);
+        return;
+      }
+
+      // Créer la nouvelle conversation
+      const { data: newConv, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          name: `Conversation avec ${member.name}`
+        })
+        .select()
+        .single();
+
+      if (convError) {
+        throw convError;
+      }
+
+      // Créer le participant
+      const { error: participantError } = await supabase
+        .from('conversation_participants')
+        .insert({
+          conversation_id: newConv.id,
           user_name: member.name,
           user_role: member.role,
-          avatar_url: null,
-          is_online: Math.random() > 0.4,
-          created_at: new Date().toISOString()
-        },
-        unreadCount: 0
-      };
+          is_online: Math.random() > 0.5
+        });
 
-      setConversations(prev => [newConversation, ...prev]);
-      setSelectedConversationId(conversationId);
+      if (participantError) {
+        throw participantError;
+      }
+
+      // Rafraîchir les conversations
+      await fetchConversations();
+      setSelectedConversationId(newConv.id);
       
       toast.success(`Nouvelle conversation créée avec ${member.name}`);
+      
     } catch (error) {
       console.error('❌ Erreur lors de la création de la conversation:', error);
       toast.error('Erreur lors de la création de la conversation');
     }
   };
 
+  // Supprimer une conversation
   const deleteConversation = async (conversationId: string) => {
     try {
       console.log('🗑️ Suppression de la conversation:', conversationId);
       
+      // Supprimer les messages associés
+      await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', conversationId);
+
+      // Supprimer les participants
+      await supabase
+        .from('conversation_participants')
+        .delete()
+        .eq('conversation_id', conversationId);
+
+      // Supprimer la conversation
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', conversationId);
+
+      if (error) {
+        throw error;
+      }
+      
+      // Mettre à jour l'état local
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
       
       if (selectedConversationId === conversationId) {
@@ -337,6 +350,7 @@ export function useMessages() {
     }
   };
 
+  // Archiver une conversation (pour l'instant, on la supprime juste)
   const archiveConversation = async (conversationId: string) => {
     try {
       console.log('📦 Archivage de la conversation:', conversationId);
@@ -344,20 +358,11 @@ export function useMessages() {
       const conversationToArchive = conversations.find(conv => conv.id === conversationId);
       if (!conversationToArchive) return;
       
-      // Marquer comme archivée
+      // Pour l'instant, on déplace juste localement
       const archivedConversation = { ...conversationToArchive, is_archived: true };
       
-      // Ajouter aux conversations archivées
       setArchivedConversations(prev => [archivedConversation, ...prev]);
-      
-      // Supprimer des conversations actives
       setConversations(prev => prev.filter(conv => conv.id !== conversationId));
-      
-      // Sauvegarder en local
-      const userEmail = user?.email || 'unknown';
-      const archivedKey = `archived_conversations_${userEmail}`;
-      const currentArchived = JSON.parse(localStorage.getItem(archivedKey) || '[]');
-      localStorage.setItem(archivedKey, JSON.stringify([...currentArchived, conversationId]));
       
       if (selectedConversationId === conversationId) {
         setSelectedConversationId(null);
@@ -369,11 +374,13 @@ export function useMessages() {
     }
   };
 
+  // Sélectionner une conversation
   const selectConversation = (conversationId: string) => {
     console.log('✅ Sélection de la conversation:', conversationId);
     setSelectedConversationId(conversationId);
   };
 
+  // Actualiser les messages
   const refreshMessages = async () => {
     console.log('🔄 Actualisation des messages');
     await fetchConversations();
@@ -382,12 +389,68 @@ export function useMessages() {
     }
   };
 
+  // Configuration des abonnements temps réel
+  useEffect(() => {
+    if (!user) return;
+
+    console.log('🔄 Configuration des abonnements temps réel...');
+
+    // Écouter les nouveaux messages
+    const messagesChannel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          console.log('📨 Nouveau message reçu:', payload.new);
+          
+          // Si c'est pour la conversation sélectionnée et que ce n'est pas moi
+          if (payload.new.conversation_id === selectedConversationId && !payload.new.is_me) {
+            setMessages(prev => [...prev, payload.new as Message]);
+          }
+          
+          // Actualiser les conversations pour mettre à jour le dernier message
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    // Écouter les changements de conversations
+    const conversationsChannel = supabase
+      .channel('conversations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations'
+        },
+        () => {
+          console.log('🔄 Changement dans les conversations détecté');
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔌 Nettoyage des abonnements temps réel');
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(conversationsChannel);
+    };
+  }, [user, selectedConversationId]);
+
+  // Charger les conversations au montage
   useEffect(() => {
     if (user) {
       fetchConversations();
     }
   }, [user]);
 
+  // Charger les messages quand une conversation est sélectionnée
   useEffect(() => {
     if (selectedConversationId) {
       console.log('📨 Conversation sélectionnée changée:', selectedConversationId);
