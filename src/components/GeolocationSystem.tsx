@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { InteractiveMap } from './InteractiveMap';
+import { SimpleMap } from './geolocation/SimpleMap';
 import { GeolocationFilters } from './geolocation/GeolocationFilters';
 import { GeolocationList } from './geolocation/GeolocationList';
 import { GeolocationHeader } from './geolocation/GeolocationHeader';
@@ -74,18 +74,12 @@ export function GeolocationSystem() {
 
       {/* Layout principal avec carte et liste - sections empilées verticalement */}
       <div className="space-y-4 w-full">
-        {/* Carte interactive */}
-        <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 w-full">
-          <CardContent className="p-0">
-            <div className="h-[600px] rounded-lg overflow-hidden">
-              <InteractiveMap 
-                userLocation={userLocation}
-                technicians={sampleTechnicians}
-                maintenancePoints={sampleInterventions}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Carte simplifiée */}
+        <SimpleMap 
+          userLocation={userLocation}
+          technicians={sampleTechnicians}
+          maintenancePoints={sampleInterventions}
+        />
 
         {/* Liste synchronisée */}
         <div className="w-full">
