@@ -195,9 +195,55 @@ export function useReportGeneration() {
     }
   };
 
+  const getAvailableReports = () => {
+    return [
+      {
+        id: 1,
+        title: 'Rapport mensuel - Janvier 2024',
+        type: 'Maintenance',
+        date: '31/01/2024',
+        status: 'Terminé',
+        size: '2.4 MB',
+        technician: 'Jean Dupont',
+        zone: 'Zone Nord'
+      },
+      {
+        id: 2,
+        title: 'Analyse des pannes - Q4 2023',
+        type: 'Analyse',
+        date: '15/01/2024',
+        status: 'Terminé',
+        size: '1.8 MB',
+        technician: 'Marie Martin',
+        zone: 'Zone Sud'
+      },
+      {
+        id: 3,
+        title: 'Performance techniciens - Décembre',
+        type: 'RH',
+        date: '05/01/2024',
+        status: 'En cours',
+        size: '-',
+        technician: 'Paul Durand',
+        zone: 'Zone Ouest'
+      },
+      {
+        id: 4,
+        title: 'Rapport de coûts - Q4 2023',
+        type: 'Financier',
+        date: '20/01/2024',
+        status: 'Terminé',
+        size: '1.2 MB',
+        technician: 'Sophie Leroy',
+        zone: 'Zone Est'
+      }
+    ];
+  };
+
   return {
     generateReport,
     downloadExistingReport,
+    getAvailableReports,
     isGenerating
   };
 }

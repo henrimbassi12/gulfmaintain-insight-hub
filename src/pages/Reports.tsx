@@ -6,8 +6,10 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
+import { RecentReports } from '@/components/reports/RecentReports';
 import { ReportsList } from '@/components/reports/ReportsList';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
+import { useReportGeneration } from '@/hooks/useReportGeneration';
 import { MaintenanceTrackingForm } from '@/components/forms/MaintenanceTrackingForm';
 import { RefrigeratorMaintenanceForm } from '@/components/forms/RefrigeratorMaintenanceForm';
 import { MovementForm } from '@/components/forms/MovementForm';
@@ -22,6 +24,7 @@ import { Wrench, Settings } from 'lucide-react';
 export default function Reports() {
   const { userProfile } = useAuth();
   const { reports, isLoading, refetch, updateReport, deleteReport, createReport } = useReports();
+  const { getAvailableReports } = useReportGeneration();
   const [refreshing, setRefreshing] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedForm, setSelectedForm] = useState<{type: string, title: string} | null>(null);
@@ -166,6 +169,8 @@ export default function Reports() {
             onCreateForm={handleCreateForm}
           />
         </PermissionCheck>
+
+        <RecentReports reports={getAvailableReports()} />
         
         <ReportsList 
           reports={reports}
