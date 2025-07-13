@@ -7,6 +7,7 @@ import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { MainLayout } from '@/components/MainLayout';
+import { MobileHeader } from '@/components/MobileHeader';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
@@ -35,6 +36,9 @@ function App() {
         <AuthProvider>
           <Router>
             <div className="App">
+              {/* Mobile Header - visible uniquement sur mobile */}
+              <MobileHeader />
+              
               <Routes>
                 <Route path="/" element={<Welcome />} />
                 <Route path="/login" element={<Login />} />

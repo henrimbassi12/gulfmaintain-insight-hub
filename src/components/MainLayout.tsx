@@ -41,10 +41,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex w-full bg-gray-50">
-      <AppSidebar />
+      {/* Sidebar desktop uniquement */}
+      <div className="hidden md:block">
+        <AppSidebar />
+      </div>
       
       <div className="flex-1 flex flex-col">
-        {/* Header avec trigger du sidebar toujours visible en desktop */}
+        {/* Header desktop avec sidebar trigger */}
         <header className="hidden md:flex h-14 items-center border-b bg-white px-4 sticky top-0 z-50 shadow-sm">
           <SidebarTrigger className="mr-4" />
           <h1 className="text-lg font-semibold text-gray-900">
@@ -52,8 +55,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           </h1>
         </header>
 
-        {/* Contenu principal */}
-        <main className="flex-1 overflow-auto">
+        {/* Contenu principal - padding uniquement sur mobile */}
+        <main className="flex-1 overflow-auto md:p-0">
           {children}
         </main>
       </div>
