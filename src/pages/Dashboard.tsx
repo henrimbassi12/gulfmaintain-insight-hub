@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { BarChart3, Package, Wrench, AlertTriangle, Activity, TrendingUp, Clock, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { MobileHeader } from '@/components/MobileHeader';
+
 import { DashboardCard } from '@/components/DashboardCard';
 import { InterventionTrendChart } from '@/components/dashboard/InterventionTrendChart';
 import { NotificationSystem } from '@/components/NotificationSystem';
@@ -38,7 +38,6 @@ export default function Dashboard() {
 
   return (
     <div className="w-full bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <MobileHeader />
       
       {/* Contenu principal */}
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-8 space-y-4 md:space-y-8">
