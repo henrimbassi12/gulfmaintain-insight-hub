@@ -6,7 +6,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { MainLayout } from '@/components/MainLayout';
 import { MobileHeader } from '@/components/MobileHeader';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
@@ -46,110 +45,58 @@ function App() {
                   <ProtectedRoute>
                     <>
                       <MobileHeader />
-                      <MainLayout>
-                        <Dashboard />
-                      </MainLayout>
+                      <Dashboard />
                     </>
                   </ProtectedRoute>
                 } />
                 <Route path="/equipments" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <Equipments />
-                      </MainLayout>
-                    </>
+                    <Equipments />
                   </ProtectedRoute>
                 } />
                 <Route path="/maintenance" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <Maintenance />
-                      </MainLayout>
-                    </>
+                    <Maintenance />
                   </ProtectedRoute>
                 } />
                 <Route path="/maintenance-calendar" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <MaintenanceCalendarPage />
-                      </MainLayout>
-                    </>
+                    <MaintenanceCalendarPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/planning" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <MaintenanceCalendarPage />
-                      </MainLayout>
-                    </>
+                    <MaintenanceCalendarPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/reports" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <Reports />
-                      </MainLayout>
-                    </>
+                    <Reports />
                   </ProtectedRoute>
                 } />
                 <Route path="/settings" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <Settings />
-                      </MainLayout>
-                    </>
+                    <Settings />
                   </ProtectedRoute>
                 } />
                 <Route path="/messages" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <Messages />
-                      </MainLayout>
-                    </>
+                    <Messages />
                   </ProtectedRoute>
                 } />
                 <Route path="/geolocation" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <GeolocationPage />
-                      </MainLayout>
-                    </>
+                    <GeolocationPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/supervision" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <Supervision />
-                      </MainLayout>
-                    </>
+                    <Supervision />
                   </ProtectedRoute>
                 } />
                 <Route path="/equipment-history" element={
                   <ProtectedRoute>
-                    <>
-                      <MobileHeader />
-                      <MainLayout>
-                        <EquipmentHistoryPage />
-                      </MainLayout>
-                    </>
+                    <EquipmentHistoryPage />
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />
