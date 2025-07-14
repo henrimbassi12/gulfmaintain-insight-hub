@@ -6,22 +6,31 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, RefreshCw, Activity } from 'lucide-react';
 import { MobileHeader } from '@/components/MobileHeader';
+import { useEquipments } from '@/hooks/useEquipments';
+import { useReports } from '@/hooks/useReports';
 import { toast } from 'sonner';
 
 export default function GeolocationPage() {
   const [refreshing, setRefreshing] = useState(false);
+  const { equipments, refetch: refetchEquipments } = useEquipments();
+  const { reports, refetch: refetchReports } = useReports();
 
-  const handleRefresh = () => {
+  // Calcul des statistiques en temps réel
+  const activeEquipments = equipments.filter(eq => eq.af_nf === 'AF').length;
+  const techniciansList = [...new Set(equipments.map(eq => eq.technician))];
+  const ongoingInterventions = reports.filter(report => report.status === 'En cours').length;
+  const totalTechnicians = techniciansList.length;
+
+  const handleRefresh = async () => {
     setRefreshing(true);
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Actualisation des positions...',
-        success: 'Positions actualisées avec succès',
-        error: 'Erreur lors de l\'actualisation'
-      }
-    );
-    setTimeout(() => setRefreshing(false), 1500);
+    try {
+      await Promise.all([refetchEquipments(), refetchReports()]);
+      toast.success('Positions actualisées avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de l\'actualisation');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (
@@ -98,15 +107,15 @@ export default function GeolocationPage() {
           <CardContent className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
-                <p className="text-lg md:text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">24</p>
+                <p className="text-lg md:text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">{totalTechnicians}</p>
                 <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Techniciens connectés</p>
               </div>
               <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
-                <p className="text-lg md:text-2xl font-bold text-green-600 dark:text-green-400 mb-1">156</p>
+                <p className="text-lg md:text-2xl font-bold text-green-600 dark:text-green-400 mb-1">{activeEquipments}</p>
                 <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Équipements localisés</p>
               </div>
               <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
-                <p className="text-lg md:text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">8</p>
+                <p className="text-lg md:text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">{ongoingInterventions}</p>
                 <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Interventions en cours</p>
               </div>
               <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
