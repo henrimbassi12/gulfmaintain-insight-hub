@@ -11,7 +11,7 @@ import { UserProfileSection } from '@/components/settings/UserProfileSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { SecuritySection } from '@/components/settings/SecuritySection';
 import { UserManagementSection } from '@/components/settings/UserManagementSection';
-import { AdminUserManagement } from '@/components/settings/AdminUserManagement';
+
 import { ThemeSection } from '@/components/settings/ThemeSection';
 
 export default function Settings() {
@@ -274,7 +274,6 @@ export default function Settings() {
               {isAdmin && (
                 <TabsContent value="users" className="space-y-6">
                   <UserManagementSection userProfile={userProfile} />
-                  <AdminUserManagement currentUserProfile={userProfile} />
                 </TabsContent>
               )}
             </div>
@@ -321,10 +320,7 @@ export default function Settings() {
             />
             
             {isAdmin && (
-              <>
-                <UserManagementSection userProfile={userProfile} />
-                <AdminUserManagement currentUserProfile={userProfile} />
-              </>
+              <UserManagementSection userProfile={userProfile} />
             )}
           </div>
         </div>
