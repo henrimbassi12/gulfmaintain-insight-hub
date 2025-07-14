@@ -6,7 +6,7 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReportsStats } from '@/components/reports/ReportsStats';
 import { AvailableForms } from '@/components/reports/AvailableForms';
-import { RecentReports } from '@/components/reports/RecentReports';
+
 import { ReportsList } from '@/components/reports/ReportsList';
 import { ReportFilterModal } from '@/components/reports/ReportFilterModal';
 import { useReportGeneration } from '@/hooks/useReportGeneration';
@@ -91,25 +91,6 @@ export default function Reports() {
     }
   };
 
-  // Données d'exemple pour les statistiques
-  const sampleReportsStats = [
-    {
-      id: 1,
-      title: 'Rapport de maintenance préventive',
-      type: 'maintenance',
-      date: '2024-06-24',
-      status: 'completed',
-      size: '2.5 MB'
-    },
-    {
-      id: 2,
-      title: 'Rapport d\'intervention corrective',
-      type: 'intervention',
-      date: '2024-06-23',
-      status: 'pending',
-      size: '1.8 MB'
-    }
-  ];
 
   const sampleReportForms = [
     {
@@ -161,7 +142,7 @@ export default function Reports() {
 
       <ScrollArea className="flex-1">
         <div className="space-y-8">
-        <ReportsStats reports={sampleReportsStats} />
+        <ReportsStats reports={reports} />
         
         <PermissionCheck allowedRoles={['admin', 'manager', 'technician']}>
           <AvailableForms 
@@ -170,7 +151,7 @@ export default function Reports() {
           />
         </PermissionCheck>
 
-        <RecentReports reports={getAvailableReports()} />
+        
         
         <ReportsList 
           reports={reports}
