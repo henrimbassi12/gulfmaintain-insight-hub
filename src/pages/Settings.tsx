@@ -273,6 +273,7 @@ export default function Settings() {
 
               {isAdmin && (
                 <TabsContent value="users" className="space-y-6">
+                  <UserManagementSection userProfile={userProfile} />
                   <AdminUserManagement currentUserProfile={userProfile} />
                 </TabsContent>
               )}
@@ -320,7 +321,10 @@ export default function Settings() {
             />
             
             {isAdmin && (
-              <AdminUserManagement currentUserProfile={userProfile} />
+              <>
+                <UserManagementSection userProfile={userProfile} />
+                <AdminUserManagement currentUserProfile={userProfile} />
+              </>
             )}
           </div>
         </div>
