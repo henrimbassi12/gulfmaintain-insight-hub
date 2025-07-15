@@ -9,10 +9,17 @@ import { toast } from 'sonner';
 export default function EquipmentHistoryPage() {
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    // Actualiser automatiquement en rechargeant la page
-    window.location.reload();
+    try {
+      // Forcer le rechargement des données en actualisant le cache
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      window.location.reload();
+    } catch (error) {
+      toast.error('Erreur lors de l\'actualisation');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (

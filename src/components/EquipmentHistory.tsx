@@ -386,28 +386,30 @@ export function EquipmentHistory() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleViewReport(report)}
-                            className="text-xs"
+                            className="text-xs hover:bg-blue-50"
                           >
                             <Eye className="w-3 h-3 mr-1" />
                             Voir détails
                           </Button>
 
-                          <PermissionCheck allowedRoles={['admin']}>
+                          <PermissionCheck allowedRoles={['admin', 'manager']}>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditReport(report)}
-                              className="text-xs"
+                              className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
                               <Edit className="w-3 h-3 mr-1" />
                               Modifier
                             </Button>
+                          </PermissionCheck>
 
+                          <PermissionCheck allowedRoles={['admin']}>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleDeleteReport(report)}
-                              className="text-xs text-red-600 hover:text-red-700"
+                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               <Trash2 className="w-3 h-3 mr-1" />
                               Supprimer
@@ -447,17 +449,15 @@ export function EquipmentHistory() {
         }}
       />
 
-      <PermissionCheck allowedRoles={['admin']}>
-        <ReportEditModal
-          report={selectedReport}
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedReport(null);
-          }}
-          onSave={handleUpdateReport}
-        />
-      </PermissionCheck>
+      <ReportEditModal
+        report={selectedReport}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onSave={handleUpdateReport}
+      />
     </div>
   );
 }
