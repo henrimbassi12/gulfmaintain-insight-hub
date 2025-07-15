@@ -160,16 +160,12 @@ export function useAIPredictions(): UseAIPredictionsReturn {
       console.log('✅ Prédiction IA reçue:', apiResult);
 
       // Conversion de la réponse de votre API vers le format attendu
+      const mappedStatus = mapApiStatusToAppStatus(apiResult.prediction);
       const prediction: MaintenancePrediction = {
         equipment_id: input.equipment_id,
-        predicted_status: mapApiStatusToAppStatus(apiResult.prediction),
+        predicted_status: mappedStatus,
         confidence_score: Math.floor(Math.random() * 20) + 75,
-        recommended_actions: [
-          'Vérification générale des composants',
-          `Inspection ${input.equipment_type.toLowerCase()}`,
-          'Test des capteurs de température',
-          'Contrôle de l\'étanchéité'
-        ],
+        recommended_actions: getMaintenanceInstructions(mappedStatus),
         priority_level: input.usage_intensity === 'high' ? 'medium' : 'low',
         estimated_intervention_date: new Date(Date.now() + (Math.random() * 14 + 1) * 24 * 60 * 60 * 1000).toISOString(),
         estimated_duration_hours: Math.floor(Math.random() * 4) + 1,
@@ -224,6 +220,38 @@ export function useAIPredictions(): UseAIPredictionsReturn {
     return statusMap[apiStatus] || 'Maintenance_preventive';
   };
 
+  const getMaintenanceInstructions = (status: MaintenancePrediction['predicted_status']): string[] => {
+    switch (status) {
+      case 'Investigation_defaillance':
+        return [
+          'Réaliser un diagnostic approfondi',
+          'Tester les composants critiques (compresseur, capteurs)',
+          'Remplacer si nécessaire'
+        ];
+      case 'Maintenance_preventive':
+        return [
+          'Appliquer la check-list standard',
+          'Nettoyage complet de l\'équipement',
+          'Resserrage des connexions',
+          'Vérification des fluides'
+        ];
+      case 'Entretien_renforce':
+        return [
+          'Réaliser un entretien plus complet',
+          'Remplacement systématique des pièces d\'usure',
+          'Contrôle approfondi de tous les composants'
+        ];
+      case 'Surveillance_renforcee':
+        return [
+          'Aucune action immédiate nécessaire',
+          'Inscrire l\'équipement pour un suivi lors des prochaines visites',
+          'Surveiller les indicateurs de performance'
+        ];
+      default:
+        return ['Suivre les procédures standards de maintenance'];
+    }
+  };
+
   const generateSimulatedPrediction = (input: MaintenancePredictionInput): MaintenancePrediction => {
     const statuses: MaintenancePrediction['predicted_status'][] = [
       'Maintenance_preventive', 'Surveillance_renforcee', 'Entretien_renforce', 'Investigation_defaillance'
@@ -235,13 +263,7 @@ export function useAIPredictions(): UseAIPredictionsReturn {
       equipment_id: input.equipment_id,
       predicted_status: randomStatus,
       confidence_score: Math.floor(Math.random() * 20) + 75,
-      recommended_actions: [
-        'Vérification générale des composants',
-        `Inspection ${input.equipment_type.toLowerCase()}`,
-        'Test des capteurs de température',
-        'Nettoyage des filtres',
-        'Contrôle de l\'étanchéité'
-      ],
+      recommended_actions: getMaintenanceInstructions(randomStatus),
       priority_level: input.usage_intensity === 'high' ? 'medium' : 'low',
       estimated_intervention_date: new Date(Date.now() + (Math.random() * 14 + 1) * 24 * 60 * 60 * 1000).toISOString(),
       estimated_duration_hours: Math.floor(Math.random() * 4) + 1,
