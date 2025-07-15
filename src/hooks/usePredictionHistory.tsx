@@ -50,31 +50,44 @@ export function usePredictionHistory() {
       }
 
       // Mapper les données de la base vers notre interface
-      const mappedPredictions: PredictionHistoryItem[] = (data || []).map(item => ({
-        id: item.id,
-        equipment_id: item.equipment_id,
-        equipment_name: item.equipment_name,
-        predicted_status: mapDbStatusToAppStatus(item.predicted_date, item.failure_risk),
-        confidence_score: item.confidence_score || 75,
-        recommended_actions: [item.recommended_action],
-        priority_level: item.failure_risk > 80 ? 'high' : item.failure_risk > 60 ? 'medium' : 'low',
-        estimated_intervention_date: item.predicted_date,
-        estimated_duration_hours: 2,
-        required_skills: ['Réfrigération', 'Électricité', 'Diagnostic'],
-        recommended_parts: ['Filtre à air', 'Joint d\'étanchéité'],
-        risk_factors: [`Risque de panne: ${item.failure_risk}%`, `Type: ${item.type}`, `Localisation: ${item.location}`],
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        location: item.location,
-        type: item.type,
-        equipment_brand: item.equipment_brand,
-        equipment_model: item.equipment_model,
-        equipment_serial_number: item.equipment_serial_number,
-        maintenance_history: item.maintenance_history,
-        environmental_factors: item.environmental_factors,
-        usage_pattern: item.usage_pattern,
-        failure_risk: item.failure_risk
-      }));
+      const mappedPredictions: PredictionHistoryItem[] = (data || []).map(item => {
+        const predictedStatus = mapDbStatusToAppStatus(item.predicted_date, item.failure_risk);
+        const maintenanceInstructions = getMaintenanceInstructions(predictedStatus);
+        
+        return {
+          id: item.id,
+          equipment_id: item.equipment_id,
+          equipment_name: item.equipment_name,
+          predicted_status: predictedStatus,
+          confidence_score: item.confidence_score || 75,
+          recommended_actions: maintenanceInstructions,
+          priority_level: item.failure_risk > 80 ? 'critical' : item.failure_risk > 60 ? 'high' : item.failure_risk > 40 ? 'medium' : 'low',
+          estimated_intervention_date: item.predicted_date,
+          estimated_duration_hours: predictedStatus === 'Investigation_defaillance' ? 4 : 
+                                   predictedStatus === 'Entretien_renforce' ? 3 :
+                                   predictedStatus === 'Maintenance_preventive' ? 2 : 1,
+          required_skills: predictedStatus === 'Investigation_defaillance' ? ['Diagnostic avancé', 'Réparation', 'Électricité', 'Réfrigération'] :
+                          predictedStatus === 'Entretien_renforce' ? ['Maintenance avancée', 'Réfrigération', 'Mécanique'] :
+                          predictedStatus === 'Maintenance_preventive' ? ['Maintenance standard', 'Nettoyage', 'Vérifications'] :
+                          ['Surveillance', 'Inspection visuelle'],
+          recommended_parts: predictedStatus === 'Investigation_defaillance' ? ['Compresseur', 'Capteurs', 'Joints'] :
+                            predictedStatus === 'Entretien_renforce' ? ['Pièces d\'usure', 'Filtres', 'Joints'] :
+                            predictedStatus === 'Maintenance_preventive' ? ['Filtres', 'Huile', 'Joints'] :
+                            [],
+          risk_factors: [`Risque de panne: ${item.failure_risk}%`, `Type: ${item.type}`, `Localisation: ${item.location}`],
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          location: item.location,
+          type: item.type,
+          equipment_brand: item.equipment_brand,
+          equipment_model: item.equipment_model,
+          equipment_serial_number: item.equipment_serial_number,
+          maintenance_history: item.maintenance_history,
+          environmental_factors: item.environmental_factors,
+          usage_pattern: item.usage_pattern,
+          failure_risk: item.failure_risk
+        };
+      });
 
       setPredictions(mappedPredictions);
       console.log(`✅ Récupération de ${mappedPredictions.length} prédictions réussie`);
@@ -89,7 +102,7 @@ export function usePredictionHistory() {
     }
   }, []);
 
-  // Mapper le statut de la base de données vers le statut de l'application
+  // Mapper le statut de la base de données vers le statut de l'application avec consignes
   const mapDbStatusToAppStatus = (predictedDate: string, failureRisk: number): MaintenancePrediction['predicted_status'] => {
     const daysUntilPrediction = Math.ceil((new Date(predictedDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
     
@@ -101,6 +114,39 @@ export function usePredictionHistory() {
       return 'Surveillance_renforcee';
     } else {
       return 'Maintenance_preventive';
+    }
+  };
+
+  // Obtenir les consignes spécifiques pour chaque type de maintenance
+  const getMaintenanceInstructions = (status: MaintenancePrediction['predicted_status']): string[] => {
+    switch (status) {
+      case 'Investigation_defaillance':
+        return [
+          'Réaliser un diagnostic approfondi',
+          'Tester les composants critiques (compresseur, capteurs)',
+          'Remplacer si nécessaire'
+        ];
+      case 'Maintenance_preventive':
+        return [
+          'Appliquer la check-list standard',
+          'Nettoyage complet de l\'équipement',
+          'Resserrage des connexions',
+          'Vérification des fluides'
+        ];
+      case 'Entretien_renforce':
+        return [
+          'Réaliser un entretien plus complet',
+          'Remplacement systématique des pièces d\'usure',
+          'Contrôle approfondi de tous les composants'
+        ];
+      case 'Surveillance_renforcee':
+        return [
+          'Aucune action immédiate nécessaire',
+          'Inscrire l\'équipement pour un suivi lors des prochaines visites',
+          'Surveiller les indicateurs de performance'
+        ];
+      default:
+        return ['Suivre les procédures standards de maintenance'];
     }
   };
 
@@ -132,18 +178,29 @@ export function usePredictionHistory() {
       }
 
       // Ajouter la nouvelle prédiction à la liste
+      const predictedStatus = mapDbStatusToAppStatus(data.predicted_date, data.failure_risk);
+      const maintenanceInstructions = getMaintenanceInstructions(predictedStatus);
+      
       const newPrediction: PredictionHistoryItem = {
         id: data.id,
         equipment_id: data.equipment_id,
         equipment_name: data.equipment_name,
-        predicted_status: mapDbStatusToAppStatus(data.predicted_date, data.failure_risk),
+        predicted_status: predictedStatus,
         confidence_score: data.confidence_score || 75,
-        recommended_actions: [data.recommended_action],
-        priority_level: data.failure_risk > 80 ? 'high' : data.failure_risk > 60 ? 'medium' : 'low',
+        recommended_actions: maintenanceInstructions,
+        priority_level: data.failure_risk > 80 ? 'critical' : data.failure_risk > 60 ? 'high' : data.failure_risk > 40 ? 'medium' : 'low',
         estimated_intervention_date: data.predicted_date,
-        estimated_duration_hours: 2,
-        required_skills: ['Réfrigération', 'Électricité', 'Diagnostic'],
-        recommended_parts: ['Filtre à air', 'Joint d\'étanchéité'],
+        estimated_duration_hours: predictedStatus === 'Investigation_defaillance' ? 4 : 
+                                 predictedStatus === 'Entretien_renforce' ? 3 :
+                                 predictedStatus === 'Maintenance_preventive' ? 2 : 1,
+        required_skills: predictedStatus === 'Investigation_defaillance' ? ['Diagnostic avancé', 'Réparation', 'Électricité', 'Réfrigération'] :
+                        predictedStatus === 'Entretien_renforce' ? ['Maintenance avancée', 'Réfrigération', 'Mécanique'] :
+                        predictedStatus === 'Maintenance_preventive' ? ['Maintenance standard', 'Nettoyage', 'Vérifications'] :
+                        ['Surveillance', 'Inspection visuelle'],
+        recommended_parts: predictedStatus === 'Investigation_defaillance' ? ['Compresseur', 'Capteurs', 'Joints'] :
+                          predictedStatus === 'Entretien_renforce' ? ['Pièces d\'usure', 'Filtres', 'Joints'] :
+                          predictedStatus === 'Maintenance_preventive' ? ['Filtres', 'Huile', 'Joints'] :
+                          [],
         risk_factors: [`Risque de panne: ${data.failure_risk}%`, `Type: ${data.type}`, `Localisation: ${data.location}`],
         created_at: data.created_at,
         updated_at: data.updated_at,

@@ -75,6 +75,21 @@ export function PredictionHistoryModal({ prediction, isOpen, onClose }: Predicti
     }
   };
 
+  const getStatusDescription = (status: MaintenancePrediction['predicted_status']) => {
+    switch (status) {
+      case 'Investigation_defaillance':
+        return 'Diagnostic approfondi nécessaire - Intervention critique requise';
+      case 'Entretien_renforce':
+        return 'Maintenance complète recommandée - Remplacement préventif des pièces';
+      case 'Maintenance_preventive':
+        return 'Maintenance standard selon planning - Check-list habituelle';
+      case 'Surveillance_renforcee':
+        return 'Surveillance accrue lors des prochaines visites - Pas d\'action immédiate';
+      default:
+        return 'Maintenance selon procédures standards';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -101,10 +116,13 @@ export function PredictionHistoryModal({ prediction, isOpen, onClose }: Predicti
                 <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium text-gray-600">Statut Prédit</label>
-                    <div className="mt-1">
+                    <div className="mt-1 space-y-2">
                       <Badge className={`${getStatusColor(prediction.predicted_status)} text-sm`}>
                         {getStatusLabel(prediction.predicted_status)}
                       </Badge>
+                      <p className="text-xs text-gray-600 italic">
+                        {getStatusDescription(prediction.predicted_status)}
+                      </p>
                     </div>
                   </div>
                   
@@ -173,7 +191,7 @@ export function PredictionHistoryModal({ prediction, isOpen, onClose }: Predicti
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Wrench className="w-5 h-5 text-blue-600" />
-                Actions Recommandées
+                Consignes de Maintenance - {getStatusLabel(prediction.predicted_status)}
               </CardTitle>
             </CardHeader>
             <CardContent>
