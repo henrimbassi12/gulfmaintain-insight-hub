@@ -7,7 +7,7 @@ const MODEL_METRICS = {
   "Surveillance_renforcee": { precision: 0.92, recall: 0.96, f1: 0.94, support: 25 },
 };
 
-const GLOBAL_ACCURACY = 0.9531; // 95.31%
+const GLOBAL_ACCURACY = 0.9688; // 96.88%
 
 export interface EnrichedPredictionMessage {
   title: string;
@@ -72,24 +72,12 @@ export function formatPredictionMessage(
       break;
   }
 
-  // Format selon vos spécifications exactes
-  let formattedResult = '';
-  
-  if (predictedClass === 'Maintenance_preventive') {
-    formattedResult = `✅ Prédiction IA : ${statusTitle}
-
-🧠 Basée sur un modèle d'intelligence artificielle affichant une précision globale de ${(GLOBAL_ACCURACY * 100).toFixed(2)} %, cette prédiction repose sur l'analyse de plusieurs critères critiques observés lors des maintenances précédentes.
-
-📊 Confiance élevée : le modèle affiche une précision de ${precision} % pour cette catégorie spécifique (« ${statusTitle} »), avec un rappel de ${recall} % et un score F1 de ${f1Score}.
-
-🔍 Interprétation : Il est fortement probable que le statut post-entretien soit : **${statusTitle}**.`;
-  } else {
-    formattedResult = `${emoji} Résultat IA : ${statusTitle}
+  // Format en deux blocs distincts
+  const formattedResult = `${emoji} Résultat IA : ${statusTitle}
 
 Ce statut est prédit avec une précision de ${precision} %, un rappel de ${recall} % et un F1-score de ${Math.round(parseFloat(f1Score) * 100)} %, selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.
 
-👉 ${recommendation}`;
-  }
+° Il est recommandé de planifier un ${statusTitle.toLowerCase()} pour optimiser les performances de cet équipement.`;
 
   const enrichedMessage = {
     title: `${emoji} Prédiction IA : ${statusTitle}`,
