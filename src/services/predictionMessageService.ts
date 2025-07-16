@@ -52,22 +52,22 @@ export function formatPredictionMessage(
   switch (predictedClass) {
     case 'Entretien_renforce':
       statusTitle = 'Entretien renforcé';
-      recommendation = 'Il est recommandé de planifier un entretien renforcé pour optimiser les performances de cet équipement.';
+      recommendation = 'Réaliser un entretien plus complet : remplacement systématique des pièces d\'usure, contrôle approfondi.';
       emoji = '🔧';
       break;
     case 'Investigation_defaillance':
       statusTitle = 'Investigation défaillance';
-      recommendation = 'Il est recommandé d\'effectuer une investigation approfondie pour identifier les causes de défaillance.';
+      recommendation = 'Réaliser un diagnostic approfondi, tester les composants critiques (compresseur, capteurs), remplacer si nécessaire.';
       emoji = '🔍';
       break;
     case 'Maintenance_preventive':
       statusTitle = 'Maintenance préventive';
-      recommendation = '';
+      recommendation = 'Appliquer la check-list standard : nettoyage, resserrage des connexions, vérification des fluides.';
       emoji = '✅';
       break;
     case 'Surveillance_renforcee':
       statusTitle = 'Surveillance renforcée';
-      recommendation = 'Il est recommandé de renforcer la surveillance de cet équipement pour anticiper tout défaut critique.';
+      recommendation = 'Aucune action immédiate. Inscrire l\'équipement pour un suivi lors des prochaines visites.';
       emoji = '👁️';
       break;
   }
