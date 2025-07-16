@@ -72,6 +72,38 @@ export function DashboardAIPredictionForm() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const getMaintenanceInstructions = (status: string): string[] => {
+    switch (status) {
+      case 'Investigation_defaillance':
+        return [
+          'Réaliser un diagnostic approfondi',
+          'Tester les composants critiques (compresseur, capteurs)',
+          'Remplacer si nécessaire'
+        ];
+      case 'Maintenance_preventive':
+        return [
+          'Appliquer la check-list standard',
+          'Nettoyage complet de l\'équipement',
+          'Resserrage des connexions',
+          'Vérification des fluides'
+        ];
+      case 'Entretien_renforce':
+        return [
+          'Réaliser un entretien plus complet',
+          'Remplacement systématique des pièces d\'usure',
+          'Contrôle approfondi de tous les composants'
+        ];
+      case 'Surveillance_renforcee':
+        return [
+          'Aucune action immédiate nécessaire',
+          'Inscrire l\'équipement pour un suivi lors des prochaines visites',
+          'Surveiller les indicateurs de performance'
+        ];
+      default:
+        return ['Suivre les procédures standards de maintenance'];
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -103,11 +135,7 @@ export function DashboardAIPredictionForm() {
         predicted_status: randomStatus,
         confidence_score: Math.round(80 + Math.random() * 15),
         risk_level: Math.random() > 0.7 ? 'Élevé' : Math.random() > 0.4 ? 'Moyen' : 'Faible',
-        recommendations: [
-          'Vérification des composants électriques',
-          'Contrôle de la température',
-          'Inspection des joints d\'étanchéité'
-        ]
+        recommendations: getMaintenanceInstructions(randomStatus)
       };
 
       setPredictionResult(mockResult);
