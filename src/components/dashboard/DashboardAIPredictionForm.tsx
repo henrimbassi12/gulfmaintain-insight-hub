@@ -75,32 +75,15 @@ export function DashboardAIPredictionForm() {
   const getMaintenanceInstructions = (status: string): string[] => {
     switch (status) {
       case 'Investigation_defaillance':
-        return [
-          'Réaliser un diagnostic approfondi',
-          'Tester les composants critiques (compresseur, capteurs)',
-          'Remplacer si nécessaire'
-        ];
+        return ['Il est recommandé de planifier une investigation défaillance pour optimiser les performances de cet équipement.'];
       case 'Maintenance_preventive':
-        return [
-          'Appliquer la check-list standard',
-          'Nettoyage complet de l\'équipement',
-          'Resserrage des connexions',
-          'Vérification des fluides'
-        ];
+        return ['Il est recommandé de planifier une maintenance préventive pour optimiser les performances de cet équipement.'];
       case 'Entretien_renforce':
-        return [
-          'Réaliser un entretien plus complet',
-          'Remplacement systématique des pièces d\'usure',
-          'Contrôle approfondi de tous les composants'
-        ];
+        return ['Il est recommandé de planifier un entretien renforcé pour optimiser les performances de cet équipement.'];
       case 'Surveillance_renforcee':
-        return [
-          'Aucune action immédiate nécessaire',
-          'Inscrire l\'équipement pour un suivi lors des prochaines visites',
-          'Surveiller les indicateurs de performance'
-        ];
+        return ['Il est recommandé de planifier une surveillance renforcée pour optimiser les performances de cet équipement.'];
       default:
-        return ['Suivre les procédures standards de maintenance'];
+        return ['Il est recommandé de planifier une maintenance préventive pour optimiser les performances de cet équipement.'];
     }
   };
 
@@ -444,7 +427,7 @@ export function DashboardAIPredictionForm() {
                       ⚠️ Risque: {predictionResult.risk_level}
                     </Badge>
                     <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                      🤖 IA: 95.31% précision
+                      🤖 IA: 96.88% précision
                     </Badge>
                   </div>
 

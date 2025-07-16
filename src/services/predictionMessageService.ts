@@ -75,9 +75,7 @@ export function formatPredictionMessage(
   // Format en deux blocs distincts
   const formattedResult = `${emoji} Résultat IA : ${statusTitle}
 
-Ce statut est prédit avec une précision de ${precision} %, un rappel de ${recall} % et un F1-score de ${Math.round(parseFloat(f1Score) * 100)} %, selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.
-
-° Il est recommandé de planifier un ${statusTitle.toLowerCase()} pour optimiser les performances de cet équipement.`;
+Ce statut est prédit avec une précision de ${precision} %, un rappel de ${recall} % et un F1-score de ${Math.round(parseFloat(f1Score) * 100)} %, selon notre modèle affichant une performance générale de ${Math.round(GLOBAL_ACCURACY * 100)} %.`;
 
   const enrichedMessage = {
     title: `${emoji} Prédiction IA : ${statusTitle}`,
