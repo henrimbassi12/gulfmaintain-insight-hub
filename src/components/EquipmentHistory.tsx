@@ -14,6 +14,7 @@ import { ReportEditModal } from '@/components/reports/ReportEditModal';
 import { EquipmentHistoryExport } from '@/components/EquipmentHistoryExport';
 import { PredictionHistoryModal } from '@/components/history/PredictionHistoryModal';
 import { PredictionEfficiencyTracker } from '@/components/history/PredictionEfficiencyTracker';
+import { RealtimePredictionFeed } from '@/components/history/RealtimePredictionFeed';
 import { usePredictionHistory } from '@/hooks/usePredictionHistory';
 import { MaintenanceReport } from '@/types/maintenance';
 import { toast } from 'sonner';
@@ -182,6 +183,9 @@ export function EquipmentHistory() {
 
   return (
     <div className="space-y-6">
+      {/* Feed temps réel des prédictions IA */}
+      <RealtimePredictionFeed />
+      
       {/* Tracker d'efficacité des prédictions IA */}
       <PredictionEfficiencyTracker />
       
