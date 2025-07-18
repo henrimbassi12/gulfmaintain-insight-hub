@@ -13,6 +13,7 @@ import { ReportDetailsModal } from '@/components/reports/ReportDetailsModal';
 import { ReportEditModal } from '@/components/reports/ReportEditModal';
 import { EquipmentHistoryExport } from '@/components/EquipmentHistoryExport';
 import { PredictionHistoryModal } from '@/components/history/PredictionHistoryModal';
+import { PredictionEfficiencyTracker } from '@/components/history/PredictionEfficiencyTracker';
 import { usePredictionHistory } from '@/hooks/usePredictionHistory';
 import { MaintenanceReport } from '@/types/maintenance';
 import { toast } from 'sonner';
@@ -181,6 +182,9 @@ export function EquipmentHistory() {
 
   return (
     <div className="space-y-6">
+      {/* Tracker d'efficacité des prédictions IA */}
+      <PredictionEfficiencyTracker />
+      
       {/* Filtres */}
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardHeader className="bg-gray-50 border-b border-gray-100 pb-4">
