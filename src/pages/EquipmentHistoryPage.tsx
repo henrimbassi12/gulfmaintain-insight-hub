@@ -4,6 +4,7 @@ import { EquipmentHistory } from '@/components/EquipmentHistory';
 import { Clock, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MobileHeader } from '@/components/MobileHeader';
+import { RealtimeNotificationCenter } from '@/components/history/RealtimeNotificationCenter';
 import { toast } from 'sonner';
 
 export default function EquipmentHistoryPage() {
@@ -23,34 +24,35 @@ export default function EquipmentHistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900">
       <MobileHeader />
       
-      {/* Header desktop uniquement - style référence Messages */}
+      {/* Header desktop uniquement - style amélioré */}
       <div className="hidden md:block">
-        <div className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 dark:bg-gray-800/80 dark:border-gray-700 sticky top-0 z-40 w-full">
+        <div className="glass-effect shadow-lg border-b border-purple-100 dark:border-purple-800/30 sticky top-0 z-40 w-full">
           <div className="w-full px-4 py-6">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-orange-700 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 animate-pulse-glow">
                   <Clock className="w-6 h-6 text-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1 leading-tight">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-1 leading-tight animate-fade-in-up">
                     Historique des équipements
                   </h1>
                   <p className="text-gray-500 dark:text-gray-300 text-sm leading-relaxed">
-                    Timeline complète des interventions et maintenances
+                    Timeline complète des interventions et prédictions IA en temps réel
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
+               <div className="flex items-center gap-3">
+                <RealtimeNotificationCenter />
                 <Button 
                   variant="outline" 
                   onClick={handleRefresh}
                   disabled={refreshing}
-                  className="hover:bg-orange-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600"
+                  className="hover-lift glass-effect border-purple-200 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-800/50"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                   Actualiser
@@ -70,6 +72,7 @@ export default function EquipmentHistoryPage() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Timeline des interventions</p>
           </div>
           <div className="flex items-center gap-2">
+            <RealtimeNotificationCenter />
             <Button 
               variant="outline"
               size="sm"
@@ -81,7 +84,7 @@ export default function EquipmentHistoryPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full">
+        <div className="glass-effect rounded-2xl floating-shadow border border-purple-100/50 dark:border-purple-700/30 w-full overflow-hidden animate-scale-in">
           <EquipmentHistory />
         </div>
       </div>
