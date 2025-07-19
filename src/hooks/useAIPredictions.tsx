@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { formatPredictionMessage } from '@/services/predictionMessageService';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface MaintenancePredictionInput {
   equipment_id: string;
@@ -149,7 +150,9 @@ export function useAIPredictions(): UseAIPredictionsReturn {
           description: 'L\'API a rejeté les données. Utilisation de données simulées.'
         });
         
-        return generateSimulatedPrediction(input);
+        const simulatedPrediction = generateSimulatedPrediction(input);
+        await savePredictionToDatabase(simulatedPrediction, input);
+        return simulatedPrediction;
       }
 
       if (!response.ok) {
@@ -179,6 +182,9 @@ export function useAIPredictions(): UseAIPredictionsReturn {
         created_at: new Date().toISOString(),
       };
       
+      // Sauvegarder la prédiction dans la base de données
+      await savePredictionToDatabase(prediction, input);
+      
       // Utiliser le nouveau service de formatage pour le message de succès
       const enrichedMessage = formatPredictionMessage(prediction.predicted_status, prediction.confidence_score);
       
@@ -202,11 +208,63 @@ export function useAIPredictions(): UseAIPredictionsReturn {
         description: 'Impossible de contacter l\'API - Données d\'exemple utilisées'
       });
       
-      return generateSimulatedPrediction(input);
+      const simulatedPrediction = generateSimulatedPrediction(input);
+      await savePredictionToDatabase(simulatedPrediction, input);
+      return simulatedPrediction;
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  const savePredictionToDatabase = async (prediction: MaintenancePrediction, input: MaintenancePredictionInput) => {
+    try {
+      // Convertir la prédiction au format de la base de données
+      const dbPrediction = {
+        equipment_id: prediction.equipment_id,
+        equipment_name: `Équipement ${prediction.equipment_id}`,
+        type: input.equipment_type,
+        location: input.location,
+        failure_risk: Math.floor((100 - prediction.confidence_score) * 1.2), // Risque inversement proportionnel à la confiance
+        predicted_date: prediction.estimated_intervention_date.split('T')[0],
+        recommended_action: prediction.recommended_actions.join(', '),
+        confidence_score: prediction.confidence_score,
+        equipment_brand: 'Coca-Cola',
+        equipment_model: input.equipment_type,
+        equipment_serial_number: `SN-${prediction.equipment_id}`,
+        maintenance_history: {
+          last_maintenance: input.last_maintenance_date,
+          failure_history: input.failure_history
+        },
+        environmental_factors: {
+          sensor_data: input.sensor_data,
+          usage_intensity: input.usage_intensity
+        },
+        usage_pattern: input.usage_intensity
+      };
+
+      console.log('💾 Sauvegarde de la prédiction en base:', dbPrediction);
+
+      const { data, error } = await supabase
+        .from('failure_predictions')
+        .insert(dbPrediction)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Erreur lors de la sauvegarde:', error);
+        toast.error('Erreur de sauvegarde', {
+          description: 'La prédiction n\'a pas pu être sauvegardée'
+        });
+        return null;
+      }
+
+      console.log('✅ Prédiction sauvegardée:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde:', error);
+      return null;
+    }
+  };
 
   const mapApiStatusToAppStatus = (apiStatus: string): MaintenancePrediction['predicted_status'] => {
     // Mapper la réponse de votre API vers les statuts attendus par l'app
