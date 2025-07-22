@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, Search, Filter, X, Wrench, AlertTriangle, CheckCircle, Clock, Eye, Download, Edit, Trash2, Brain } from 'lucide-react';
+import { Activity, Search, Filter, X, Wrench, AlertTriangle, CheckCircle, Clock, Eye, Download, Edit, Trash2, Brain, Calendar, UserPlus } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { useReports } from '@/hooks/useReports';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,8 @@ import { EquipmentHistoryExport } from '@/components/EquipmentHistoryExport';
 import { PredictionHistoryModal } from '@/components/history/PredictionHistoryModal';
 import { PredictionEfficiencyTracker } from '@/components/history/PredictionEfficiencyTracker';
 import { RealtimePredictionFeed } from '@/components/history/RealtimePredictionFeed';
+import { InterventionPlanningModal } from '@/components/history/InterventionPlanningModal';
+import { TechnicianAssignmentModal } from '@/components/history/TechnicianAssignmentModal';
 import { usePredictionHistory } from '@/hooks/usePredictionHistory';
 import { MaintenanceReport } from '@/types/maintenance';
 import { toast } from 'sonner';
@@ -34,6 +36,8 @@ export function EquipmentHistory() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
+  const [isPlanningModalOpen, setIsPlanningModalOpen] = useState(false);
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
 
   useEffect(() => {
     let filtered = reports;
@@ -143,6 +147,55 @@ export function EquipmentHistory() {
       } catch (error) {
         toast.error('Erreur lors de la suppression de la prédiction');
       }
+    }
+  };
+
+  const handlePlanIntervention = (prediction: any) => {
+    setSelectedPrediction(prediction);
+    setIsPlanningModalOpen(true);
+  };
+
+  const handleAssignTechnician = (prediction: any) => {
+    setSelectedPrediction(prediction);
+    setIsAssignmentModalOpen(true);
+  };
+
+  const handleCreateIntervention = async (interventionData: any) => {
+    try {
+      // Créer une intervention planifiée
+      const intervention = {
+        equipment_id: selectedPrediction?.equipment_id,
+        equipment_name: selectedPrediction?.equipment_name,
+        type: 'Prédictive',
+        priority: selectedPrediction?.priority_level,
+        date: interventionData.date,
+        technician: interventionData.technician,
+        description: interventionData.description,
+        estimated_duration: selectedPrediction?.estimated_duration_hours,
+        status: 'Planifié'
+      };
+
+      toast.success('Intervention planifiée avec succès', {
+        description: `Intervention prévue le ${new Date(interventionData.date).toLocaleDateString('fr-FR')}`
+      });
+      
+      setIsPlanningModalOpen(false);
+      setSelectedPrediction(null);
+    } catch (error) {
+      toast.error('Erreur lors de la planification de l\'intervention');
+    }
+  };
+
+  const handleAssignToTechnician = async (assignmentData: any) => {
+    try {
+      toast.success('Technicien assigné avec succès', {
+        description: `${assignmentData.technician} a été assigné à l'équipement ${selectedPrediction?.equipment_id}`
+      });
+      
+      setIsAssignmentModalOpen(false);
+      setSelectedPrediction(null);
+    } catch (error) {
+      toast.error('Erreur lors de l\'assignation du technicien');
     }
   };
 
@@ -334,6 +387,30 @@ export function EquipmentHistory() {
                             Voir détails
                           </Button>
 
+                          <PermissionCheck allowedRoles={['admin', 'manager']}>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => handlePlanIntervention(prediction)}
+                              className="text-xs bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Clock className="w-3 h-3 mr-1" />
+                              Planifier
+                            </Button>
+                          </PermissionCheck>
+
+                          <PermissionCheck allowedRoles={['admin', 'manager']}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAssignTechnician(prediction)}
+                              className="text-xs text-green-600 hover:text-green-700"
+                            >
+                              <Wrench className="w-3 h-3 mr-1" />
+                              Assigner
+                            </Button>
+                          </PermissionCheck>
+
                           <PermissionCheck allowedRoles={['admin']}>
                             <Button
                               variant="outline"
@@ -465,6 +542,26 @@ export function EquipmentHistory() {
           setSelectedReport(null);
         }}
         onSave={handleUpdateReport}
+      />
+
+      <InterventionPlanningModal
+        prediction={selectedPrediction}
+        isOpen={isPlanningModalOpen}
+        onClose={() => {
+          setIsPlanningModalOpen(false);
+          setSelectedPrediction(null);
+        }}
+        onPlan={handleCreateIntervention}
+      />
+
+      <TechnicianAssignmentModal
+        prediction={selectedPrediction}
+        isOpen={isAssignmentModalOpen}
+        onClose={() => {
+          setIsAssignmentModalOpen(false);
+          setSelectedPrediction(null);
+        }}
+        onAssign={handleAssignToTechnician}
       />
     </div>
   );
