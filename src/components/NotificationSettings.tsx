@@ -13,7 +13,7 @@ interface NotificationSettingsProps {
 }
 
 export function NotificationSettings({ onTogglePush }: NotificationSettingsProps) {
-  const { permissionState, requestPermission, isEnabled, sendNotification } = usePushNotifications();
+  const { permissionState, requestPermission, isEnabled, sendNotification, isSupported, permission } = usePushNotifications();
   const [browserNotifications, setBrowserNotifications] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -67,11 +67,11 @@ export function NotificationSettings({ onTogglePush }: NotificationSettingsProps
   };
 
   const getPermissionBadge = () => {
-    if (!permissionState.isSupported) {
+    if (!isSupported) {
       return <Badge variant="secondary">Non supporté</Badge>;
     }
     
-    switch (permissionState.permission) {
+    switch (permission) {
       case 'granted':
         return (
           <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -91,7 +91,7 @@ export function NotificationSettings({ onTogglePush }: NotificationSettingsProps
     }
   };
 
-  if (!permissionState.isSupported) {
+  if (!isSupported) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <div className="flex items-center gap-2 mb-2">
@@ -122,7 +122,7 @@ export function NotificationSettings({ onTogglePush }: NotificationSettingsProps
           <Switch
             checked={isEnabled && browserNotifications}
             onCheckedChange={handleTogglePush}
-            disabled={permissionState.permission === 'denied'}
+            disabled={permission === 'denied'}
           />
         </div>
       </div>
@@ -140,7 +140,7 @@ export function NotificationSettings({ onTogglePush }: NotificationSettingsProps
         />
       </div>
 
-      {permissionState.permission === 'denied' && (
+      {permission === 'denied' && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
@@ -163,7 +163,7 @@ export function NotificationSettings({ onTogglePush }: NotificationSettingsProps
         </div>
       )}
 
-      {!isEnabled && permissionState.permission === 'default' && (
+      {!isEnabled && permission === 'default' && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <Bell className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
