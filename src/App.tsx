@@ -7,6 +7,7 @@ import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { MobileHeader } from '@/components/MobileHeader';
+import { OfflineIndicatorMobile } from '@/components/mobile/OfflineIndicatorMobile';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
@@ -104,6 +105,9 @@ function App() {
               
               {/* Système de notifications global */}
               <NotificationCenter />
+              
+              {/* Indicateur de connexion mobile */}
+              <OfflineIndicatorMobile />
               
               {/* Toasters pour les notifications */}
               <Toaster />

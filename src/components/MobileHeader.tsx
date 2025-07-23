@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Shield, Bell, X, Clock, Wrench, AlertTriangle, CheckCircle } from 'lucide-react';
+import { SyncStatusIndicator } from '@/components/mobile/SyncStatusIndicator';
 import { MobileDrawer } from './ui/mobile-drawer';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -95,6 +96,8 @@ export function MobileHeader() {
         </div>
         
         <div className="flex items-center gap-3">
+          <SyncStatusIndicator />
+          
           <Button 
             variant="ghost" 
             size="icon" 
