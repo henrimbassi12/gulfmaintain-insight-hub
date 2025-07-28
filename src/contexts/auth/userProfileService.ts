@@ -3,7 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const fetchUserProfile = async (userId: string): Promise<any> => {
   try {
-    console.log('🔍 fetchUserProfile - Récupération pour userId:', userId);
+    // Log only in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 fetchUserProfile - Récupération pour userId:', userId);
+    }
     
     const { data, error } = await supabase
       .from('profiles')
@@ -16,7 +19,10 @@ export const fetchUserProfile = async (userId: string): Promise<any> => {
       return null;
     }
     
-    console.log('✅ fetchUserProfile - Profil récupéré:', data);
+    // Don't log sensitive user data in production
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ fetchUserProfile - Profil récupéré');
+    }
     return data;
   } catch (error) {
     console.error('❌ fetchUserProfile - Erreur catch:', error);

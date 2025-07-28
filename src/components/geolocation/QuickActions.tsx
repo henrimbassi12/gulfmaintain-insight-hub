@@ -40,7 +40,9 @@ export function QuickActions({ userLocation }: QuickActionsProps) {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Simuler l'envoi des coordonnées à l'équipe
-      console.log('Position partagée:', userLocation);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Position partagée');
+      }
       
       toast({
         title: "📍 Position partagée",

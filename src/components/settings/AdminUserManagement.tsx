@@ -110,25 +110,21 @@ export function AdminUserManagement({ currentUserProfile }: AdminUserManagementP
     }
 
     try {
-      // Pour changer le mot de passe d'un autre utilisateur, nous devons utiliser l'API Admin
-      const { error } = await supabase.auth.admin.updateUserById(editingPassword, {
-        password: newPassword
+      // Client-side admin API won't work - use password reset instead
+      const user = users.find(u => u.id === editingPassword);
+      if (!user) {
+        throw new Error('Utilisateur non trouvé');
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
-        // Si l'API admin n'est pas disponible, on utilise la méthode de réinitialisation
-        const user = users.find(u => u.id === editingPassword);
-        if (user) {
-          const { error: resetError } = await supabase.auth.resetPasswordForEmail(user.email, {
-            redirectTo: `${window.location.origin}/reset-password`,
-          });
-
-          if (resetError) throw resetError;
-          toast.success('Email de réinitialisation envoyé à l\'utilisateur');
-        }
-      } else {
-        toast.success('Mot de passe modifié avec succès');
+        throw error;
       }
+      
+      toast.success('Email de réinitialisation envoyé à l\'utilisateur');
 
       setEditingPassword(null);
       setNewPassword('');

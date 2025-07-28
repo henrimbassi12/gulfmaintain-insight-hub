@@ -218,7 +218,9 @@ export function InteractiveMap({ userLocation, technicians, maintenancePoints }:
 
     // Position utilisateur (bleu)
     if (userLocation) {
-      console.log('👤 Ajout marqueur utilisateur:', userLocation);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('👤 Ajout marqueur utilisateur');
+      }
       const userMarker = new mapboxgl.Marker({ color: '#3b82f6' })
         .setLngLat([userLocation.lng, userLocation.lat])
         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`

@@ -20,20 +20,18 @@ export function EnrichedPredictionResult({
   recommendations,
   probabilities 
 }: EnrichedPredictionResultProps) {
-  console.log('🚀 EnrichedPredictionResult - Données reçues:', { 
-    predicted_status, 
-    confidence_score, 
-    risk_level, 
-    recommendations,
-    probabilities 
-  });
-
   // Utilisation du service d'enrichissement
   const enrichedMessage = formatPredictionMessage(predicted_status, confidence_score);
   const performanceDetails = getModelPerformanceDetails(predicted_status);
 
-  console.log('✨ Message enrichi généré:', enrichedMessage);
-  console.log('📊 Détails de performance générés:', performanceDetails);
+  // Helper function to safely render HTML content
+  const sanitizeHtml = (html: string) => {
+    // Simple HTML sanitization - remove script tags and dangerous attributes
+    return html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
+      .replace(/javascript:/gi, '');
+  };
 
   const getStatusIcon = () => {
     switch (predicted_status) {
@@ -98,13 +96,13 @@ export function EnrichedPredictionResult({
             <div className="bg-green-50 p-4 rounded-lg border-l-4 border-l-green-500">
               <div className="flex items-start gap-2">
                 <span className="text-lg">🔍</span>
-                <div>
-                  <h4 className="font-semibold text-green-900 mb-2">Interprétation</h4>
-                  <div 
-                    className="text-green-800 text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: enrichedMessage.interpretation }} 
-                  />
-                </div>
+                  <div>
+                    <h4 className="font-semibold text-green-900 mb-2">Interprétation</h4>
+                    <div 
+                      className="text-green-800 text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(enrichedMessage.interpretation) }} 
+                    />
+                  </div>
               </div>
             </div>
             
