@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GeolocationSystem } from '@/components/GeolocationSystem';
+import { GeolocationWithPermission } from '@/components/GeolocationWithPermission';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,7 +129,7 @@ export default function GeolocationPage() {
         {/* Système de géolocalisation - sections empilées verticalement */}
         <Card className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm w-full">
           <CardContent className="p-4">
-            <GeolocationSystem />
+            <GeolocationWithPermission />
           </CardContent>
         </Card>
       </div>

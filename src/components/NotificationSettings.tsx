@@ -147,9 +147,12 @@ export function NotificationSettings({ onTogglePush }: NotificationSettingsProps
             <div>
               <p className="text-sm text-orange-800 font-medium">Notifications bloquées</p>
               <p className="text-sm text-orange-700 mt-1">
-                Pour réactiver les notifications, cliquez sur l'icône de cadenas ou d'information 
-                dans la barre d'adresse de votre navigateur, puis autorisez les notifications.
+                Pour réactiver les notifications :
               </p>
+              <div className="mt-2 text-sm text-orange-700">
+                <p><strong>Sur Safari :</strong> Touchez "aA" → "Paramètres du site web" → Activez "Notifications"</p>
+                <p className="mt-1"><strong>Sur Chrome :</strong> Touchez l'icône de cadenas → Autorisez les notifications</p>
+              </div>
             </div>
           </div>
         </div>

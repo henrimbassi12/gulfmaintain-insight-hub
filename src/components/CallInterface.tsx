@@ -13,6 +13,7 @@ import {
   VolumeX
 } from 'lucide-react';
 import { toast } from "sonner";
+import { PermissionGuide } from './PermissionGuide';
 
 interface CallInterfaceProps {
   isVisible: boolean;
@@ -26,6 +27,7 @@ export function CallInterface({ isVisible, onClose, contactName, callType }: Cal
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(callType === 'video');
   const [callDuration, setCallDuration] = useState(0);
+  const [showPermissionGuide, setShowPermissionGuide] = useState(false);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -48,6 +50,11 @@ export function CallInterface({ isVisible, onClose, contactName, callType }: Cal
 
   const startCall = async () => {
     try {
+      // Vérifier d'abord si les APIs sont supportées
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('API multimédia non supportée');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: isVideoEnabled
@@ -72,7 +79,23 @@ export function CallInterface({ isVisible, onClose, contactName, callType }: Cal
       
     } catch (error) {
       console.error('Erreur lors du démarrage de l\'appel:', error);
-      toast.error('Impossible d\'accéder à la caméra/microphone');
+      
+      let errorMessage = 'Impossible d\'accéder à la caméra/microphone';
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = 'Permission refusée pour la caméra/microphone. Veuillez autoriser l\'accès dans les paramètres du navigateur.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'Aucune caméra ou microphone détecté sur cet appareil.';
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = 'Caméra/microphone non supporté par ce navigateur.';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = 'Caméra/microphone déjà utilisé par une autre application.';
+        }
+      }
+      
+      toast.error(errorMessage);
+      setShowPermissionGuide(true);
     }
   };
 
@@ -119,6 +142,35 @@ export function CallInterface({ isVisible, onClose, contactName, callType }: Cal
   };
 
   if (!isVisible) return null;
+
+  // Afficher le guide des permissions si nécessaire
+  if (showPermissionGuide) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div className="space-y-4">
+          <PermissionGuide 
+            type="camera" 
+            onRetry={() => {
+              setShowPermissionGuide(false);
+              startCall();
+            }} 
+          />
+          <div className="text-center">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowPermissionGuide(false);
+                onClose();
+              }}
+              className="bg-white"
+            >
+              Annuler
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">

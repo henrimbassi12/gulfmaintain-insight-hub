@@ -93,13 +93,13 @@ export function useGeolocation() {
         
         switch(error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "Permission de géolocalisation refusée. Veuillez autoriser l'accès à votre position.";
+            errorMessage = "Permission de géolocalisation refusée. Veuillez autoriser l'accès à votre position. Position par défaut utilisée: Akwa, Douala, Région du Littoral, Cameroun - Zone commerciale centrale";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "Position non disponible. Vérifiez votre connexion.";
+            errorMessage = "Position non disponible. Vérifiez votre connexion GPS et votre réseau.";
             break;
           case error.TIMEOUT:
-            errorMessage = "Délai d'attente dépassé pour obtenir votre position.";
+            errorMessage = "Délai d'attente dépassé pour obtenir votre position. Utilisation de la position par défaut.";
             break;
         }
         
