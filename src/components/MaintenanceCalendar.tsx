@@ -215,36 +215,6 @@ export function MaintenanceCalendar() {
               mediumPriority: "bg-yellow-100 border-yellow-300 text-yellow-800 hover:bg-yellow-200",
               lowPriority: "bg-green-100 border-green-300 text-green-800 hover:bg-green-200"
             }}
-            components={{
-              DayContent: ({ date, displayMonth }) => {
-                const dayEvents = getEventsByDate(date);
-                const isCurrentMonth = date.getMonth() === displayMonth.getMonth();
-                
-                return (
-                  <div className="relative w-full h-full flex flex-col items-center justify-center">
-                    <span className={`${!isCurrentMonth ? 'text-gray-400' : ''}`}>
-                      {date.getDate()}
-                    </span>
-                    {dayEvents.length > 0 && (
-                      <div className="absolute bottom-1 flex gap-0.5">
-                        {dayEvents.slice(0, 3).map((event, idx) => (
-                          <div
-                            key={idx}
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              event.priority === 'high' ? 'bg-red-500' :
-                              event.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                            }`}
-                          />
-                        ))}
-                        {dayEvents.length > 3 && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-            }}
           />
         </div>
       </div>
